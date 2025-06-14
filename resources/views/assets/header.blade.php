@@ -27,7 +27,6 @@
                     <span class="clearfix"></span>
                 </div>
                 @guest
-                    @if(config('restaurant.hasInstall') == true)
                         <ul class="nav navbar-nav navbar-right pull-right">
                             <li><a href="{{ route('login') }}" class="waves-effect waves-light">Login</a></li>
                             @if(\App\Models\User::first())
@@ -36,11 +35,7 @@
                                 <li><a href="{{ route('register') }}" class="waves-effect waves-light">Join</a></li>
                             @endif
                         </ul>
-                    @else
-                        <ul class="nav navbar-nav navbar-right pull-right">
-                            <li><a href="{{url('/install')}}" class="waves-eefect waves-light">Install</a></li>
-                        </ul>
-                    @endif
+                    
                 @else
 
                     @admin
