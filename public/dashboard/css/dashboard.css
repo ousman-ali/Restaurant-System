@@ -1,0 +1,98 @@
+@font-face {
+    font-family: playball;
+    src: url(Playball-Regular.ttf);
+}
+
+@font-face {
+    font-family: Ruritania-outline;
+    src: url(Ruritania-Outline.ttf);
+}
+
+.my-logo{
+    font-family: playball;
+    color: #ffffff!important;
+    text-transform: none;
+    font-size: 30px;
+    font-style: normal;
+}
+
+.navbar-default{
+    background-color:orangered;
+}
+.account-pages{
+    background-image: url("../../../img_assets/login.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    opacity: 0.5;
+}
+
+.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover{
+    color: #fff;
+    background-color: orangered;
+}
+#sidebar-menu > ul > li > a:hover{
+    color: orangered;
+}
+#sidebar-menu .subdrop{
+    color: orangered !important;
+}
+#sidebar-menu ul ul a:hover{
+    color: orangered !important;
+}
+#sidebar-menu .subdrop{
+    border-left: 3px solid orangered;
+}
+#sidebar-menu > ul > li > a.active,#sidebar-menu ul ul li.active a{
+    color: orangered !important;
+}
+#sidebar-menu > ul > li > a.active{
+    border-left: 3px solid orangered;
+}
+
+.navbar-default .badge{
+    background-color: black!important;
+}
+#image-preview {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    color: #ecf0f1;
+    background-image: url("../../../img_assets/avater.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 200px 200px;
+}
+#image-preview input {
+    line-height: 200px;
+    font-size: 200px;
+    position: absolute;
+    opacity: 0;
+    z-index: 10;
+
+}
+#image-preview label {
+    position: absolute;
+    z-index: 5;
+    opacity: 0.8;
+    cursor: pointer;
+    background-color: orangered;
+    width: 200px;
+    height: 50px;
+    font-size: 20px;
+    line-height: 50px;
+    text-transform: uppercase;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    text-align: center;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover, .tabs-vertical > li.active > a, .tabs-vertical > li.active > a:focus, .tabs-vertical > li.active > a:hover{
+    color : orangered !important;
+}
+

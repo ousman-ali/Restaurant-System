@@ -1,0 +1,3 @@
+[submodule "packages/binary-castle/boilerplate"]
+	path = packages/binary-castle/boilerplate
+	url = https://github.com/binary-castle/boilerplate-laravel.git
