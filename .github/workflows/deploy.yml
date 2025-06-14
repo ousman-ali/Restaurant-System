@@ -33,9 +33,6 @@ jobs:
           target: ${{ secrets.CPANEL_DEPLOY_PATH }}
           debug: true
           overwrite: true # Only overwrite existing files
-          exclude: |
-            storage/
-            storage/**
 
       - name: Run Laravel deployment commands
         uses: appleboy/ssh-action@v0.1.3
