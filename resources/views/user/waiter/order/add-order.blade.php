@@ -10,7 +10,7 @@
 
     </div>
 
-    <script>
+    <script> 
         window.componentName = 'pos'; // Set the name of the component here dynamically
     </script>
 

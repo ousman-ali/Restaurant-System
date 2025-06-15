@@ -3,7 +3,6 @@
 @section('title')
     Dashboard
 @endsection
-
 @section('content')
     <div class="row" id="renderHtmlHear">
 
@@ -16,6 +15,7 @@
 
     <style>
         .dish-details{
+            width: 100%;
             height: 200px;
             overflow-y: scroll;
         }
@@ -45,7 +45,7 @@
             $.fn.renderHTML = function (data) {
                 $.each(data, function (index, dish) {
                     $("#renderHtmlHear").append(
-                        $("<div>", {class: "col-lg-4"}).append(
+                        $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom"}).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
@@ -55,6 +55,7 @@
                                         $("<span>", {class: "pull-right", text: dish.served_by.name})
                                     )
                                 ),
+                                
                                 $("<div>", {class: "panel-body dish-details"}).append(
                                     $("<ul>", {class: 'list-group'}).append(
                                         $.map(dish.order_details, function (index, dishDetails) {

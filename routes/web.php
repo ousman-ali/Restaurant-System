@@ -207,7 +207,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/kitchen-stat/kitchen={id}/start={start_date}/end={end_date}', [KitchenController::class, 'shoeKitchenStat']);
     });
 
-    // Waiter Only
+    // Waiter Only 
     Route::middleware(['waiter'])->group(function () {
         //Dish
         Route::get('/dish-types/{dish_id}', [RecipeController::class, 'getTypesOfDish']);

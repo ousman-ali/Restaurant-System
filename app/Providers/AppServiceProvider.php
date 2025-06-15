@@ -31,11 +31,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::if('kitchen', function () {
-            return auth()->check() && auth()->user()->role() == 3;
+            return auth()->check() && auth()->user()->role() == 4;
         });
 
         Blade::if('waiter', function () {
-            return auth()->check() && auth()->user()->role() == 4;
+            return auth()->check() && auth()->user()->role() == 3;
         });
     }
 

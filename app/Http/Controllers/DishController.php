@@ -105,6 +105,7 @@ class DishController extends Controller
      */
     public function saveDish(Request $request)
     {
+    
         $this->validate($request, [
             'dish' => 'required|string',
             'category_id' => 'required|numeric|exists:dish_categories,id',
@@ -117,6 +118,7 @@ class DishController extends Controller
                     rand(8000000, 99999999) . '.' . $request->thumbnail->extension());
         }
         $dish->user_id = auth()->user()->id;
+        $dish->category_id = $request->category_id;
         if ($dish->save()) {
             return redirect()->to('/dish-price/' . $dish->id);
         }
@@ -143,6 +145,7 @@ class DishController extends Controller
                     rand(8000000, 99999999) . '.' . $request->thumbnail->extension());
         }
         $dish->user_id = auth()->user()->id;
+        $dish->category_id = $request->category_id;
         $dish->available = $request->get('available') == 'on' ? 1 : 0;
         if ($dish->save()) {
             return response()->json('Ok', 200);

@@ -207,6 +207,7 @@
         </div>
     </div>
 
+
     <div class="dish-detail-container">
         <div class="dish-header">
             <h2>{{ $dish->dish }} ({{$dish->category->name}})</h2>

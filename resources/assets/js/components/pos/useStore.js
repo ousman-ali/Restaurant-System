@@ -61,7 +61,7 @@ const fetchProducts = async () => {
     }
 };
 
-const fetchTables = async () => {
+const fetchTables = async () => { 
     try {
         const response = await axios.get('/web-api/tables');
         tables.value = response.data;

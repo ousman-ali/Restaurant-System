@@ -33,7 +33,7 @@ class OrderController extends Controller
         $dishes = Dish::all();
         return view('user.waiter.order.add-order', [
             'tables' => $tables,
-            'dishes' => $dishes
+            'dishes' => $dishes 
         ]);
     }
 
