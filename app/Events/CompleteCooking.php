@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Events;
-
+use App\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PresenceChannel; 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,15 +14,16 @@ class CompleteCooking implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $msg;
+    public $order;
+
     /**
      * Create a new event instance.
      *
-     * @return void
+     * @param Order $order
      */
-    public function __construct($msg)
+    public function __construct(Order $order)
     {
-        $this->msg = $msg;
+        $this->order = $order;
     }
 
     /**
@@ -38,5 +39,21 @@ class CompleteCooking implements ShouldBroadcast
     public function broadcastAs()
     {
         return "complete-cooking-event";
+    }
+
+    public function broadcastWith()
+    {
+
+        return  $this->prepareData();
+
+    }
+
+    protected function prepareData()
+    {
+        return [
+            'id'   =>    $this->order->id,
+            'order_no'   =>    $this->order->order_no,
+            'cook_complete_time' =>$this->order->cook_complete_time,
+        ];
     }
 }

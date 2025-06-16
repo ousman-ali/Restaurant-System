@@ -22,7 +22,7 @@ class StartCooking implements ShouldBroadcast
     public function __construct(Order $order)
     {
         $this->order = $order;
-    }
+    } 
 
     /**
      * Get the channels the event should broadcast on.
@@ -50,6 +50,8 @@ class StartCooking implements ShouldBroadcast
     {
         return [
             'id'   =>    $this->order->id,
+            'order_no'   =>    $this->order->order_no,
+            'cook_start_time' => $this->order->cook_start_time,
         ];
     }
 

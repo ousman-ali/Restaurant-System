@@ -71,7 +71,29 @@
                         </li>
                     </ul>
                     @endmanager
-
+                    
+                    
+                    <!-- Notification Dropdown -->
+                    <ul class="nav navbar-nav navbar-right pull-right">
+                        <li class="dropdown top-menu-item-xs notificationDropdown">
+                            <a href="#" class="dropdown-toggle waves-effect waves-light" data-toggle="dropdown"
+                            role="button" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-bell"></i>
+                                <span class="badge badge-danger notif-count"style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu notif-menu"
+                                style="width: 300px; max-height: 400px; overflow-y: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
+                                <li class="text-center"><strong>Notifications</strong></li>
+                                <li class="divider"></li>
+                                <!-- Dynamic notifications will appear here -->
+                            </ul>
+                        </li>
+                    </ul>
+                    <script>
+                        window.userRole = {{ auth()->user()->role }};
+                        const isAdmin = @json(auth()->check() && auth()->user()->role == 1);
+                        const isWaiter = @json(auth()->check() && auth()->user()->role == 3);
+                    </script>
 
                     <ul class="nav navbar-nav navbar-right pull-right">
                         <li class="dropdown top-menu-item-xs">

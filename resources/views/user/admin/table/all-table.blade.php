@@ -59,7 +59,7 @@
                                 <i class="fa fa-pencil"></i>
                             </a>
                             <a href="#" onclick="$(this).confirmDelete('/delete-table/'+{{$table->id}})" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
+                                <i class="fa fa-trash-o"></i> 
                             </a>
                         </div>
                     </td>

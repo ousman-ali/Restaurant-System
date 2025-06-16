@@ -73,7 +73,7 @@
                                     <a href="{{url('/edit-order/'.$o->id)}}"
                                        class="btn btn-success waves-effect waves-light">
                                         <i class="fa fa-pencil"></i>
-                                    </a>
+                                    </a> 
                                     <button type="button" onclick="printInvoice({{$o->id}})"
                                             href="{{url('/print-order/'.$o->id)}}"
                                             class="btn btn-purple waves-effect waves-light">
@@ -171,6 +171,9 @@
                     alert("Error printing receipt. Please try again.");
                 });
         }
+
+       
+
     </script>
 
 @endsection

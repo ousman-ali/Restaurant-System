@@ -24,6 +24,7 @@
 
 
     <script>
+        
         var orders = [];
         var socketId = null;
         var sender = false;
@@ -37,11 +38,6 @@
                 $(this).renderHTML(orders);
 
             });
-
-
-
-
-
             $.fn.renderHTML = function (data) {
                 $.each(data, function (index, dish) {
                     $("#renderHtmlHear").append(
@@ -70,6 +66,56 @@
                                             )
                                         })
                                     )
+                                ),
+                                $("<div>", {class: "panel-body order-info"}).append(
+                                    $("<p>", {text: "Order Time: "}).append(
+                                        $("<span>", {class: "badge badge-info", text: new Date(dish.created_at).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ),
+                                    dish.cook_start_time ? $("<p>", {text: "Cooking Start Time: "}).append(
+                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ) : "",
+                                    dish.cook_complete_time ? $("<p>", {text: "Cooking Complete Time: "}).append(
+                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ) : "",
+                                    dish.serve_time ? $("<p>", {text: "Serve Time: "}).append(
+                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.serve_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ) : ""
                                 ),
                                 (dish.status == 0) ?
                                     $("<button>", {
@@ -109,7 +155,6 @@
             var channel = pusher.subscribe('order');
             channel.bind('order-event', function(data) {
                 $.get("/kitchen-orders", function (data) {
-                    console.log(data);
                     orders = data;
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(orders);
@@ -119,7 +164,6 @@
             var startCooking = pusher.subscribe('start-cooking');
             startCooking.bind('kitchen-event',function (data) {
                 $.get("/kitchen-orders", function (data) {
-                    console.log(data);
                     orders = data;
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(orders);

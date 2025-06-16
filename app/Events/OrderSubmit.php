@@ -13,15 +13,18 @@ class OrderSubmit implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $order;
+    public $type;
 
     /**
      * Create a new event instance.
      *
      * @param Order $order
+     * @param string|null $type
      */
-    public function __construct(Order $order)
+    public function __construct(Order $order, $type = null)
     {
         $this->order = $order;
+        $this->type = $type;
     }
 
     /**
@@ -48,7 +51,7 @@ class OrderSubmit implements ShouldBroadcast
 
     protected function prepareData()
     {
-        return [
+        return [ 
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
             'status'   =>    $this->order->status,
@@ -62,6 +65,8 @@ class OrderSubmit implements ShouldBroadcast
             'updated_at'   =>    $this->order->updated_at,
             'order_details'   => $this->order->orderDetails,
             'served_by'  => $this->order->servedBy,
+            'sender_role' => auth()->user()->role,
+            'type' => $this->type,
         ];
     }
 

@@ -216,7 +216,7 @@ class OrderController extends Controller
             DB::commit();
 
             try {
-                broadcast(new OrderSubmit($order));
+                broadcast(new OrderSubmit($order, 'update'));
             } catch (\Exception $exception) {
                 Log::error("Broadcasting failed: " . $exception->getMessage());
             }
@@ -268,12 +268,15 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         OrderDetails::where('order_id', $order->id)->delete();
         CookedProduct::where('order_id', $order->id)->delete();
+
         if ($order->delete()) {
-            broadcast(new OrderCancel('orderCancel'))->toOthers();
-            return redirect()->back()->with('delete_success', 'The order has been deleted successfully');
+            broadcast(new OrderCancel('orderCancel', $order))->toOthers();
+            return response()->json(['success' => true, 'message' => 'Order deleted successfully']);
         }
 
+        return response()->json(['success' => false], 500);
     }
+
 
     /**
      * Show order of authenticate kitchen
@@ -303,6 +306,7 @@ class OrderController extends Controller
         if ($order->status == 0) {
             $order->status = 1;
             $order->kitchen_id = auth()->user()->id;
+            $order->cook_start_time = now();
             $order->save();
         }
         $orders = Order::where('kitchen_id', 0)
@@ -330,6 +334,7 @@ class OrderController extends Controller
     {
         $order = Order::findOrfail($id);
         $order->status = 2;
+        $order->cook_complete_time = now();
         $order->save();
         $orders = Order::where('kitchen_id', 0)
             ->orWhere('kitchen_id', auth()->user()->id)
@@ -339,7 +344,7 @@ class OrderController extends Controller
             ->orderBy('id', 'desc')
             ->get();
         try {
-            broadcast(new CompleteCooking("Complete"))->toOthers();
+            broadcast(new CompleteCooking($order))->toOthers();
         } catch (\Exception $exception) {
             Log::error("Broadcasting failed: " . $exception->getMessage());
         }
@@ -357,7 +362,7 @@ class OrderController extends Controller
         $order->status = 3;
         if ($order->save()) {
             try {
-                broadcast(new OrderServed("success"))->toOthers();
+                broadcast(new OrderServed("success", $order))->toOthers();
             } catch (\Exception $exception) {
                 Log::error("Broadcasting failed: " . $exception->getMessage());
             }
