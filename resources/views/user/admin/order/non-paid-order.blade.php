@@ -112,10 +112,14 @@
                                 <i class="fa fa-print"></i>
                             </button>
                             @if($order->status == 0)
-                                <a href="#" onclick="$(this).confirmDelete('/delete-order/{{$order->id}}')"
-                                   class="btn btn-danger waves-effect waves-light">
-                                    <i class="fa fa-trash-o"></i>
-                                </a>
+                                
+                                <form action="{{ route('order.delete')}}" method="post" class="deleteform">
+                                    @csrf
+                                    <input type="hidden" name="order_id" value="{{$order->id}}">
+                                    <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </form>
                             @endif
                         </div>
                     </td>

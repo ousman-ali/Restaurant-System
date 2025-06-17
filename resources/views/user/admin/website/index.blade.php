@@ -70,13 +70,15 @@
                                 <i class="fa fa-code"></i>
                             </a>
 
-                            <form action="{{ route('website.destroy', $section->id) }}" method="POST" style="display: inline-block;">
+                            <form action="{{ route('website.destroy', $section->id) }}" method="post" class="deleteform">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger waves-effect waves-light" onclick="return confirm('Are you sure you want to delete this section?')">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
                                     <i class="fa fa-trash-o"></i>
                                 </button>
                             </form>
+
+                            
                         </div>
                     </td>
                 </tr>

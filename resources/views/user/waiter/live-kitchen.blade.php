@@ -91,18 +91,40 @@
                 });
             };
 
+            // $.fn.cancelOrder = function (index) {
+            //     var conf = confirm('Are you sure ?');
+            //     if(conf){
+            //         $.get('/delete-order/'+orders[index].id,function (data) {
+            //             orders.splice(index,1);
+            //             $("#renderHtmlHear").empty();
+            //             $(this).renderHTML(orders);
+            //         });
+
+            //     }
+
+            // };
+
             $.fn.cancelOrder = function (index) {
-                var conf = confirm('Are you sure ?');
-                if(conf){
-                    $.get('/delete-order/'+orders[index].id,function (data) {
-                        orders.splice(index,1);
+            var conf = confirm('Are you sure ?');
+            if (conf) {
+                var orderId = orders[index].id;
+
+                $.post('/delete-order', 
+                    {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        order_id: orderId
+                    },
+                    function (data) {
+                        orders.splice(index, 1);
                         $("#renderHtmlHear").empty();
                         $(this).renderHTML(orders);
-                    });
+                    }
+                ).fail(function (xhr) {
+                    alert('Failed to delete order: ' + xhr.responseText);
+                });
+            }
+        };
 
-                }
-
-            };
 
             $.fn.renderHTML = function (data) {
                 $.each(data, function (index, dish) {

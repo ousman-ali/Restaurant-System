@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Session;
 class OrderController extends Controller
 {
     /**
@@ -263,19 +263,38 @@ class OrderController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteOrder($id)
-    {
-        $order = Order::findOrFail($id);
-        OrderDetails::where('order_id', $order->id)->delete();
-        CookedProduct::where('order_id', $order->id)->delete();
+    // public function deleteOrder($id)
+    // {
+    //     $order = Order::findOrFail($id);
+    //     OrderDetails::where('order_id', $order->id)->delete();
+    //     CookedProduct::where('order_id', $order->id)->delete();
 
-        if ($order->delete()) {
+    //     if ($order->delete()) {
+    //         broadcast(new OrderCancel('orderCancel', $order))->toOthers();
+    //         Session::flash('success', 'Order deleted successfully!');
+    //         // return response()->json(['success' => true, 'message' => 'Order deleted successfully']);
+    //     }
+
+    //     return response()->json(['success' => false], 500);
+    // }
+
+    public function deleteOrder(Request $request)
+        {
+            $order = Order::findOrFail($request->order_id);
+            OrderDetails::where('order_id', $order->id)->delete();
+            CookedProduct::where('order_id', $order->id)->delete();
             broadcast(new OrderCancel('orderCancel', $order))->toOthers();
-            return response()->json(['success' => true, 'message' => 'Order deleted successfully']);
+            $order->delete();
+            Session::flash('delete_success', 'The order has been deleted successfully');
+            return back();
+            // if ($order->delete()) {
+            //     broadcast(new OrderCancel('orderCancel', $order))->toOthers();
+            //     return redirect()->back()->with('success', 'The order has been deleted successfully');
+            // }
+
+            // return redirect()->back()->with('error', 'Failed to delete order');
         }
 
-        return response()->json(['success' => false], 500);
-    }
 
 
     /**

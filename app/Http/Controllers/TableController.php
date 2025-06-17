@@ -47,13 +47,14 @@ class TableController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteTable($id)
+    public function deleteTable(Request $request)
     {
-        $table = Table::findOrFail($id);
+        $table = Table::findOrFail($request->table_id);
         if ($table->delete()) {
-            Order::where('table_id', $id)->update(array('table_id' => 0));
-            return redirect()->back();
-        }
+            Order::where('table_id', $request->table_id)->update(array('table_id' => 0));
+            return redirect()->back()->with('delete_success','Table has been deleted');
+            // return redirect()->back();
+        } 
     }
 
     /**

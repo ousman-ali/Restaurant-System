@@ -80,10 +80,19 @@
                                         <i class="fa fa-print"></i>
                                     </button>
                                     @if($o->status == 0)
-                                        <a href="#" onclick="$(this).confirmDelete('/delete-order/{{$o->id}}')"
+                                        {{-- <a href="#" onclick="$(this).confirmDelete('/delete-order/'+{{$o->id}})"
                                            class="btn btn-danger waves-effect waves-light">
                                             <i class="fa fa-trash-o"></i>
-                                        </a>
+                                        </a> --}}
+
+                                        <form action="{{ route('order.delete')}}" method="post" class="deleteform">
+                                            @csrf
+                                            <input type="hidden" name="order_id" value="{{$o->id}}">
+                                            <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </form>
+
                                     @endif
                                 </div>
                             @else
@@ -93,7 +102,7 @@
                                 </a>
                             @endif
                         </td>
-                    </tr>
+                    </tr> 
                 @endforeach
                 </tbody>
             </table>

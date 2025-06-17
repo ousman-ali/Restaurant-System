@@ -81,10 +81,10 @@ class DishController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function deleteDish($id): RedirectResponse
+    public function deleteDish(Request $request): RedirectResponse
     {
-        $dish = Dish::findOrFail($id);
-        $dish_on_order = OrderDetails::where('dish_id', $id)->first();
+        $dish = Dish::findOrFail($request->dish_id);
+        $dish_on_order = OrderDetails::where('dish_id', $request->dish_id)->first();
         if (!$dish_on_order) {
             DishPrice::where('dish_id', $dish->id)->delete();
             DishInfo::where('dish_id', $dish->id)->delete();
@@ -96,6 +96,15 @@ class DishController extends Controller
                 ->with('delete_error',
                     'Dish cannot delete ! This dish has been used in order. If you dont want to show this dish anymore you can simply de-active this dish');
         }
+    }
+
+    public function deleteDishPrice(Request $request)
+    {
+        $price_type = DishPrice::find($request->id);
+        if($price_type->delete()){
+            return redirect()->back()->with('delete_success', 'Dish price has been delete successfully ..');
+        }
+        return redirect()->back()->with('delete_error', 'Dish price cannot be deleted ..');
     }
 
     /**
@@ -253,9 +262,9 @@ class DishController extends Controller
      * @param $id
      * @return RedirectResponse
      */
-    public function deleteDishImage($id)
+    public function deleteDishImage(Request $request)
     {
-        $dish_image = DishInfo::findOrFail($id);
+        $dish_image = DishInfo::find($request->id);
         if ($dish_image->delete()) {
             return redirect()->back()->with('delete_success', 'Dish Image has been delete successfully....');
         }

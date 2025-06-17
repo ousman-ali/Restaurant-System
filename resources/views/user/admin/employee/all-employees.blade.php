@@ -112,9 +112,13 @@
                                 <i class="fa fa-pencil"></i>
                             </a>
 
-                            <a href="#" onclick="$(this).confirmDelete('/delete-employee/{{$employee->id}}')" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
+                            <form action="{{ route('employee.delete')}}" method="post" class="deleteform">
+                                @csrf
+                                <input type="hidden" name="id" value="{{$employee->id}}">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

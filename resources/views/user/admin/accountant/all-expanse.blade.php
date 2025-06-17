@@ -76,9 +76,14 @@
                             <td>{{$_expanse->created_at->format('M - Y')}}</td>
                             <td>{{$_expanse->title}}
                                 <a href="{{url('/edit-expanse/'.$_expanse->id)}}"><i class="fa fa-pencil"></i></a>
-                                <a href="javascript:void(0);" class="text-danger"
-                                   onclick="$(this).confirmDelete('/delete-expanse/{{$_expanse->id}}')"><i
-                                            class="fa fa-trash-o"></i></a>
+                                <form action="{{ route('expense.delete')}}" method="post" class="deleteform">
+                                    @csrf
+                                    <input type="hidden" name="expense_id" value="{{$_expanse->id}}">
+                                    <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </form>
+                               
                             </td>
                             <th>{{config('restaurant.currency.symbol')}} {{number_format($_expanse->expanse,2)}} {{config('restaurant.currency.currency')}}</th>
                             <td>{{$_expanse->user->name}}</td>

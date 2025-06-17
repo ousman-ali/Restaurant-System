@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="btn-group pull-right m-t-15">
-                <a href="{{url('/all-table')}}" class="btn btn-default waves-effect">All Expense <span class="m-l-5"></span></a>
+                <a href="{{url('/all-expanse')}}" class="btn btn-default waves-effect">All Expense <span class="m-l-5"></span></a>
             </div>
 
             <h4 class="page-title">New Expanse </h4>
@@ -70,6 +70,7 @@
             $("#datepicker-autoclose").datepicker();
 
             var expanseForm = $("#expanseForm");
+            console.log('form', expanseForm);
             expanseForm.on('submit', function (e) {
                 e.preventDefault();
                 var formData = new FormData(this);

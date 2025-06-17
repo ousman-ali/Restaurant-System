@@ -29,5 +29,16 @@
 <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
 <![endif]-->
 
+<style>
+    .swal-footer {
+        text-align: center !important;
+    }
+    .pull-right {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 8px; /* Adjust spacing between icons */
+        }
+</style>
+
 <script src="{{url('/dashboard/js/modernizr.min.js')}}"></script>
 

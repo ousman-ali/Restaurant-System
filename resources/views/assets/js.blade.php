@@ -37,7 +37,8 @@
 <script src="{{ url('/dashboard/plugins/ladda-buttons/js/ladda.min.js') }}"></script>
 <script src="{{ url('/dashboard/plugins/ladda-buttons/js/ladda.jquery.min.js') }}"></script>
 
-
+{{-- sweet alert --}}
+<script src="{{ asset('dashboard/js/sweetalert.min.js') }}"></script>
 
 {{--Custom plugins--}}
 <script src="{{ url('/dashboard/js/dashboard.js') }}"></script>
@@ -255,31 +256,74 @@
     const cancelOrderChannel = pusher.subscribe('cancel-order');
     console.log('📡 Subscribing to cancel order channel...');
     cancelOrderChannel.bind('order-cancel-event', function(data) {
-        if (window.userRole === 4) {
-             try {
-                const audio = new Audio('{{ asset('sound/notification.mp3') }}');
-                audio.volume = 1.0;
-                audio.play().catch(error => {
-                    console.error('🔇 Audio playback failed:', error);
-                });
-            } catch (e) {
-                console.error('❌ Error playing notification sound:', e);
+        const senderRole = data.sender_role;
+
+        // Ignore if sender and current user share the same role
+        if (senderRole === window.userRole) {
+            console.log('🔕 Ignored: Notification from same role.');
+            return;
+        }
+
+        try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+            audio.play().catch(error => {
+                console.error('🔇 Audio playback failed:', error);
+            });
+        } catch (e) {
+            console.error('❌ Error playing notification sound:', e);
+        }
+
+        let message = '';
+        let time = 'N/A';
+        let href = '';
+        message = `Order #${data.order_no} canceled`;
+        if (data.updated_at) {
+            const isoTime = data.updated_at.replace(' ', 'T');
+            time = new Date(isoTime).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+        handleNotification(message, time, href);
+    });
+
+    
+
+    // delete popup
+$(document).on('click', '.deletebtn', function (e) {
+    e.preventDefault();
+
+    let form = $(this).closest('form');
+
+    swal({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        type: 'warning',
+        buttons: {
+            confirm: {
+                text: 'Yes, delete it!',
+                className: 'btn btn-success'
+            },
+            cancel: {
+                visible: true,
+                className: 'btn btn-danger'
             }
-            const message = `Order #${data.order_no} has canceled`;
-            let time = 'N/A';
-            let href = '/all-order';
-            if (data.updated_at) {
-                const isoTime = data.updated_at.replace(' ', 'T');
-                time = new Date(isoTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
-            handleNotification(message, time, href);
+        }
+    }).then((Delete) => {
+        if (Delete) {
+            form.submit();
         } else {
-            console.log('🔕 Ignored: Not an admin or waiter.');
+            swal.close();
         }
     });
+});
+
+
+
+
+
+
 
 </script> 

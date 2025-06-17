@@ -85,7 +85,11 @@
                     <span class="text-success tran-price">{{config('restaurant.currency.symbol')}} {{number_format($dish_price->price,2)}} {{config('restaurant.currency.currency')}}</span>
                     <span class="pull-right">|
                         <a href="{{url('/edit-dish-price/'.$dish_price->id)}}" class="btn btn-link"><i class="fa fa-pencil"></i></a>
-                        <a href="#" onclick="$(this).confirmDelete('/delete-dish-type/'+{{$dish_price->id}})" class="btn btn-link text-danger"><i class="fa fa-trash-o"></i></a>
+                        <form action="{{ route('dish-price.delete') }}" method="post" class="deleteform">
+                            @csrf
+                            <input type="hidden" name="id" value="{{$dish_price->id}}">
+                            <button style="border:none; background:transparent;"  class="pull-right text-danger deletebtn"><i class="fa fa-trash-o"></i> </button> </h4>
+                        </form>
                     </span>
                     <span class="pull-right text-muted">{{$dish_price->created_at->format('d-M-Y')}} </span>
                     <span class="clearfix"></span>

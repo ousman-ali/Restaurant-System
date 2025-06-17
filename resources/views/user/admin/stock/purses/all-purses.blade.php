@@ -53,7 +53,7 @@
                     <td>{{$purse->purses_id}} </td>
                     <th>{{config('restaurant.currency.symbol')}} {{ number_format($pursesValue,2,'.',',') }} {{config('restaurant.currency.currency')}} </th>
                     <td>{{$purse->user->name}} </td>
-                    <td>{{$purse->supplier->name}} </td>
+                    <td>{{$purse->supplier?->name}} </td>
                     <td>
                         @if($pursesValue-$pursesPayment <= 0)
                             Paid
@@ -72,9 +72,13 @@
                             <a href="{{url('/purses-payment/'.$purse->id)}}" class="btn btn-info waves-effect waves-light">
                                 <i class="fa fa-info"></i>
                             </a>
-                            <a href="#" onclick="$(this).confirmDelete('/delete-purses/'+{{$purse->id}})" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
+                            <form action="{{ route('purse.delete')}}" method="post" class="deleteform">
+                                @csrf
+                                <input type="hidden" name="purse_id" value="{{$purse->id}}">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

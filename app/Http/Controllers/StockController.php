@@ -76,17 +76,17 @@ class StockController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteStock($id)
+    public function deleteStock(Request $request)
     {
-        $product = Product::findOrFail($id);
-        $product_on_dish = Recipe::where('product_id',$id)->first();
-        $product_on_purses = PursesProduct::where('product_id',$id)->first();
+        $product = Product::findOrFail($request->item_id);
+        $product_on_dish = Recipe::where('product_id',$request->item_id)->first();
+        $product_on_purses = PursesProduct::where('product_id',$request->item_id)->first();
         $product_on_cooked = CookedProduct::where('product_id')->first();
         if(!$product_on_dish || !$product_on_purses || !$product_on_cooked){
-            return redirect()->to('/cannot-delete-item/'.$id);
+            return redirect()->to('/cannot-delete-item/'.$request->item_id);
         }else{
             $product->delete();
-            return redirect()->back();
+            return redirect()->back()->with('delete_success','Item stock has been deleted successfully');
         }
 
     }

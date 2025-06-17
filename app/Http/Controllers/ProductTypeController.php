@@ -31,15 +31,15 @@ class ProductTypeController extends Controller
         ]);
     }
 
-    public function deleteProductType($id)
+    public function deleteProductType(Request $request)
     {
-        $product_type = ProductType::findOrFail($id);
+        $product_type = ProductType::findOrFail($request->id);
         $product_type_in_product = Product::where('product_type_id',$product_type->id)->first();
         if(!$product_type_in_product){
             $product_type->delete();
             return redirect()->back()->with('delete_success','Product type has been delete successfully');
         }else{
-            return redirect()->to('/cannot-delete-product-type/'.$id);
+            return redirect()->to('/cannot-delete-product-type/'.$request->id);
         }
     }
 

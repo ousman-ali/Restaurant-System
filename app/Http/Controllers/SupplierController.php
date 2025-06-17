@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Session;
 class SupplierController extends Controller
 {
     /**
@@ -41,9 +41,12 @@ class SupplierController extends Controller
         ]);
     }
 
-    public function deleteSupplier($id)
+    public function deleteSupplier(Request $request)
     {
-
+        $supplier = Supplier::findOrFail($request->supplier_id);
+        $supplier->delete();
+        Session::flash('delete_success', 'The Supplier has been deleted successfully');
+        return back();
     }
 
     /**

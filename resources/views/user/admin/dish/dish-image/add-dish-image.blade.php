@@ -86,7 +86,13 @@
                                 <a href="{{url($image->image)}}" class="image-popup" title="{{$image->title}}">
                                     <img src="{{url($image->image)}}" class="thumb-img" alt="work-thumbnail">
                                 </a>
-                                <h4>{{$image->title}} <a href="#" onclick="$(this).confirmDelete('/delete-dish-image/{{$image->id}}')" class="pull-right text-danger"><i class="fa fa-trash-o"></i> </a> </h4>
+                                <h4>{{$image->title}} 
+                                    <form action="{{ route('dish-image.delete') }}" method="post" class="deleteform">
+                                        @csrf
+                                        <input type="hidden" name="id" value="{{$image->id}}">
+                                        <button style="border:none; background:transparent;"  class="pull-right text-danger deletebtn"><i class="fa fa-trash-o"></i> </button> </h4>
+                                    </form>
+                                    
                             </div>
                         </div>
                     @endforeach

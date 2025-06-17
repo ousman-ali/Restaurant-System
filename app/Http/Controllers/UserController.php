@@ -66,34 +66,36 @@ class UserController extends Controller
      * Delete employee
      * @param $id
      */
-    public function deleteEmployee($id)
+    public function deleteEmployee(Request $request)
     {
-        $user = User::findOrFail($id);
+       
+        $user = User::findOrFail($request->id);
         $user_in_order = Order::where('user_id', $user->id)
             ->orWhere('served_by', $user->id)
             ->orWhere('kitchen_id', $user->id)
             ->first();
-        $user_in_dish = Dish::where('user_id', $id)->first();
-        $user_id_product = Product::where('user_id', $id)->first();
-        $user_in_product_type = ProductType::where('user_id', $id)->first();
-        $user_in_purses = Purse::where('user_id', $id)->first();
-        $user_in_puirses_payment = PursesPayment::where('user_id', $id)->first();
-        $user_in_recipe = Recipe::where('user_id', $id)->first();
-        $user_in_stock = Stock::where('user_id', $id)->first();
-        $user_in_supplier = Supplier::where('user_id', $id)->first();
-        $user_in_tbale = Table::where('user_id', $id)->first();
-        $user_in_unit = Unit::where('user_id', $id)->first();
-        $user_in_employee = Employee::where('user_id', $id)->first();
+        $user_in_dish = Dish::where('user_id', $request->id)->first();
+        $user_id_product = Product::where('user_id', $request->id)->first();
+        $user_in_product_type = ProductType::where('user_id', $request->id)->first();
+        $user_in_purses = Purse::where('user_id', $request->id)->first();
+        $user_in_puirses_payment = PursesPayment::where('user_id', $request->id)->first();
+        $user_in_recipe = Recipe::where('user_id', $request->id)->first();
+        $user_in_stock = Stock::where('user_id', $request->id)->first();
+        $user_in_supplier = Supplier::where('user_id', $request->id)->first();
+        $user_in_tbale = Table::where('user_id', $request->id)->first();
+        $user_in_unit = Unit::where('user_id', $request->id)->first();
+        // $user_in_employee = Employee::where('user_id', $request->id)->first();
+        
 
         if ($user_in_order || $user_in_dish || $user_id_product || $user_in_product_type || $user_in_purses
             || $user_in_puirses_payment || $user_in_recipe || $user_in_stock || $user_in_supplier || $user_in_tbale
-            || $user_in_unit || $user_in_employee
+            || $user_in_unit
         ) {
             return redirect()->back()->with('delete_error', 'You cannot delete this user');
         } else {
             if ($user->role != 1) {
                 Employee::destroy($user->employee->id);
-                User::destroy($id);
+                User::destroy($request->id);
                 return redirect()->back()->with('delete_success', 'Employee has been deleted successfully');
             }
         }

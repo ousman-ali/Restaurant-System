@@ -37,17 +37,23 @@
                     </td>
 
                     <td>
-                        <div class="btn-group-justified">
-                            <a href="{{url('/edit-dish-type/'.$dish->id)}}"
-                               class="btn btn-success waves-effect waves-light">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <a href="{{ url('/edit-dish-type/' . $dish->id) }}"
+                            class="btn btn-success btn-sm waves-effect waves-light">
                                 <i class="fa fa-pencil"></i>
                             </a>
 
-                            <a href="#" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
+                            <form action="{{ route('dish-type.delete') }}" method="post" class="deleteform" style="margin: 0;">
+                                @csrf
+                                <input type="hidden" name="dish_type_id" value="{{ $dish->id }}">
+                                <button type="submit" class="btn btn-danger btn-sm waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
+
+
                 </tr>
             @endforeach
             </tbody>

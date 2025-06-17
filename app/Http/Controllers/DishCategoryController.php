@@ -50,10 +50,11 @@ class DishCategoryController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteDishType($id)
+    public function deleteDishType(Request $request)
     {
-        $dishType = DishPrice::findOrFail($id);
-        $dish_type_on_order = OrderDetails::where('dish_type_id', $id)->first();
+        $dishType = DishCategory::findOrFail($request->dish_type_id);
+        $dish_type_on_order = OrderDetails::where('dish_type_id', $request->dish_type_id)->first();
+        
         if (!$dish_type_on_order) {
             $dishType->delete();
             return redirect()->back()->with('delete_success', 'Dish type has been deleted successfully');

@@ -23,6 +23,7 @@
     $pursePayment = $purses->pursesPayments->sum('payment_amount');
     $purseDue = $purses->pursesProducts->sum('gross_price') - $purses->pursesPayments->sum('payment_amount');
     ?>
+   
 
     <div class="row">
         <div class="card-box">
@@ -44,7 +45,7 @@
                 </dd>
                 <dt>Supplier :</dt>
                 <dd>
-                    <a href="{{url('/view-supplier/'.$purses->supplier->id)}}" class="btn btn-link">{{$purses->supplier->name}}</a>
+                    <a href="{{url('/view-supplier/'.$purses?->supplier?->id)}}" class="btn btn-link">{{$purses?->supplier?->name}}</a>
                 </dd>
                 <dt>
                     Purses At :

@@ -55,6 +55,7 @@ class OrderCancel implements ShouldBroadcast
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
             'updated_at' => $this->order->updated_at,
+            'sender_role' => auth()->user()->role,
         ];
     }
 }

@@ -58,9 +58,13 @@
                             <a href="{{url('/view-supplier/'.$supplier->id)}}" class="btn btn-info waves-effect waves-light">
                                 <i class="fa fa-info"></i>
                             </a>
-                            <a href="#" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
+                            <form action="{{ route('delete.supplier')}}" method="post" class="deleteform">
+                                @csrf
+                                <input type="hidden" name="supplier_id" value="{{$supplier->id}}">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

@@ -22,8 +22,13 @@
                                             class="md md-mode-edit"></i></a>
                                 <a href="{{url('/view-dish/'.$dish->id)}}" class="btn btn-info btn-sm"><i
                                             class="md md-announcement"></i></a>
-                                <a href="#" onclick="$(this).confirmDelete('/delete-dish/'+{{$dish->id}})"
-                                   class="btn btn-danger btn-sm"><i class="md md-close"></i></a>
+                                <form action="{{ route('dish.delete')}}" method="post" class="deleteform">
+                                    @csrf
+                                    <input type="hidden" name="dish_id" value="{{$dish->id}}">
+                                    <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

@@ -104,9 +104,9 @@ class AccountantController extends Controller
         }
     }
 
-    public function deleteExpanse($id)
+    public function deleteExpanse(Request $request)
     {
-        $expanse =  OfficeExpanse::findOrFail($id);
+        $expanse =  OfficeExpanse::findOrFail($request->expense_id);
         if($expanse){
             $expanse->delete();
             return redirect()->back()->with('delete_success','Expanse has been deleted');

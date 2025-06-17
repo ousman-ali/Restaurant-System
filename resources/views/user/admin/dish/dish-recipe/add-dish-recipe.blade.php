@@ -129,7 +129,7 @@
                             <tbody>
                             <?php $count = 1; ?>
                             @foreach($dish->dishRecipes as $recipe)
-                                @if($recipe->dishType->dish_type == $dishInfo->dish_type)
+                                @if($recipe->dishType?->dish_type == $dishInfo->dish_type)
                                     <tr>
                                         <td>{{$count++}}</td>
                                         <td>{{$recipe->product->product_name}}</td>

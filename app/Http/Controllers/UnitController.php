@@ -47,10 +47,10 @@ class UnitController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteUnit($id)
+    public function deleteUnit(Request $request)
     {
-        $unit = Unit::findOrFail($id);
-        $product = Product::where('unit_id',$id)->first();
+        $unit = Unit::findOrFail($request->id);
+        $product = Product::where('unit_id',$request->id)->first();
         if($product){
             return redirect()->to('/cannot-delete-unit/'.$unit->id);
         }else {

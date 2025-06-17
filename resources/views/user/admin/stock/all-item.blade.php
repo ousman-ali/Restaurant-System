@@ -90,7 +90,7 @@
                                 @forelse($type->products as $product)
                                     <?php
                                     $total_purses = $product->purses->sum('quantity');
-                                    $total_cooked = $product->cookedProducts->sum('quantity');
+                                    $total_cooked = $product->cookedProducts->sum('quantity'); 
                                     $available_product = $total_purses - $total_cooked;
                                     $product_unit = $product->unit->unit;
                                     if($available_product <= 0){
@@ -105,13 +105,17 @@
                                         <div class="col-md-8">
                                             <h4 class="product-head">
                                                 <a href="{{url('/view-item/'.$product->id)}}" class="{{$available_product <= 0 ? 'blink' : ''}}">{{$product->product_name}}</a>
-                                                <div class="pull-right">
+                                                <div class="pull-right d-flex align-items-center gap-1">
                                                     <a href="{{url('/edit-item/'.$product->id)}}"><i
                                                                 class="fa fa-pencil text-success"></i></a>
-                                                    |
-                                                    <a href="#"
-                                                       onclick="$(this).confirmDelete('/delete-item/{{$product->id}}')"
-                                                       class="text-danger"><i class="fa fa-trash-o"></i></a>
+                                                    
+                                                    <form action="{{ route('item.delete')}}" method="post" class="deleteform">
+                                                        @csrf
+                                                        <input type="hidden" name="item_id" value="{{$product->id}}">
+                                                        <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn" style="all: unset; padding: 0; margin: 0; cursor: pointer;">
+                                                            <i class="fa fa-trash-o"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </h4>
 
@@ -160,13 +164,19 @@
                                     <div class="col-md-8">
                                         <h4 class="product-head">
                                             <a href="{{url('/view-item/'.$product->id)}}" class="{{$available_product <= 0 ? 'blink' : ''}}">{{$product->product_name}}</a>
-                                            <div class="pull-right">
+                                            <div class="pull-right d-flex align-items-center gap-1">
                                                 <a href="{{url('/edit-item/'.$product->id)}}"><i
                                                             class="fa fa-pencil text-success"></i></a>
                                                 |
-                                                <a href="#"
-                                                   onclick="$(this).confirmDelete('/delete-item/{{$product->id}}')"
-                                                   class="text-danger"><i class="fa fa-trash-o"></i></a>
+                                               
+
+                                                   <form action="{{ route('item.delete')}}" method="post" class="deleteform">
+                                                        @csrf
+                                                        <input type="hidden" name="item_id" value="{{$product->id}}">
+                                                        <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn" style="all: unset; padding: 0; margin: 0; cursor: pointer;">
+                                                            <i class="fa fa-trash-o"></i>
+                                                        </button>
+                                                    </form>
                                             </div>
                                         </h4>
 

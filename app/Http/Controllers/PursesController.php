@@ -153,7 +153,7 @@ class PursesController extends Controller
     {
         $purses = Purse::findOrFail($purses_id);
         return view('user.admin.stock.purses.purses-payment',[
-            'purses'        =>      $purses
+            'purses'=> $purses
         ]);
     }
 
@@ -217,9 +217,9 @@ class PursesController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deletePurses($id)
+    public function deletePurses(Request $request)
     {
-        $purses = Purse::findOrFail($id);
+        $purses = Purse::findOrFail($request->purse_id);
         PursesProduct::where('purse_id',$purses->id)->delete();
         PursesPayment::where('purse_id',$purses->id)->delete();
         if($purses->delete()){

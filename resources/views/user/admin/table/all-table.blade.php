@@ -58,9 +58,14 @@
                             <a href="{{url('/edit-table/'.$table->id)}}" class="btn btn-success waves-effect waves-light">
                                 <i class="fa fa-pencil"></i>
                             </a>
-                            <a href="#" onclick="$(this).confirmDelete('/delete-table/'+{{$table->id}})" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i> 
-                            </a>
+                            
+                            <form action="{{ route('table.delete')}}" method="post" class="deleteform">
+                                @csrf
+                                <input type="hidden" name="table_id" value="{{$table->id}}">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

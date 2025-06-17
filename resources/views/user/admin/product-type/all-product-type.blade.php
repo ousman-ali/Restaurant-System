@@ -60,14 +60,20 @@
                     </td>
 
                     <td>
-                        <div class="btn-group-justified">
+                        <div style="display: flex; align-items: center; gap: 5px;">
                             <a href="{{url('/edit-product-type/'.$product_type->id)}}" class="btn btn-success waves-effect waves-light">
                                 <i class="fa fa-pencil"></i>
                             </a>
 
-                            <a href="#" onclick="$(this).confirmDelete('/delete-product-type/'+{{$product_type->id}})" class="btn btn-danger waves-effect waves-light">
-                                <i class="fa fa-trash-o"></i>
-                            </a>
+                            
+
+                            <form action="{{ route('product-type.delete')}}" method="post" class="deleteform">
+                                @csrf
+                                <input type="hidden" name="id" value="{{$product_type->id}}">
+                                <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
