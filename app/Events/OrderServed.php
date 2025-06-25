@@ -55,6 +55,8 @@ class OrderServed implements ShouldBroadcast
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
             'updated_at' => $this->order->updated_at,
+            'purchase_time' => $this->order->purchase_time,
+            'sender_role' => auth()->user()->role,
         ];
     }
 }

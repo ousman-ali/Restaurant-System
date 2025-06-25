@@ -255,7 +255,26 @@
         </tr>
         </thead>
         <tbody>
-        @foreach($order->orderPrice as $index => $orderDetails)
+            @foreach($order->orderPrice as $index => $orderDetails)
+                <tr>
+                    <td class="sl">{{ $index + 1 }}</td>
+                    <td class="description">
+                        @if($orderDetails->ready_dish_id)
+                            {{ $orderDetails->readyDish->name ?? 'Ready Dish' }}
+                        @elseif($orderDetails->dish_id)
+                            {{ $orderDetails->dish->dish ?? 'Dish' }}
+                            <div class="item-variant">{{ $orderDetails->dishType->dish_type ?? '' }}</div>
+                        @else
+                            Unknown Item
+                        @endif
+                    </td>
+                    <td class="qty">{{ $orderDetails->quantity }}</td>
+                    <td class="rate">{{ number_format($orderDetails->net_price, 2) }}</td>
+                    <td class="amount">{{ number_format($orderDetails->net_price * $orderDetails->quantity, 2) }}</td>
+                </tr>
+            @endforeach
+
+        {{-- @foreach($order->orderPrice as $index => $orderDetails)
             <tr>
                 <td class="sl">{{ $index + 1 }}</td>
                 <td class="description">
@@ -266,7 +285,7 @@
                 <td class="rate">{{ number_format($orderDetails->net_price, 2) }}</td>
                 <td class="amount">{{ number_format($orderDetails->net_price * $orderDetails->quantity, 2) }}</td>
             </tr>
-        @endforeach
+        @endforeach --}}
         </tbody>
     </table>
 

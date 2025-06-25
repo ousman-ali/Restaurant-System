@@ -52,6 +52,7 @@ class StartCooking implements ShouldBroadcast
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
             'cook_start_time' => $this->order->cook_start_time,
+            'sender_role' => auth()->user()->role,
         ];
     }
 

@@ -31,6 +31,14 @@
                 </li>
 
                 <li class="has_sub">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="icon icon-fire"></i> <span> Barman </span> <span class="menu-arrow"></span> </a>
+                    <ul class="list-unstyled">
+                        <li><a href="{{url('/live-barman')}}">Live Barman</a></li>
+                        {{--<li><a href="{{url('/kitchen-stat')}}">Kitchen Statistics</a></li>--}}
+                    </ul>
+                </li>
+
+                <li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="ti-notepad"></i> <span> Orders </span> <span class="menu-arrow"></span> </a>
                     <ul class="list-unstyled">
                         <li><a href="{{url('/new-order')}}">New Order</a></li>
@@ -91,7 +99,9 @@
                     <a href="javascript:void(0);" class="waves-effect"><i class="fa fa-cutlery"></i><span> Dish </span> <span class="menu-arrow"></span></a>
                     <ul class="list-unstyled">
                         <li><a href="{{url('/add-dish')}}">Add Dish</a></li>
+                        <li><a href="{{url('/add-ready-dish')}}">Add Ready Dish</a></li>
                         <li><a href="{{url('/all-dish')}}">All Dish</a></li>
+                        <li><a href="{{url('/all-ready-dish')}}">All Ready Dish</a></li>
                         <li><a href="{{url('/all-dish-type')}}">Dish Categories</a></li>
                     </ul>
                 </li>

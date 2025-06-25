@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dish;
+use App\Models\ReadyDish;
 use App\Models\DishCategory;
 use App\Models\DishInfo;
 use App\Models\DishPrice;
@@ -46,6 +47,44 @@ class DishController extends Controller
     {
         $dishes = Dish::with(['dishPrices', 'dishImages'])->whereHas('dishRecipes')->get();
         return response()->json($dishes);
+    }
+
+    public function getReadyDishes(): JsonResponse
+    {
+    $dishes = ReadyDish::with(['dishImages', 'dishRecipes'])
+    ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
+    ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
+    ->get()
+    ->filter(function ($dish) {
+        if ($dish->source_type === 'inhouse') {
+            return $dish->total_ready_quantity == null || $dish->total_ready_quantity == 0;
+        } elseif ($dish->source_type === 'supplier') {
+            return $dish->total_purchased_quantity == null || $dish->total_purchased_quantity == 0;
+        }
+        return false;
+    })
+    ->values();
+
+        return response()->json($dishes);
+    }
+
+    public function getReadyProducts(): JsonResponse
+    {
+    $dishes = ReadyDish::with(['dishImages', 'dishRecipes'])
+        ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
+        ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
+        ->get()
+        ->filter(function ($dish) {
+            if ($dish->source_type === 'inhouse') {
+                return $dish->total_ready_quantity > 0;
+            } elseif ($dish->source_type === 'supplier') {
+                return $dish->total_purchased_quantity > 0;
+            }
+            return false;
+        })
+        ->values();
+
+    return response()->json($dishes);
     }
 
     /**

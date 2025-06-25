@@ -29,7 +29,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Dish :</label>
                                 <div class="col-md-4">
-                                    <select name="" id="dish" class="form-control" required>
+                                    <select name="" id="dish" class="form-control select2" required>
                                         <option value="">Select Dish</option>
                                         @foreach($dishes as $dish)
                                             <option value="{{$dish->id}}">{{$dish->dish}}</option>
@@ -50,7 +50,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label" for="example-email">Product :</label>
                                 <div class="col-md-8">
-                                    <select name="" id="product" class="form-control" required>
+                                    <select name="" id="product" class="form-control select2" required>
                                         <option value="">Select One</option>
                                         @foreach($products as $product)
                                             <option value="{{$product->id}}">{{$product->product_name}} &nbsp;&nbsp;&nbsp; {{$product->product_code}} </option>

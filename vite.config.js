@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
+    
     plugins: [
         laravel({
             input: ['resources/assets/js/app.js'],
@@ -10,4 +11,14 @@ export default defineConfig({
         }),
         vue(),
     ],
+
+    server: {
+        host: 'restulator.local',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'restulator.local',
+        },
+        cors: true,
+    },
 });

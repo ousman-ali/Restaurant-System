@@ -40,10 +40,24 @@ class StagingDataSeeder extends Seeder
             'role' => 3,
             'active' => true,
         ]);
+        
         User::factory()->create([
             'email' => 'kitchen@gmail.com',
             'password' => Hash::make('password'),
             'role' => 4,
+            'active' => true,
+        ]);
+
+        User::factory()->create([
+            'email' => 'barman@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 5,
+            'active' => true,
+        ]);
+        User::factory()->create([
+            'email' => 'baker@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 6,
             'active' => true,
         ]);
 

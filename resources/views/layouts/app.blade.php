@@ -42,6 +42,16 @@
         @include('assets.sidebar.manager')
         @endmanager
 
+        @barman
+        @include('assets.sidebar.barman')
+        @endbarman
+
+        @baker
+        @include('assets.sidebar.baker')
+        @endbaker
+
+        
+
         <div class="content-page">
             <div class="content">
                 <div class="container">
@@ -57,6 +67,7 @@
         @include('assets.js')
         @yield('extra-js')
         @include('assets.show-session-message')
+       
 
 </div>
 

@@ -44,7 +44,7 @@
             <a href="javascript:void(0);" data-toggle="tab" aria-expanded="false">
                 <span class="visible-xs"><i class="fa fa-photo"></i></span>
                 <span class="hidden-xs">Dish Images</span>
-            </a>
+            </a> 
         </li>
     </ul>
     <div class="tab-content">

@@ -57,7 +57,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label" for="example-email">Product Category :</label>
                                 <div class="col-md-8">
-                                    <select name="product_type_id" id="" class="form-control">
+                                    <select name="product_type_id" id="" class="form-control select2">
                                         <option value="">Select One</option>
                                         @foreach($product_type as $type)
                                             <option value="{{$type->id}}">{{$type->product_type}}</option>
@@ -70,7 +70,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label" for="example-email">Unit :</label>
                                 <div class="col-md-8">
-                                    <select name="unit_id" id="" class="form-control">
+                                    <select name="unit_id" id="" class="form-control select2">
                                         <option value="">Select One</option>
                                         @foreach($units as $unit)
                                             <option value="{{$unit->id}}">{{$unit->unit}}</option>

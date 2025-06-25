@@ -18,6 +18,14 @@
 
 {{--Select 2 Plugins--}}
 <script src="{{ url('/dashboard/plugins/select2/js/select2.min.js') }}"></script>
+<script>
+  $(document).ready(function() {
+    $('.select2').select2({
+      placeholder: "Select an option",
+      allowClear: true
+    });
+  });
+</script>
 
 
 {{--Notification Plugins--}}
@@ -91,76 +99,169 @@
     // start cooking
     const channel = pusher.subscribe('start-cooking');
     console.log('📡 Subscribing to start-cooking channel...');
+
     channel.bind('kitchen-event', function(data) {
-        if (window.userRole === 1 || window.userRole === 3) {
-             try {
-                const audio = new Audio('{{ asset('sound/notification.mp3') }}');
-                audio.volume = 1.0;
-                audio.play().catch(error => {
-                    console.error('🔇 Audio playback failed:', error);
-                });
-            } catch (e) {
-                console.error('❌ Error playing notification sound:', e);
+        const senderRole = parseInt(data.sender_role);
+        const userRole = parseInt(window.userRole);
+
+        if (senderRole === 6) {
+            if ([5].includes(userRole)) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} has started cooking`;
+                let time = 'N/A';
+                let href = '';
+
+                if (userRole === 5) {
+                    href = '/baker-status';
+                }
+
+                if (data.cook_start_time) {
+                    const isoTime = data.cook_start_time.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Not a target role for sender_role = 5');
             }
-            const message = `Order #${data.order_no} has started cooking`;
-            let time = 'N/A';
-            let href = '';
-            if(window.userRole == 1){
-                href = '/live-kitchen';
-            }else if(window.userRole == 3){
-                href = '/kitchen-status';
-            }
-            if (data.cook_start_time) {
-                const isoTime = data.cook_start_time.replace(' ', 'T');
-                time = new Date(isoTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
-            handleNotification(message, time, href);
         } else {
-            console.log('🔕 Ignored: Not an admin or waiter.');
+            // Default logic for other sender roles
+            if (userRole === 1 || userRole === 3) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} has started cooking`;
+                let time = 'N/A';
+                let href = '';
+
+                if (userRole === 1) {
+                    href = '/live-kitchen';
+                } else if (userRole === 3) {
+                    href = '/kitchen-status';
+                }
+
+                if (data.cook_start_time) {
+                    const isoTime = data.cook_start_time.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Not an admin or waiter.');
+            }
         }
     });
+
 
     // complete cooking
 
     const completeCookingChannel = pusher.subscribe('complete-cooking');
     console.log('📡 Subscribing to complete-cooking channel...');
-    completeCookingChannel.bind('complete-cooking-event', function(data) {
-        if (window.userRole === 1 || window.userRole === 3) {
-             try {
-                const audio = new Audio('{{ asset('sound/notification.mp3') }}');
-                audio.volume = 1.0;
-                audio.play().catch(error => {
-                    console.error('🔇 Audio playback failed:', error);
-                });
-            } catch (e) {
-                console.error('❌ Error playing notification sound:', e);
+
+    completeCookingChannel.bind('complete-cooking-event', function (data) {
+        const senderRole = parseInt(data.sender_role);
+        const userRole = parseInt(window.userRole);
+
+        console.log('roles', senderRole, userRole);
+
+        // Check if sender_role is 5
+        if (senderRole === 6) {
+            if ([5].includes(userRole)) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} has completed cooking`;
+                let time = 'N/A';
+                let href = '';
+
+                if (userRole === 5) {
+                    href = '/baker-status';
+                }
+
+                if (data.cook_complete_time) {
+                    const isoTime = data.cook_complete_time.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Not a target role for sender_role = 5');
             }
-            const message = `Order #${data.order_no} has completed cooking`;
-            let time = 'N/A';
-            let href = '';
-            if(window.userRole == 1){
-                href = '/live-kitchen';
-            }else if(window.userRole == 3){
-                href = '/kitchen-status';
-            }
-            console.log('href', href);
-            if (data.cook_complete_time) {
-                const isoTime = data.cook_complete_time.replace(' ', 'T');
-                time = new Date(isoTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
-            handleNotification(message, time, href);
+
         } else {
-            console.log('🔕 Ignored: Not an admin or waiter.');
+            // original logic
+            if (userRole === 1 || userRole === 3) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} has completed cooking`;
+                let time = 'N/A';
+                let href = '';
+
+                if (userRole === 1) {
+                    href = '/live-kitchen';
+                } else if (userRole === 3) {
+                    href = '/kitchen-status';
+                }
+
+                if (data.cook_complete_time) {
+                    const isoTime = data.cook_complete_time.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Not an admin or waiter.');
+            }
         }
     });
+
 
     // new order notify for kitchen
     const newOrderChannel = pusher.subscribe('order');
@@ -223,33 +324,75 @@
     // order served
     const servedOrderChannel = pusher.subscribe('order-served');
     console.log('📡 Subscribing to serve order channel...');
-    servedOrderChannel.bind('order-served-event', function(data) {
-        if (window.userRole === 1) {
-             try {
-                const audio = new Audio('{{ asset('sound/notification.mp3') }}');
-                audio.volume = 1.0;
-                audio.play().catch(error => {
-                    console.error('🔇 Audio playback failed:', error);
-                });
-            } catch (e) {
-                console.error('❌ Error playing notification sound:', e);
+
+    servedOrderChannel.bind('order-served-event', function (data) {
+        const senderRole = parseInt(data.sender_role);
+        const userRole = parseInt(window.userRole);
+
+        if (senderRole === 1) {
+            // Notify only barman (userRole 5)
+            if (userRole === 5) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} purchased`;
+                let href = '/my-barman-orders';
+                let time = 'N/A';
+
+                if (data.purchase_time) {
+                    const isoTime = data.purchase_time.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Sender role = 1, but not a barman.');
             }
-            const message = `Order #${data.order_no} has served`;
-            let href = '/all-order';
-            let time = 'N/A';
-            if (data.updated_at) {
-                const isoTime = data.updated_at.replace(' ', 'T');
-                time = new Date(isoTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
-            handleNotification(message, time, href);
+
         } else {
-            console.log('🔕 Ignored: Not an admin or waiter.');
+            // Default: notify only admin (role 1)
+            if (userRole === 1) {
+                try {
+                    const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+                    audio.volume = 1.0;
+                    audio.play().catch(error => {
+                        console.error('🔇 Audio playback failed:', error);
+                    });
+                } catch (e) {
+                    console.error('❌ Error playing notification sound:', e);
+                }
+
+                const message = `Order #${data.order_no} has served`;
+                let href = '/all-order';
+                let time = 'N/A';
+
+                if (data.updated_at) {
+                    const isoTime = data.updated_at.replace(' ', 'T');
+                    time = new Date(isoTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                handleNotification(message, time, href);
+            } else {
+                console.log('🔕 Ignored: Not admin for default served order event.');
+            }
         }
     });
+
 
     // cancel order
 
@@ -326,4 +469,8 @@ $(document).on('click', '.deletebtn', function (e) {
 
 
 
+
 </script> 
+
+
+

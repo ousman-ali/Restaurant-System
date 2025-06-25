@@ -9,12 +9,14 @@ import {ref, onMounted} from 'vue';
 import Example from './components/Example.vue';  // Import Example component
 import LiveOrder from './components/LiveOrder.vue';  // Import other component
 import POS from './components/pos/Index.vue';
+import ReadyPos from './components/ready-pos/Index.vue';
 
 // Define available components
 const components = {
     example: Example,
     liveOrder: LiveOrder,
     pos: POS,
+    readyPos: ReadyPos,
 };
 
 // Create a ref to hold the dynamically chosen component

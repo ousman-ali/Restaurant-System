@@ -54,6 +54,7 @@ class CompleteCooking implements ShouldBroadcast
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
             'cook_complete_time' =>$this->order->cook_complete_time,
+            'sender_role' => auth()->user()->role,
         ];
     }
 }

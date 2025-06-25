@@ -114,12 +114,26 @@
 
         <div class="order-actions">
             <div class="actions-grid">
-                <div class="btn btn-outline" role="button" @click="saveOrder">
-                    Save
+                <!-- <div class="btn btn-outline" role="button" @click="saveOrder">
+                    Order
                     <span class="shortcut-badge">F7</span>
-                </div>
+                </div> -->
+                <button
+                    ref="orderBtn"
+                    type="button"
+                    class="btn btn-outline ladda-button"
+                    data-style="expand-right"
+                    data-spinner-color="#000"
+                    @click="saveOrderWithLoading"
+                    >
+                    <span class="ladda-label">
+                        Order
+                        <span class="shortcut-badge">F7</span>
+                    </span>
+                    </button>
+
                 <div role="button" class="btn btn-primary" @click="handleOrderAction">
-                    <span>✓</span> Save & Pay
+                    <span>✓</span> Order & Pay
                     <span class="shortcut-badge">F6</span>
                 </div>
             </div>
@@ -199,10 +213,10 @@
                     <!-- Complete Order Button -->
                     <div class="model-footer">
                         <div style="display: flex; gap: 15px; width: 100%;">
-                            <button class="btn btn-outline" @click="saveOrder" role="button">
+                            <button class="btn btn-outline ladda-button"  role="button" data-style="expand-right" data-spinner-color="#000" @click="(e) => saveOrderWithLoading(e, false)">
                                 Complete Order
                             </button>
-                            <button class="btn btn-success btn-block" @click="saveOrder(true)" role="button">
+                            <button class="btn btn-success btn-block ladda-button" @click="(e) => saveOrderWithLoading(e, true)" data-style="expand-right" data-spinner-color="#fff" role="button">
                                 Complete & Print Order
                             </button>
                         </div>
@@ -233,7 +247,8 @@ const {
     updateCartItemQuantity,
     config,
     clearCart,
-    saveOrder
+    saveOrder,
+    saveOrderWithLoading,
 } = useStore();
 
 const tableList = ref(false);

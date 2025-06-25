@@ -1,9 +1,11 @@
 // useStore.js
 import {ref, computed, readonly, onMounted} from 'vue';
-
+import * as Ladda from 'ladda';
 // Create a singleton pattern to ensure the store is only initialized once
 let initialized = false;
 let initializationPromise = null;
+
+
 
 // Common state that will be shared across all instances
 const config = ref({
@@ -25,6 +27,7 @@ const config = ref({
 const carts = ref([]);
 const tables = ref([]);
 const products = ref([]);
+const readyProducts = ref([]);
 const productCategories = ref([]);
 const discountAmount = ref(0);
 const currentPaymentAmount = ref('');
@@ -55,7 +58,9 @@ const finalTotal = computed(() => {
 const fetchProducts = async () => {
     try {
         const response = await axios.get('/web-api/dishes');
+        const readyResponse = await axios.get('/web-api/ready-products');
         products.value = response.data;
+        readyProducts.value = readyResponse.data;
     } catch (err) {
         console.error('Error fetching products:', err);
     }
@@ -88,6 +93,36 @@ const fetchConfig = async () => {
     }
 };
 
+const addReadyProductToCart = (product) => {
+    // If no specific variant is selected, use the first price option
+    // const variant = selectedVariant || product.dish_prices[0];
+
+    // Check if this dish variant is already in the cart
+    const existingCartItemIndex = carts.value.findIndex(item =>
+        item.productId === product.id
+    );
+
+    if (existingCartItemIndex !== -1) {
+        // If the item exists, increase quantity
+        carts.value[existingCartItemIndex].quantity += 1;
+    } else {
+        // If the item doesn't exist, add it to the cart
+        carts.value.push({
+            cartItemId: Date.now(), // Unique ID for the cart item
+            productId: product.id,
+            ready_dish_id:product.id,
+            dish_id: null,
+            name: product.name,
+            price: product.price,
+            quantity: 1,
+            isReadyDish:true,
+            image: product.thumbnail
+        });
+
+        console.log('carts', carts);
+    }
+};
+
 const fetchOrderById = async () => {
     if (!window.editOrderId) {
         return;
@@ -96,18 +131,22 @@ const fetchOrderById = async () => {
     try {
         const response = await axios.get(`/get-order-details/${window.editOrderId}`);
         updateOrder.value = response.data;
-
-        // Map order details to cart items
+        console.log('order', response.data);
         const order = response.data.order_details.map((item) => {
+            console.log('items', item);
+            const productId = item.ready_dish_id ?? item.dish_id;
             return {
                 cartItemId: item.id,
-                productId: item.dish_id,
+                productId: productId,
+                dish_id: item.dish_id,
+                ready_dish_id: item.ready_dish_id,
                 variantId: item.dish_type_id,
-                name: item.dish?.dish,
+                name: item.ready_dish_id ? item.ready_dish.name : item.dish?.dish,
                 variantName: item.dish_type?.dish_type,
-                price: item.dish_type?.price,
+                price: item.ready_dish_id ? item.ready_dish.price :item.dish_type?.price,
                 quantity: item.quantity,
-                image: item.dish?.thumbnail
+                image: item.ready_dish_id ? item.ready_dish.thumbnail : item.dish?.thumbnail,
+                isReadyDish:response.data.is_ready,
             };
         });
 
@@ -124,6 +163,21 @@ const fetchOrderById = async () => {
         console.error('Error fetching order details:', err);
     }
 };
+
+
+const saveOrderWithLoading = async (event, shouldPrint = false) => {
+  const laddaBtn = Ladda.create(event.currentTarget);
+  laddaBtn.start();
+
+  try {
+    await saveOrder(shouldPrint); // your existing function
+  } catch (err) {
+    showToast("Failed to save order.");
+  } finally {
+    laddaBtn.stop();
+  }
+};
+
 
 // Cart manipulation functions
 const addProductToCart = (product, selectedVariant = null) => {
@@ -143,13 +197,18 @@ const addProductToCart = (product, selectedVariant = null) => {
         carts.value.push({
             cartItemId: Date.now(), // Unique ID for the cart item
             productId: product.id,
+            ready_dish_id: null,
+            dish_id: product.id,
             variantId: variant.id,
             name: product.dish,
             variantName: variant.dish_type,
             price: variant.price,
             quantity: 1,
-            image: product.thumbnail
+            image: product.thumbnail,
+            isReadyDish: false,
         });
+
+        console.log('carts', carts);
     }
 };
 
@@ -180,6 +239,7 @@ const clearCart = () => {
     selectedTable.value = null;
 };
 
+console.log('carts', carts);
 // Order processing functions
 const saveOrder = async (shouldPrint = false) => {
     const orderData = {
@@ -189,11 +249,13 @@ const saveOrder = async (shouldPrint = false) => {
         change_amount: currentPaymentAmount.value ? (finalTotal.value - currentPaymentAmount.value) : 0,
         discount_amount: discountAmount.value ? discountAmount.value : 0,
         items: carts.value.map(item => ({
-            dish_id: item.productId,
+            dish_id: item.dish_id,
+            ready_dish_id: item.ready_dish_id ?? null,
             dish_type_id: item.variantId,
             quantity: item.quantity,
-            net_price: item.price, // Single item price without tax
-            gross_price: item.price * item.quantity, // Total price for this item
+            net_price: item.price,
+            gross_price: item.price * item.quantity,
+            is_ready:item.isReadyDish,
         }))
     };
 
@@ -211,9 +273,9 @@ const saveOrder = async (shouldPrint = false) => {
 
         isOrderModalVisible.value = false;
 
-        if (shouldPrint && response.data.id) {
-            printInvoice(response.data.id);
-        }
+        // if (shouldPrint && response.data.id) {
+        //     printInvoice(response.data.id);
+        // }
 
         return response.data;
     } catch (err) {
@@ -316,6 +378,7 @@ export default function useStore() {
         // State
         config,
         products,
+        readyProducts,
         productCategories,
         tables,
         selectedTable,
@@ -335,10 +398,12 @@ export default function useStore() {
 
         // Methods
         addProductToCart,
+        addReadyProductToCart,
         deleteProductFromCart,
         updateCartItemQuantity,
         clearCart,
         saveOrder,
+        saveOrderWithLoading,
         printInvoice,
         showToast,
 

@@ -80,11 +80,13 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Employee Type :</label>
                                 <div class="col-md-6">
-                                    <select name="role" id="" class="form-control" required>
+                                    <select name="role" id="" class="form-control select2" required>
                                         <option value="">Select One</option>
                                         <option value="2">Shop Manager</option>
-                                        <option value="3">Kitchen</option>
-                                        <option value="4">Waiter</option>
+                                        <option value="3">Waiter</option>
+                                        <option value="4">Kitchen</option>
+                                        <option value="5">Barman</option>
+                                        <option value="6">Baker</option>
                                     </select>
 
                                 </div>

@@ -117,6 +117,8 @@ $(document).ready(function () {
             grossPrice: $("#grossPrice").val()
         }
 
+        console.log('purse', purse);
+
          //push purse object to purses array
         purses.push(purse);
 
@@ -272,8 +274,98 @@ $(document).ready(function () {
        });
     }
 
+    // function calculateGross() {
+    //         const unitPrice = parseFloat($('#unit_price').val()) || 0;
+    //         const quantity = parseFloat($('input[name="quantity"]').val()) || 0;
+    //         const gross = unitPrice * quantity;
+    //         $('#gross').val(gross.toFixed(2));
+    //         return gross;
+    //     }
+
+    //     $('#unit_price').on('input', function () {
+    //         calculateGross();
+    //     });
+
+    //     $('#payment').on('input', function () {
+    //         const gross = calculateGross(); // Recalculate if needed
+    //         const payment = parseFloat($(this).val()) || 0;
+
+    //         if (payment > gross) {
+    //             $('#payment').css('border-color', 'red');
+    //         } else {
+    //             $('#payment').css('border-color', '');
+    //         }
+    //     });
+
+
+
+
+$('#dishSelector').on('change', function () {
+    const selected = $(this).find('option:selected');
+    const quantity = selected.data('quantity');
+    $('#dishQuantity').val(quantity);
 });
 
+$('#unitPrice').on('input', function () {
+    const qty = parseFloat($('#dishQuantity').val());
+    const price = parseFloat($(this).val());
+    console.log('data', price, qty);
+    $('#gross').val((qty * price).toFixed(2));
+    console.log('gross', $('#gross').val());
+});
+
+$('#addToList').on('click', function () {
+    const dishId = $('#dishSelector').val();
+    const dishName = $('#dishSelector option:selected').text();
+    const quantity = $('#dishQuantity').val();
+    const unitPrice = $('#unitPrice').val();
+    const gross = $('#gross').val();
+
+    if (!dishId || !quantity || !unitPrice) {
+        alert("Fill all fields");
+        return;
+    }
+
+    const entry = { dishId, dishName, quantity, unitPrice, gross };
+    stockItems.push(entry);
+
+    $('#dishList').append(`<p>${dishName} - Qty: ${quantity}, Unit Price: ${unitPrice}, Total: ${gross}</p>`);
+    $('#dishSelector').val('');
+    $('#dishQuantity').val('');
+    $('#unitPrice').val('');
+    $('#gross').val('');
+});
+
+$('#submitAllStock').on('click', function () {
+    const supplierId = $('select[name="supplier_id"]').val();
+    const orderId = $('input[name="order_id"]').val();
+
+    if (!supplierId || stockItems.length === 0) {
+        alert("Please select supplier and add at least one item.");
+        return;
+    }
+
+    $.ajax({
+        method: 'POST',
+        url: '/save-ready-purses',
+        data: {
+            _token: $('input[name="_token"]').val(),
+            supplier_id: supplierId,
+            order_id: orderId,
+            items: stockItems
+        },
+        success: function () {
+            // alert('Stock added successfully!');
+            location.reload();
+        },
+        error: function () {
+            // alert('Something went wrong');
+        }
+    });
+});
+
+});
+let stockItems = [];
 var purse = {};
 var unitId = '';
 var unitName = '';

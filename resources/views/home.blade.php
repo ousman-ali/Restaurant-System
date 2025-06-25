@@ -22,4 +22,13 @@
     @include('user.admin.dashboard')
     @endmanager
 
+    @barman
+    @include('user.barman.dashboard')
+    @endbarman
+
+    
+    @baker
+    @include('user.baker.dashboard')
+    @endbaker
+
 @endsection

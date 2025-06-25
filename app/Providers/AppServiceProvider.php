@@ -37,6 +37,15 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('waiter', function () {
             return auth()->check() && auth()->user()->role() == 3;
         });
+
+        Blade::if('barman', function () {
+            return auth()->check() && auth()->user()->role() == 5;
+        });
+
+        Blade::if('baker', function () {
+            return auth()->check() && auth()->user()->role() == 6;
+        });
+        
     }
 
     /**

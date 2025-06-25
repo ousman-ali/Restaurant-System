@@ -18,6 +18,9 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WaiterController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\ReadyDishController;
+use App\Http\Controllers\ReadyDishOrderController;
+use App\Http\Controllers\BakerController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -104,6 +107,16 @@ Route::middleware('active.user')->group(function () {
         Route::post('/save-dish', [DishController::class, 'saveDish']);
         Route::post('/update-dish/{id}', [DishController::class, 'updateDish']);
 
+         //Ready Dish Management
+        Route::get('/add-ready-dish', [ReadyDishController::class, 'add']);
+        Route::get('/all-ready-dish', [ReadyDishController::class, 'all']);
+        Route::get('/view-ready-dish/{id}', [ReadyDishController::class, 'view']);
+        Route::get('/edit-ready-dish/{id}', [ReadyDishController::class, 'edit']);
+        Route::post('/delete-ready-dish', [ReadyDishController::class, 'delete'])->name('ready-dish.delete');
+        Route::post('/save-ready-dish', [ReadyDishController::class, 'save']);
+        Route::post('/update-ready-dish/{id}', [ReadyDishController::class, 'update']);
+
+
         // Dish Report
         Route::get('/dish-stat', [DishController::class, 'dishStat']);
         Route::post('/dish-stat-post', [DishController::class, 'postDishStat']);
@@ -128,6 +141,19 @@ Route::middleware('active.user')->group(function () {
 
         Route::post('/save-recipes/{dish_id}', [RecipeController::class, 'saveRecipe']);
         Route::post('/update-recipes/{id}', [RecipeController::class, 'updateRecipe']);
+
+         // Ready Dish Image
+        Route::get('/ready-dish-image/{dish_id}', [ReadyDishController::class, 'addDishImage']);
+        Route::post('/delete-ready-dish-image', [ReadyDishController::class, 'deleteDishImage'])->name('dish-image.delete');
+        Route::post('/save-ready-dish-image', [ReadyDishController::class, 'saveDishImage']);
+
+        // Ready Dish Recipes
+        Route::get('/ready-dish-recipe/{dish_id}', [ReadyDishController::class, 'addRecipe']);
+        Route::get('/edit-ready-recipes/{id}', [ReadyDishController::class, 'editRecipe']);
+        Route::get('/delete-ready-recipes/{id}', [ReadyDishController::class, 'deleteRecipe']);
+
+        Route::post('/save-ready-recipes/{dish_id}', [ReadyDishController::class, 'saveRecipe']);
+        Route::post('/update-ready-recipes/{id}', [ReadyDishController::class, 'updateRecipe']);
 
         // Table Controller
         Route::get('/all-table', [TableController::class, 'allTable']);
@@ -208,6 +234,29 @@ Route::middleware('active.user')->group(function () {
         Route::get('/kitchen-stat/kitchen={id}/start={start_date}/end={end_date}', [KitchenController::class, 'shoeKitchenStat']);
     });
 
+    // baker Only (All baker access can also access by admin or shop manager)
+    Route::middleware(['baker'])->group(function () {
+        // Baker
+        Route::get('/baker-orders', [OrderController::class, 'bakerOrderToJSON']);
+        Route::get('/baker-start-cooking/{id}', [OrderController::class, 'bakerStartCooking']);
+        Route::get('/baker-complete-cooking/{id}', [OrderController::class, 'bakerCompleteCooking']);
+        Route::get('/baker-cooking-history', [BakerController::class, 'myCookingHistory']);
+        // Live Baker
+        Route::get('/live-barman', [BakerController::class, 'liveBarman']);
+        Route::get('/live-barman-admin-json', [BakerController::class, 'adminLiveBarmanJSON']);
+        // Baker Stat
+        Route::get('/baker-stat', [BakerController::class, 'bakerStat']);
+        Route::post('/baker-stat-post', [BakerController::class, 'postBakerStat']);
+        Route::get('/baker-stat/baker={id}/start={start_date}/end={end_date}', [BakerController::class, 'shoeBakerStat']);
+
+        // Route (web.php)
+        Route::get('/get-ready-recipe-form/{dish}', [BakerController::class, 'getRecipeForm']);
+        Route::get('/get-ready-recipe-form-all/{orderId}', [BakerController::class, 'getRecipeFormAll']);
+
+        Route::post('/save-ready-purses', [BakerController::class, 'savePurses'])->name('ready-purse.save');
+
+    });
+
     // Waiter Only 
     Route::middleware(['waiter'])->group(function () {
         //Dish
@@ -236,6 +285,37 @@ Route::middleware('active.user')->group(function () {
         Route::get('/waiter-stat/waiter={id}/start={start_date}/end={end_date}', [WaiterController::class, 'showWaiterStat']);
     });
 
+    // Barman Only 
+    Route::middleware(['barman'])->group(function () {
+        //Dish
+        // Route::get('/dish-types/{dish_id}', [RecipeController::class, 'getTypesOfDish']);
+        // Orders
+        Route::get('/new-barman-order', [ReadyDishOrderController::class, 'newOrder']);
+        Route::get('/print-barman-order/{id}', [ReadyDishOrderController::class, 'printOrder']);
+        Route::get('/marked-barman-order/{id}', [ReadyDishOrderController::class, 'markOrder']);
+        Route::post('/delete-barman-order', [ReadyDishOrderController::class, 'deleteOrder'])->name('order.delete');
+        Route::post('/delete-barman-supplier-order', [ReadyDishOrderController::class, 'deleteSupplierOrder'])->name('order.supplier.delete');
+        Route::post('/delete-barman-inhouse.order', [ReadyDishOrderController::class, 'deleteInhouseOrder'])->name('order.inhouse.delete');
+        Route::get('/all-barman-order', [ReadyDishOrderController::class, 'allOrder']);
+        Route::get('/non-paid-barman-order', [ReadyDishOrderController::class, 'nonPaidOrder']);
+        Route::get('/get-barman-order-details/{id}', [ReadyDishOrderController::class, 'getOrderDetails']);
+        Route::get('/edit-barman-order/{id}', [ReadyDishOrderController::class, 'editOrder']);
+        Route::post('/save-barman-order', [ReadyDishOrderController::class, 'saveOrder']);
+        Route::put('/update-barman-order/{id}', [ReadyDishOrderController::class, 'updateOrder']);
+        // barman Order
+        Route::get('/barman-order-served/{id}', [ReadyDishOrderController::class, 'orderServed']);
+        Route::get('/barman-order-confirm/{id}', [ReadyDishOrderController::class, 'orderConfirm']);
+        // Order By Barman
+        Route::get('/my-barman-orders', [ReadyDishOrderController::class, 'myOrder']);
+        // Live baker for barman
+        Route::get('/baker-status', [BakerController::class, 'barmanLiveBaker']);
+        Route::get('/baker-status-waiter-json', [BakerController::class, 'barmanLiveBakerJSON']);
+        // Barman Stat
+        Route::get('/barman-stat', [BarmanController::class, 'barmanStat']);
+        Route::post('/barman-stat-post', [BarmanController::class, 'postBarmanStat']);
+        Route::get('/barman-stat/barman={id}/start={start_date}/end={end_date}', [BarmanController::class, 'showBarmanStat']);
+    });
+
     //Profile Settings
     Route::get('/profile', [HomeController::class, 'profileInfo']);
     Route::get('/profile-edit', [HomeController::class, 'profileEdit']);
@@ -246,6 +326,8 @@ Route::middleware('active.user')->group(function () {
     Route::prefix('/web-api')->group(function () {
         Route::get('/tables', [TableController::class, 'getTables']);
         Route::get('/dishes', [DishController::class, 'getDishes']);
+        Route::get('/ready-dishes', [DishController::class, 'getReadyDishes']);
+        Route::get('/ready-products', [DishController::class, 'getReadyProducts']);
         Route::get('/config', [SettingsController::class, 'getConfig']);
         Route::get('/orders', [OrderController::class, 'getOrders']); // Added for order management
         Route::get('/dish-categories', [DishCategoryController::class, 'getDishCategories']);

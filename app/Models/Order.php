@@ -22,6 +22,11 @@ class Order extends Model
         return $this->belongsTo(User::class,'kitchen_id');
     }
 
+    public function baker()
+    {
+        return $this->belongsTo(User::class,'baker_id');
+    }
+
     public function table()
     {
         return $this->belongsTo(Table::class);
@@ -29,6 +34,6 @@ class Order extends Model
 
     public function orderDetails()
     {
-        return $this->hasMany(OrderDetails::class)->with('dish')->with('dishType');
+        return $this->hasMany(OrderDetails::class)->with('dish')->with('dishType')->with('readyDish');
     }
 }

@@ -28,6 +28,7 @@
             </ol>
         </div>
     </div>
+    
     @foreach($orders as $order)
         <div class="card-box">
             <h4>{{$order[0]->created_at->format('M-Y')}}</h4>
@@ -44,6 +45,7 @@
                 </tr>
                 </thead>
                 <tbody>
+                    
                 @foreach($order as $o)
                         <?php
                         $orderSum = $o->orderPrice->sum('gross_price');
@@ -59,7 +61,7 @@
                                 <p class="text-warning">Pending...</p>
                             @elseif($o->status == 1)
                                 Cooking...
-                            @elseif($o->status == 2)
+                            @elseif($o->status == 2) 
                                 <b class="text-custom"><i>Cooked !</i></b>
                             @elseif($o->status == 3)
                                 <b class="text-danger">Served !</b>

@@ -16,7 +16,7 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">Kitchen</label>
                     <div class="col-sm-7">
-                        <select name="kitchen" id="" class="form-control">
+                        <select name="kitchen" id="" class="form-control select2">
                             <option value="0">All</option>
                             @foreach($waiter as $k)
                                 <option value="{{$k->id}}">{{$k->name}}</option>

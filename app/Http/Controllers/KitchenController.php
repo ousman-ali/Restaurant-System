@@ -57,7 +57,7 @@ class KitchenController extends Controller
     /**
      * Waiter live kitchen data
      * @return \Illuminate\Http\JsonResponse
-     */
+     */ 
     public function waiterLiveKitchenJSON()
     {
         $orders = Order::where('status', '!=', 3)

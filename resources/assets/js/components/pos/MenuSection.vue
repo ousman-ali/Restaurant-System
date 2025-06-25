@@ -35,38 +35,60 @@
         </div>
 
         <div class="menu-items">
-            <!-- Dish Item -->
-            <div class="menu-item" v-for="product in filteredProducts" :key="product.id"
-                 @click="addProductToCart(product)">
-                <div
-                    class="menu-item-image"
-                    :style="{backgroundImage: `url(/${product.thumbnail})`}"
-                ></div>
-                <div class="menu-item-content">
-                    <div class="menu-item-name">{{ product.dish }}</div>
-                    <div class="category-tag" v-if="getCategoryName(product.category_id)">
-                        {{ getCategoryName(product.category_id) }}
-                    </div>
-                    <div class="dish-variant-price" v-for="price in product.dish_prices" :key="price.id"
-                         @click.stop="addProductToCart(product, price)">
-                        <div class="variant-name">{{ price.dish_type }}</div>
-                        <div class="variant-price">{{ config.currency.symbol }}{{ price.price }}</div>
-                    </div>
+        <!-- Dishes -->
+        <div
+            class="menu-item"
+            v-for="product in filteredProducts"
+            :key="'product-' + product.id"
+            @click="addProductToCart(product)"
+        >
+        
+            <div class="menu-item-image" :style="{ backgroundImage: `url(/${product.thumbnail})` }"></div>
+            <div class="menu-item-content">
+                <div class="menu-item-name">{{ product.dish }}</div>
+                <div class="category-tag" v-if="getCategoryName(product.category_id)">
+                    {{ getCategoryName(product.category_id) }}
+                </div>
+                <div class="dish-variant-price" v-for="price in product.dish_prices" :key="price.id" @click.stop="addProductToCart(product, price)">
+                    <div class="variant-name">{{ price.dish_type }}</div>
+                    <div class="variant-price">{{ config.currency.symbol }}{{ price.price }}</div>
                 </div>
             </div>
+        </div>
 
-            <div v-if="filteredProducts.length === 0"
-                 style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
-                <div style="font-size: 36px; margin-bottom: 15px;">🍽️</div>
-                <h3 style="margin-bottom: 10px; color: #666;">No dishes found</h3>
-                <p style="color: #888; max-width: 300px; margin: 0 auto;">
-                    We couldn't find any dishes
-                    <span v-if="searchString">matching your search criteria.</span>
-                    <span v-if="selectedCategoryId">in this category.</span>
-                    <span>Please try a different category or search term.</span>
-                </p>
+        <!-- Ready Products -->
+        <div
+            class="menu-item"
+            v-for="product in filteredReadyProducts"
+            :key="'ready-' + product.id"
+            @click="addReadyProductToCart(product)"
+        >
+            <div class="menu-item-image" :style="{ backgroundImage: `url(/${product.thumbnail})` }"></div>
+            <div class="menu-item-content">
+                <div class="menu-item-name">{{ product.name }}</div>
+                <div class="category-tag" v-if="getCategoryName(product.category_id)">
+                    {{ getCategoryName(product.category_id) }} <span class="badge">Ready</span>
+                </div>
+                 <div class="menu-item-stock">
+                    <small class="text-muted">
+                        Stock:
+                        {{
+                            product.source_type === 'inhouse'
+                                ? product.total_ready_quantity
+                                : product.total_purchased_quantity
+                        }}
+                    </small>
+                </div>
+                <div class="dish-variant-price"  @click.stop="addReadyProductToCart(product)">
+                    <!-- Stock Display -->
+                    
+                    <div class="variant-name">{{ product.name }}</div>
+                    <div class="variant-price">{{ config.currency.symbol }}{{ product.price }}</div>
+                </div>
             </div>
         </div>
+    </div>
+
     </div>
 </template>
 
@@ -74,7 +96,7 @@
 import useStore from "./useStore.js";
 import { ref, computed } from "vue";
 
-const { products, productCategories, searchString, addProductToCart, config, updateOrder } = useStore();
+const { products, readyProducts, productCategories, searchString, addProductToCart, addReadyProductToCart, config, updateOrder } = useStore();
 const selectedCategoryId = ref(null);
 
 // Function to select a category
@@ -86,6 +108,8 @@ const selectCategory = (categoryId) => {
 const clearSearch = () => {
     searchString.value = "";
 };
+
+
 
 // Function to get category name by id
 const getCategoryName = (categoryId) => {
@@ -138,6 +162,53 @@ const filteredProducts = computed(() => {
 
     return result;
 });
+
+const filteredReadyProducts = computed(() => {
+    let result = readyProducts.value;
+
+    // Filter by category if selected
+    if (selectedCategoryId.value !== null) {
+        result = result.filter(product => product.category_id === selectedCategoryId.value);
+    }
+
+    // Filter by search string if provided
+    if (searchString.value) {
+        const search = searchString.value.toLowerCase();
+        result = result.filter(product => {
+            // Search by dish name
+            if (product.dish.toLowerCase().includes(search)) {
+                return true;
+            }
+
+            // Search by dish type/variant
+            if (product.dish_prices.some(price =>
+                price.dish_type.toLowerCase().includes(search)
+            )) {
+                return true;
+            }
+
+            // Search by category name
+            const categoryName = getCategoryName(product.category_id).toLowerCase();
+            if (categoryName.includes(search)) {
+                return true;
+            }
+
+            // Search by price range (if search is a number)
+            const searchNumber = parseFloat(search);
+            if (!isNaN(searchNumber)) {
+                return product.dish_prices.some(price =>
+                    parseFloat(price.price) <= searchNumber
+                );
+            }
+
+            return false;
+        });
+    }
+
+    return result;
+});
+
+console.log('products', filteredProducts, filteredReadyProducts);
 </script>
 
 <style scoped>

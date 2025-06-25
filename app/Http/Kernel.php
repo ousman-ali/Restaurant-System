@@ -8,6 +8,8 @@ use App\Http\Middleware\InActiveUser;
 use App\Http\Middleware\KitchenRoleCheck;
 use App\Http\Middleware\ManagerRoleCheck;
 use App\Http\Middleware\WaiterRoleCheck;
+use App\Http\Middleware\BarmanRoleCheck;
+use App\Http\Middleware\BakerRoleCheck;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -68,5 +70,7 @@ class Kernel extends HttpKernel
         'manager' => ManagerRoleCheck::class,
         'kitchen' => KitchenRoleCheck::class,
         'waiter' => WaiterRoleCheck::class,
+        'barman' => BarmanRoleCheck::class,
+        'baker' => BakerRoleCheck::class,
     ];
 }
