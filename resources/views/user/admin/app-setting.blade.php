@@ -17,10 +17,10 @@
             <a href="{{url('/app-settings')}}">App Settings</a>
         </li>
     </ol>
-    <div class="card-box">
+    {{-- <div class="card-box">
         After setup your mail/pusher or app you must config your application cache. <a href="{{url('/cache-config')}}">Click Hear</a> To config your application cache. After cache config you might need to re login
 
-    </div>
+    </div> --}}
 
     <div class="row">
         <div class="col-sm-12">
@@ -28,7 +28,7 @@
 
 
                 <ul class="nav nav-tabs">
-                    <li class="active">
+                    {{-- <li class="active">
                         <a href="#mail" data-toggle="tab" aria-expanded="true">
                             <span class="visible-xs"><i class="fa fa-envelope-o"></i></span>
                             <span class="hidden-xs">Mail Setup</span>
@@ -39,8 +39,8 @@
                             <span class="visible-xs"><i class="fa fa-paper-plane-o"></i></span>
                             <span class="hidden-xs">Pusher Setup</span>
                         </a>
-                    </li>
-                    <li class="">
+                    </li> --}}
+                    <li class="active">
                         <a href="#appSetup" data-toggle="tab" aria-expanded="false">
                             <span class="visible-xs"><i class="fa fa-file-pdf-o"></i></span>
                             <span class="hidden-xs">App Setup</span>
@@ -50,7 +50,7 @@
 
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane active" id="mail">
+                    {{-- <div class="tab-pane active" id="mail">
                         <h3>SMTP Setup</h3>
                         <form class="form-horizontal" role="form" id="smtpMailSetting"  data-parsley-validate novalidate>
                             {{csrf_field()}}
@@ -169,8 +169,8 @@
                                 </div>
                             </div>
                         </form>
-                    </div>
-                    <div class="tab-pane" id="appSetup">
+                    </div> --}}
+                    <div class="tab-pane active" id="appSetup">
                         <form class="form-horizontal" role="form" id="timeZoneSettings"  data-parsley-validate novalidate>
                             {{csrf_field()}}
                             <div id="smtpDetails">
@@ -257,10 +257,10 @@
                     </div>
 
 
-                    <div class="tab-pane" id="language">
+                    {{-- <div class="tab-pane" id="language">
                         <p>Language ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.</p>
                         <p>Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt.Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim.</p>
-                    </div>
+                    </div> --}}
                 </div>
 
             </div>

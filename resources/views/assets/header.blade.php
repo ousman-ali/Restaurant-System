@@ -5,8 +5,8 @@
     <div class="topbar-left">
         <div class="text-center">
             <a href="{{url('/')}}" class="logo">
-                <i class="icon-c-logo my-logo">R</i>
-                <span class="my-logo">Restulator</span>
+                <i class="icon-c-logo my-logo">E</i>
+                <span class="my-logo" style="font-size: 22px;">{{ config('app.name')  }}</span>
             </a>
             <!-- Image Logo here -->
             {{--<a href="{{url('/')}}" class="logo">--}}

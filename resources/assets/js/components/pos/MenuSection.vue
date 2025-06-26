@@ -87,6 +87,20 @@
                 </div>
             </div>
         </div>
+
+        <div
+        v-if="filteredProducts.length === 0 && filteredReadyProducts.length === 0"
+        style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;"
+        >
+        <div style="font-size: 36px; margin-bottom: 15px;">🍽️</div>
+        <h3 style="margin-bottom: 10px; color: #666;">No dishes found</h3>
+        <p style="color: #888; max-width: 300px; margin: 0 auto;">
+            We couldn't find any dishes
+            <span v-if="searchString">matching your search criteria.</span>
+            <span v-if="selectedCategoryId">in this category.</span>
+            <span>Please try a different category or search term.</span>
+        </p>
+        </div>
     </div>
 
     </div>
