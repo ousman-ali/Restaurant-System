@@ -84,15 +84,36 @@ class SettingsController extends Controller
      */
     public function currencySetting(Request $request)
     {
-        $env = new DotenvEditor();
-        $env->changeEnv([
-            'RESTAURANT_CURRENCY_SYMBOL' => $request->get('symbol'),
-            'RESTAURANT_CURRENCY_CURRENCY' => $request->get('currency'),
-            'RESTAURANT_VAT_NUMBER' => $request->get('vat_number'),
-            'RESTAURANT_VAT_PERCENTAGE' => $request->get('var_percentage'),
-            'RESTAURANT_PHONE' => "'" . $request->get('phone') . "'",
-            'RESTAURANT_ADDRESS' => "'" . $request->get('address') . "'"
-        ]);
+        
+            $envPath = base_path('.env');
+
+            $data = [
+                'RESTAURANT_CURRENCY_SYMBOL' => $request->input('symbol'),
+                'RESTAURANT_CURRENCY_CURRENCY' => $request->input('currency'),
+                'RESTAURANT_VAT_NUMBER' => $request->input('vat_number'),
+                'RESTAURANT_VAT_PERCENTAGE' => $request->input('var_percentage'),
+                'RESTAURANT_PHONE' => $request->input('phone'),
+                'RESTAURANT_ADDRESS' => $request->input('address'),
+            ];
+
+            $env = file_get_contents($envPath);
+
+            foreach ($data as $key => $value) {
+                $escapedValue = '"' . str_replace('"', '\"', $value) . '"'; 
+                $pattern = "/^{$key}=.*$/m";
+                $line = "{$key}={$escapedValue}";
+
+                if (preg_match($pattern, $env)) {
+                    $env = preg_replace($pattern, $line, $env);
+                } else {
+                    $env .= "\n{$line}";
+                }
+            }
+
+            file_put_contents($envPath, $env);
+
+            Artisan::call('config:clear');
+            Artisan::call('config:cache');
     }
 
     /**

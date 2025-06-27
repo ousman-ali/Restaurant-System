@@ -113,16 +113,16 @@
 
         <div class="order-actions">
             <div class="actions-grid">
-                <div class="btn btn-outline ladda-button" data-style="expand-right"
+                <div class="btn btn-primary ladda-button" data-style="expand-right"
                     data-spinner-color="#000"
                     @click="saveOrderWithLoading" role="button">
                     Order
                     <span class="shortcut-badge">F7</span>
                 </div>
-                <div role="button" class="btn btn-primary ladda-button" @click="handleOrderAction">
+                <!-- <div role="button" class="btn btn-primary ladda-button" @click="handleOrderAction">
                     <span>✓</span> Order & Pay
                     <span class="shortcut-badge">F6</span>
-                </div>
+                </div> -->
             </div>
         </div>
 

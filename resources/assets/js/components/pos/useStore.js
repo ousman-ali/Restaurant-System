@@ -257,7 +257,10 @@ const saveOrder = async (shouldPrint = false) => {
             gross_price: item.price * item.quantity,
             is_ready:item.isReadyDish,
         }))
+        
     };
+    console.log('order data', orderData);
+
 
     try {
         let response;
@@ -266,6 +269,7 @@ const saveOrder = async (shouldPrint = false) => {
             response = await axios.put(`/update-order/${window.editOrderId}`, orderData);
             showToast("Order updated successfully.");
         } else {
+            console.log('order data', orderData);
             response = await axios.post('/save-order', orderData);
             clearCart();
             showToast("Order saved successfully.");
