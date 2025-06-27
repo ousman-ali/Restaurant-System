@@ -326,23 +326,58 @@ $('#addToList').on('click', function () {
         return;
     }
 
+    // Check for duplicate dish
+    const existingIndex = stockItems.findIndex(item => item.dishId === dishId);
+    if (existingIndex !== -1) {
+        alert("This dish is already added!");
+        return;
+    }
+
     const entry = { dishId, dishName, quantity, unitPrice, gross };
     stockItems.push(entry);
 
-    $('#dishList').append(`<p>${dishName} - Qty: ${quantity}, Unit Price: ${unitPrice}, Total: ${gross}</p>`);
+    // Append row to the table
+    $('#dishTable tbody').append(`
+        <tr data-id="${dishId}">
+            <td>${dishName}</td>
+            <td>${quantity}</td>
+            <td>${unitPrice}</td>
+            <td>${gross}</td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row">Remove</button></td>
+        </tr>
+    `);
+
+    // Clear fields
     $('#dishSelector').val('');
     $('#dishQuantity').val('');
     $('#unitPrice').val('');
     $('#gross').val('');
 });
 
+$('#dishTable').on('click', '.remove-row', function () {
+    const row = $(this).closest('tr');
+    const dishId = row.data('id');
+    stockItems = stockItems.filter(item => item.dishId !== dishId.toString());
+    row.remove();
+});
+
+
 $('#submitAllStock').on('click', function () {
     const supplierId = $('select[name="supplier_id"]').val();
     const orderId = $('input[name="order_id"]').val();
+    const paymentAmount = parseFloat($('#paymentAmount').val()) || 0;
+    const totalGross = stockItems.reduce((sum, item) => sum + parseFloat(item.gross), 0);
 
     if (!supplierId || stockItems.length === 0) {
         alert("Please select supplier and add at least one item.");
         return;
+    }
+
+    if (paymentAmount > totalGross) {
+        $('#paymentValidation').removeClass('d-none');
+        return;
+    } else {
+        $('#paymentValidation').addClass('d-none');
     }
 
     $.ajax({
@@ -352,14 +387,14 @@ $('#submitAllStock').on('click', function () {
             _token: $('input[name="_token"]').val(),
             supplier_id: supplierId,
             order_id: orderId,
-            items: stockItems
+            items: stockItems,
+            payment: paymentAmount
         },
         success: function () {
-            // alert('Stock added successfully!');
             location.reload();
         },
         error: function () {
-            // alert('Something went wrong');
+            alert('Something went wrong.');
         }
     });
 });

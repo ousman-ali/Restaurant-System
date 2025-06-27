@@ -45,7 +45,7 @@
 
                             <div class="form-group">
                                 <label>Quantity</label>
-                                <input type="number" id="dishQuantity" class="form-control" readonly>
+                                <input type="number" id="dishQuantity" class="form-control" >
                             </div>
 
                             <div class="form-group">
@@ -58,6 +58,8 @@
                                 <input type="number" id="gross" class="form-control" >
                             </div>
 
+                            
+
                             {{-- <div class="form-group">
                                 <label>Payment</label>
                                 <input type="number" id="payment" class="form-control">
@@ -66,10 +68,30 @@
                             <button type="button" class="btn btn-info" id="addToList">Add</button>
 
                             <hr>
-                            <div id="dishList"></div>
+                            <div id="dishList">
+                            <table class="table table-bordered" id="dishTable">
+                                <thead>
+                                    <tr>
+                                        <th>Dish</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Payment Amount</label>
+                            <input type="number" id="paymentAmount" class="form-control" required>
+                            <small id="paymentValidation" style="display: none;" class="text-danger d-none">Payment exceeds total amount!</small>
+                        </div>
+
 
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" id="submitAllStock">Save All</button>
+                                <button type="button" class="btn btn-primary ladda-button " data-style="expand-right" id="submitAllStock">Save All</button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
                         </form>
