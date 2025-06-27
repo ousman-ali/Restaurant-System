@@ -463,13 +463,18 @@ public function updateOrder(OrderRequest $request, $id)
             $order->cook_start_time = now();
             $order->save();
         }
-        $orders = Order::where('kitchen_id', 0)
-            ->orWhere('kitchen_id', auth()->user()->id)
-            ->where('status', '!=', 2)
-            ->with('orderDetails')
-            ->with('servedBy')
-            ->orderBy('id', 'desc')
-            ->get();
+        $orders = Order::where(function ($query) {
+            $query->where('kitchen_id', 0)
+                ->orWhere('kitchen_id', auth()->user()->id);
+        })
+        ->where('status', '!=', 2)
+        ->where('is_ready', false)
+        ->whereHas('orderDetails', function ($q) {
+            $q->whereNotNull('dish_id'); 
+        })
+        ->with(['orderDetails', 'servedBy'])
+        ->orderBy('id', 'desc')
+        ->get();
         try {
             broadcast(new StartCooking($order))->toOthers();
         } catch (\Exception $exception) {
@@ -551,13 +556,18 @@ public function updateOrder(OrderRequest $request, $id)
         $order->status = 2;
         $order->cook_complete_time = now();
         $order->save();
-        $orders = Order::where('kitchen_id', 0)
-            ->orWhere('kitchen_id', auth()->user()->id)
-            ->where('status', '!=', 2)
-            ->with('orderDetails')
-            ->with('servedBy')
-            ->orderBy('id', 'desc')
-            ->get();
+        $orders = Order::where(function ($query) {
+            $query->where('kitchen_id', 0)
+                ->orWhere('kitchen_id', auth()->user()->id);
+        })
+        ->where('status', '!=', 2)
+        ->where('is_ready', false)
+        ->whereHas('orderDetails', function ($q) {
+            $q->whereNotNull('dish_id'); 
+        })
+        ->with(['orderDetails', 'servedBy'])
+        ->orderBy('id', 'desc')
+        ->get();
         try {
             broadcast(new CompleteCooking($order))->toOthers();
         } catch (\Exception $exception) {
