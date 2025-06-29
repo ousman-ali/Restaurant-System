@@ -15,10 +15,23 @@ class InActiveUser
      */
     public function handle($request, Closure $next)
     {
-        if(auth()->check() && auth()->user()->active == 0){
-            return $next($request);
-        }else{
-            return redirect()->to('/home');
-        }
+        // if(auth()->check() && auth()->user()->active == 0){
+        //     return $next($request);
+        // }else{
+        //     return redirect()->to('/home');
+        // }
+
+         // If not logged in, redirect to login
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    // If inactive, allow
+    if (auth()->user()->active == 0) {
+        return $next($request);
+    }
+
+    // If active, redirect away
+    return redirect()->to('/home');
     }
 }

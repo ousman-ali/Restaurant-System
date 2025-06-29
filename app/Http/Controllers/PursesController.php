@@ -129,6 +129,7 @@ class PursesController extends Controller
      */
     public function getUnitOfProduct($id)
     {
+        dd($id);
         $product = Product::where('id',$id)->with('unit')->first();
         return response()->json($product);
     }

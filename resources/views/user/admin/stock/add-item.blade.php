@@ -55,6 +55,25 @@
                             </div>
 
                             <div class="form-group">
+                                <label class="col-md-2 control-label">Minimum Stock Threshold </label>
+                                <div class="col-md-8">
+                                    <input type="number" step="0.01" name="minimum_stock_threshold" class="form-control" placeholder="Minimum Stock Threshold" required min="0">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label" for="example-email">Product Type :</label>
+                                <div class="col-md-8">
+                                    <select name="dish_type" id="" class="form-control select2">
+                                        <option value="">Select One</option>
+                                        <option value="normal">Normal Dish</option>
+                                        <option value="ready">Ready Dish</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <div class="form-group">
                                 <label class="col-md-2 control-label" for="example-email">Product Category :</label>
                                 <div class="col-md-8">
                                     <select name="product_type_id" id="" class="form-control select2">

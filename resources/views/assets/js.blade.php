@@ -420,6 +420,7 @@
         let message = '';
         let time = 'N/A';
         let href = '';
+
         message = `Order #${data.order_no} canceled`;
         if (data.updated_at) {
             const isoTime = data.updated_at.replace(' ', 'T');
@@ -463,7 +464,107 @@ $(document).on('click', '.deletebtn', function (e) {
     });
 });
 
+const materialRequest = pusher.subscribe('material-request');
 
+materialRequest.bind('material-request-event', function(data) {
+    const notify = data.notify ?? null;
+
+    // ✅ Only notify the matching user
+    if (parseInt(window.userRole) !== parseInt(notify)) {
+        return; // ❌ Not this user's role — skip notification
+    }
+
+    const type = data.type ?? 'Unknown';
+    const notType = data.not_type ?? 'Unknown';
+
+    try {
+        const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+        audio.volume = 1.0;
+        audio.play().catch(error => {
+            console.error('🔇 Audio playback failed:', error);
+        });
+    } catch (e) {
+        console.error('❌ Error playing notification sound:', e);
+    }
+
+    // 📨 Build dynamic message
+    let message = '';
+    let time = 'N/A';
+    let href = '';
+
+    if (notType === 'approve') {
+        message = `✔️ ${data.user} approved a request for ${data.requested} ${data.name}`;
+    } else if (notType === 'reject') {
+        message = `❌ ${data.user} rejected the request for ${data.name}`;
+    } else {
+        message = `🔔 ${data.user} made an update on a material request.`;
+    }
+
+    if  (data.time) {
+        const rawTime = data.time;
+        const isoTime = rawTime.replace(' ', 'T');
+        time = new Date(isoTime).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
+    switch (notify.toString()) {
+        case '4':
+            href = '/kitchen/all-stock';
+            break;
+        case '5':
+            href = '/barman/all-stock';
+            break;
+        case '6':
+            href = '/baker/all-stock';
+            break;
+        default:
+            href = '/dashboard';
+            break;
+    }
+
+    handleNotification(message, time, href);
+});
+
+                       
+                       
+const stockAlert = pusher.subscribe('stock-alert');
+    stockAlert.bind('stock-alert-event', function(data) {
+        if(window.userRole == 1 || window.userRole == 2){
+            // location.reload(); 
+             try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+            audio.play().catch(error => {
+                console.error('🔇 Audio playback failed:', error);
+            });
+        } catch (e) {
+            console.error('❌ Error playing notification sound:', e);
+        }
+
+        let message = '';
+        let time = 'N/A';
+        if(data.type == 'recipe_product')
+        {
+           href = '/kitchen/requests';
+        }else{
+            href = '/barman/requests';
+        }
+        message = `${data.user} requested ${data.requested} ${data.name}.`;
+        if (data.time) {
+            const isoTime = data.time.replace(' ', 'T');
+            time = new Date(isoTime).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+        handleNotification(message, time, href);
+        }
+    });
+                        
 
 
 

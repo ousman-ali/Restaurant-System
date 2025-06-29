@@ -46,6 +46,7 @@ class ReadyDishController extends Controller
         }
         $dish->user_id = auth()->user()->id;
         $dish->category_id = $request->category_id;
+        $dish->minimum_stock_threshold = $request->minimum_stock_threshold;
         if ($dish->save()) {
             return redirect()->to('/ready-dish-image/' . $dish->id);
         }
@@ -73,6 +74,7 @@ class ReadyDishController extends Controller
         $dish->user_id = auth()->user()->id;
         $dish->category_id = $request->category_id;
         $dish->status = $request->get('available') == 'on' ? 1 : 0;
+        $dish->minimum_stock_threshold = $request->minimum_stock_threshold;
         if ($dish->save()) {
             return response()->json('Ok', 200);
         }

@@ -21,6 +21,8 @@ use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\ReadyDishController;
 use App\Http\Controllers\ReadyDishOrderController;
 use App\Http\Controllers\BakerController;
+use App\Http\Controllers\MaterialRequestController;
+use App\Http\Controllers\BarmanController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -216,6 +218,16 @@ Route::middleware('active.user')->group(function () {
         // Page Editor
         Route::get('/page-builder/{id}', [PageEditorController::class, 'editor']);
         Route::post('/website/save-section/{section}', [PageEditorController::class, 'saveSection'])->name('website.save-section');
+
+        // kitchen requests
+        Route::get('/kitchen/requests', [MaterialRequestController::class, 'kitchenRequest'])->name('materials.kitchen.requests');
+        Route::get('/barman/requests', [MaterialRequestController::class, 'barmanRequest'])->name('materials.barman.requests');
+        Route::post('/kitchen/request/approve', [MaterialRequestController::class, 'approveKitchenRequest'])->name('material-requests.approve');
+        Route::post('/barman/request/approve', [MaterialRequestController::class, 'approveBarmanRequest'])->name('material-requests.barman.approve');
+        Route::post('/kitchen/request/reject', [MaterialRequestController::class, 'rejectKitchenRequest'])->name('material-requests.kitchen.reject');
+        Route::post('/barman/request/reject', [MaterialRequestController::class, 'rejectBarmanRequest'])->name('material-requests.barman.reject');
+
+        Route::get('/baker/requests', [MaterialRequestController::class, 'bakerRequest'])->name('materials.baker.requests');
     });
 
     // Kitchen Only (All kitchen access can also access by admin or shop manager)
@@ -232,6 +244,13 @@ Route::middleware('active.user')->group(function () {
         Route::get('/kitchen-stat', [KitchenController::class, 'kitchenStat']);
         Route::post('/kitchen-stat-post', [KitchenController::class, 'postKitchenStat']);
         Route::get('/kitchen-stat/kitchen={id}/start={start_date}/end={end_date}', [KitchenController::class, 'shoeKitchenStat']);
+
+        // kitchen stock
+        Route::get('/kitchen/all-stock', [KitchenController::class, 'allStock'])->name('materials.all_stock');
+        Route::get('/kitchen/low-stock', [KitchenController::class, 'lowStock'])->name('materials.low_stock');
+        Route::post('/kitchen/request', [KitchenController::class, 'requestStock'])->name('material-requests.store');
+
+        Route::get('/get-unit-of-products/{id}', [KitchenController::class, 'getUnitOfProduct']);
     });
 
     // baker Only (All baker access can also access by admin or shop manager)
@@ -254,6 +273,14 @@ Route::middleware('active.user')->group(function () {
         Route::get('/get-ready-recipe-form-all/{orderId}', [BakerController::class, 'getRecipeFormAll']);
 
         Route::post('/save-ready-purses', [BakerController::class, 'savePurses'])->name('ready-purse.save');
+
+        // baker stock
+        Route::get('/baker/all-stock', [BakerController::class, 'allStock'])->name('materials.baker.all_stock');
+        Route::get('/baker/low-stock', [BakerController::class, 'lowStock'])->name('materials.baker.low_stock');
+        Route::post('/baker/request', [BakerController::class, 'requestStock'])->name('materials.request.baker.store');
+        
+
+        Route::get('/get-unit-of-product/{id}', [BakerController::class, 'getUnitOfProduct']);
 
     });
 
@@ -314,6 +341,10 @@ Route::middleware('active.user')->group(function () {
         Route::get('/barman-stat', [BarmanController::class, 'barmanStat']);
         Route::post('/barman-stat-post', [BarmanController::class, 'postBarmanStat']);
         Route::get('/barman-stat/barman={id}/start={start_date}/end={end_date}', [BarmanController::class, 'showBarmanStat']);
+
+        Route::get('/barman/all-stock', [BarmanController::class, 'allStock'])->name('materials.barman.all_stock');
+        Route::get('/barman/low-stock', [BarmanController::class, 'lowStock'])->name('materials.barman.low_stock');
+        Route::post('/barman/request', [BarmanController::class, 'requestStock'])->name('materials.request.barman.store');
     });
 
     //Profile Settings

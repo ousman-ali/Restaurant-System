@@ -114,7 +114,8 @@ class StockController extends Controller
         $request->validate([
             'product_name'       =>     'required|unique:products|max:255',
             'unit_id'            =>     'required|max:11',
-            'product_type_id'    =>     'required|max:11'
+            'product_type_id'    =>     'required|max:11',
+            'dish_type' => 'required',
         ]);
 
         $item = new Product();
@@ -127,6 +128,8 @@ class StockController extends Controller
                     rand(8000000,99999999).'.'.$request->thumbnail->extension());
         }
         $item->user_id = auth()->user()->id;
+        $item->minimum_stock_threshold = $request->minimum_stock_threshold;
+        $item->dish_type = $request->dish_type;
         if($item->save()){
             return response()->json('Ok',200);
         }
@@ -143,7 +146,8 @@ class StockController extends Controller
         $request->validate([
             'product_name'       =>     Rule::unique('products')->ignore($id, 'id'),
             'unit_id'            =>     'required|max:11',
-            'product_type_id'    =>     'required|max:11'
+            'product_type_id'    =>     'required|max:11',
+            'dish_type' => 'required',
         ]);
 
         $item = Product::findOrFail($id);
@@ -155,6 +159,8 @@ class StockController extends Controller
                 ->move('uploads/products/thumbnail',
                     rand(8000000,99999999).'.'.$request->thumbnail->extension());
         }
+        $item->minimum_stock_threshold = $request->minimum_stock_threshold;
+        $item->dish_type = $request->dish_type;
         $item->user_id = auth()->user()->id;
         if($item->save()){
             return response()->json('Ok',200);

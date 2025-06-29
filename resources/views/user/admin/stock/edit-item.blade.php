@@ -51,6 +51,24 @@
                                 <div class="col-md-8">
                                     <input type="text" name="product_name" class="form-control" placeholder="Product name"
                                            parsley-trigger="change" maxlength="50" required value="{{$item->product_name}}">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">Minimum Stock Threshold </label>
+                                <div class="col-md-8">
+                                    <input type="number" step="0.01" name="minimum_stock_threshold" value="{{$item->minimum_stock_threshold}}" class="form-control" placeholder="Minimum Stock Threshold" required min="0">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label" for="example-email">Product Type :</label>
+                                <div class="col-md-8">
+                                    <select name="dish_type" id="" class="form-control select2">
+                                        <option value="">Select One</option>
+                                        <option value="normal" {{$item->dish_type == 'normal' ? 'selected' : ''}}>Normal Dish</option>
+                                        <option value="ready" {{$item->dish_type == 'ready' ? 'selected' : ''}}>Ready Dish</option>
+                                    </select>
 
                                 </div>
                             </div>

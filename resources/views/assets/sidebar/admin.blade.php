@@ -39,6 +39,15 @@
                 </li>
 
                 <li class="has_sub">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="ti-archive"></i> <span> Materials </span> <span class="menu-arrow"></span> </a>
+                    <ul class="list-unstyled">
+                        <li><a href="{{url('/kitchen/requests')}}">Kitchen Requests</a></li>
+                        <li><a href="{{url('/baker/requests')}}">Baker Requests</a></li>
+                        <li><a href="{{url('/barman/requests')}}">Barman Requests</a></li>
+                    </ul>
+                </li>
+
+                <li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="ti-notepad"></i> <span> Orders </span> <span class="menu-arrow"></span> </a>
                     <ul class="list-unstyled">
                         <li><a href="{{url('/new-order')}}">New Order</a></li>

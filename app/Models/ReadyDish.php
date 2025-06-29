@@ -62,4 +62,10 @@ class ReadyDish extends Model
         return 0;
     }
 
+    public function materialRequests()
+        {
+            return $this->hasMany(MaterialRequest::class, 'reference_id')->where('type', 'ready_dish');
+        }
+
+
 }

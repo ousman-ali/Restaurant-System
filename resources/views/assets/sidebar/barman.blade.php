@@ -9,6 +9,13 @@
                 <li class="">
                     <a href="{{url('/home')}}" class="waves-effect"><i class="ti-home"></i> <span> Dashboard </span> </a>
                 </li>
+                <li class="has_sub">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="ti-package"></i> <span> Materials </span> <span class="menu-arrow"></span> </a>
+                    <ul class="list-unstyled">
+                        <li><a href="{{url('/barman/all-stock')}}">Stock Status</a></li>
+                        <li><a href="{{url('/barman/low-stock')}}">Request Material</a></li>
+                    </ul>
+                </li>
 
                 <li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="ti-notepad"></i> <span> Orders </span> <span class="menu-arrow"></span> </a>

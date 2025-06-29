@@ -75,6 +75,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="col-md-2 control-label">Minimum Stock Threshold </label>
+                    <div class="col-md-8">
+                        <input type="number" step="0.01" name="minimum_stock_threshold" value="{{$dish->minimum_stock_threshold}}" class="form-control" placeholder="Minimum Stock Threshold" required min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="col-md-2 control-label">Source Type <span class="text-danger">*</span></label>
                     <div class="col-md-8">
                         <select name="source_type" class="form-control select2" required>

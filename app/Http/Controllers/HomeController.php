@@ -112,7 +112,7 @@ class HomeController extends Controller
      */
     public function accountDisable()
     {
-        return redirect()->route('login');
+        return view('other.disable-account');
     }
 
     /**

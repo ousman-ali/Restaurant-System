@@ -38,6 +38,11 @@
         align-items: center;
         gap: 8px; /* Adjust spacing between icons */
         }
+
+    .btn-group-vertical>.btn, .btn-group>.btn {
+        position: relative;
+        float: none;
+    }
 </style>
 
 <script src="{{url('/dashboard/js/modernizr.min.js')}}"></script>

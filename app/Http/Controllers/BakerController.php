@@ -12,6 +12,7 @@ use App\Models\PursesReadyDish;
 use App\Events\OrderServed;
 use App\Models\Purse;
 use App\Models\PursesPayment;
+use App\Models\MaterialRequest;
 use Illuminate\Support\Facades\Log;
 class BakerController extends Controller
 {
@@ -240,6 +241,64 @@ public function getRecipeFormAll($orderId)
     return view('user.admin.barman._ready_recipe_form', compact('order', 'dishs', 'suppliers'))->render();
 }
 
+  public function allStock()
+    {
+        $stockProducts = Product::withSum('purses', 'quantity')->where('dish_type', 'ready')->get();
+        $data['products'] = $stockProducts;
+        return view('user.baker.materials.stock-status', $data);
+    }
+
+    public function lowStock(){
+        $products = Product::withSum('purses', 'quantity')->where('dish_type', 'ready')->get();
+        $lowStockProducts = $products->filter(function ($product) {
+            $stock = $product->purses_sum_quantity ?? 0;
+            return $stock <= $product->minimum_stock_threshold;
+        })->map(function ($product) {
+            $product->stock = $product->purses_sum_quantity ?? 0;
+            return $product;
+        });
+        $data['products'] = $lowStockProducts;
+        return view('user.baker.materials.material-request', $data);
+    }
+
+    public function requestStock(Request $request){
+        $request->validate([
+            'reference_id' => 'required|integer',
+            'requested_quantity' => 'required|numeric|min:1',
+            'type' => 'required|in:recipe_product,ready_dish',
+        ]);
+
+        MaterialRequest::create([
+            'reference_id' => $request->reference_id,
+            'type' => $request->type,
+            'requested_by' => auth()->user()->role(),
+            'requested_quantity' => $request->requested_quantity,
+            'status' => 'pending',
+        ]);
+        try {
+        $product = Product::find($request->reference_id);
+        event(new \App\Events\LowStockAlertEvent([
+            'type' => $request->type,
+            'user' =>auth()->user()->name,
+            'requested' => $request->requested_quantity,
+            'name' => $product->product_name ?? 'Unknown',
+            'current_stock' => $product->purses_sum_quantity ?? 0,
+            'minimum_stock_threshold' => $product->minimum_stock_threshold ?? 0,
+            'time' => now(),
+        ]));
+
+        } catch (\Exception $exception) {
+            Log::error("Broadcasting failed: " . $exception->getMessage());
+        }
+
+        return back()->with('success', 'Request submitted successfully.');
+    }
+
+    public function getUnitOfProduct($id)
+    {
+        $product = Product::where('id',$id)->with('unit')->first();
+        return response()->json($product);
+    }
 
 
 }

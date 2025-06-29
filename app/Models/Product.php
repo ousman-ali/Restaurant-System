@@ -41,5 +41,19 @@ class Product extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function materialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class, 'reference_id')->where('type', 'recipe_product');
+    }
+
+    public function latestMaterialRequest()
+    {
+        return $this->hasOne(MaterialRequest::class, 'reference_id')
+                    ->latestOfMany()
+                    ->where('type', 'recipe_product');
+    }
+
+
+
 
 }

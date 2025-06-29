@@ -80,5 +80,10 @@ class User extends Authenticatable
                 \Carbon\Carbon::today()->format('Y-m-d') . '%');
     }
 
+    public function materialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class, 'requested_by');
+    }
+
 
 }
