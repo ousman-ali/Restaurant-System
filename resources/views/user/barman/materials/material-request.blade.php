@@ -46,8 +46,21 @@
                         <img src="/{{ $product->thumbnail }}" alt="" class="img-responsive" width="100px">
                     </td>
                     <td>{{$product->name}}</td>
-                    <td>{{$product->materialRequests->sum('requested_quantity') }}</td>
+                     @php
+                        $sum = $product->materialRequests->sum('requested_quantity');
+                    @endphp
+
+                    <td>
+                        @if ($sum == 0)
+                            0
+                        @else
+                            {{ number_format($sum) }} {{ $product?->unit?->unit }}
+                            ({{ number_format($sum * ($product?->unit?->convert_rate ?? 0)) }} {{ $product?->unit?->child_unit }})
+                        @endif
+                    </td>
+                    {{-- <td>{{$product->materialRequests->sum('requested_quantity') }}</td> --}}
                     <td>{{$product->purchased_batches_sum_ready_quantity ?? 0}}</td>
+                  
                     <td>{{$product->minimum_stock_threshold ?? 0}}</td>
                     <td>
                         <div class="btn-group">

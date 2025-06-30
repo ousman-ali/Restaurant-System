@@ -44,7 +44,10 @@
                         <img src="/{{ $product->product->thumbnail }}" alt="" class="img-responsive" width="100px">
                     </td>
                     <td>{{$product->product->product_name}}</td>
-                    <td>{{ $product->requested_quantity}}</td>
+                    <td>
+                        {{ number_format($product->requested_quantity) }} {{ $product->product->unit->unit }}
+                        ({{ number_format($product->requested_quantity * $product->product->unit->convert_rate) }} {{ $product->product->unit->child_unit }})
+                    </td>
                     <td>
                         <div class="btn-group">
                             @if($product->status == 'approved')
@@ -104,7 +107,7 @@
                                                 <label for="" class="col-md-6 control-label">Select Supplier</label>
                                                 <div class="col-md-6">
                                                     <select name="supplier_id" id="supplier_id" class="form-control select2" required>
-                                                        <option value="">Select One</option>
+                                                        <option value="">Select Supplier</option>
                                                         @foreach($suppliers as $supplier)
                                                             <option value="{{$supplier->id}}">{{$supplier->name}}</option>
                                                         @endforeach
@@ -114,7 +117,7 @@
                                                 <label for="" class="col-md-6 control-label">Select Product</label>
                                                 <div class="col-md-6">
                                                     <select name="product_id" id="product" class="form-control select2" required disabled>
-                                                        <option value="">Select One</option>
+                                                        <option value="">Select Product</option>
                                                         @foreach($products as $product)
                                                             <option value="{{$product->id}}">{{$product->product_name}}</option>
                                                         @endforeach
@@ -149,6 +152,8 @@
                                                         <span class="input-group-addon" id="child_unit">Unit</span>
                                                     </div>
                                                 </div>
+
+                                                
                                                 <input type="hidden" name="child_unit_price" id="child_unit_price_hidden">
                                                 <input type="hidden" name="gross_price" id="grossPrice_hidden">
 

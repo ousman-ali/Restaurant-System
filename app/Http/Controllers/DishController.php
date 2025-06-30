@@ -51,7 +51,7 @@ class DishController extends Controller
 
     public function getReadyDishes(): JsonResponse
     {
-    $dishes = ReadyDish::with(['dishImages', 'dishRecipes'])
+    $dishes = ReadyDish::with(['dishImages', 'dishRecipes', 'unit'])
     ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
     ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
     ->get()
@@ -64,13 +64,12 @@ class DishController extends Controller
         return false;
     })
     ->values();
-
-        return response()->json($dishes);
+    return response()->json($dishes);
     }
 
     public function getReadyProducts(): JsonResponse
     {
-    $dishes = ReadyDish::with(['dishImages', 'dishRecipes'])
+    $dishes = ReadyDish::with(['dishImages', 'dishRecipes', 'unit'])
         ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
         ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
         ->get()

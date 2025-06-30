@@ -46,7 +46,10 @@
                         <img src="/{{ $product->readyDish->thumbnail }}" alt="" class="img-responsive" width="100px">
                     </td>
                     <td>{{$product->readyDish->name}}</td>
-                    <td>{{ $product->requested_quantity}}</td>
+                    <td>
+                        {{ number_format($product->requested_quantity) }} {{ $product->product->unit->unit }}
+                        ({{ number_format($product->requested_quantity * $product->product->unit->convert_rate) }} {{ $product->product->unit->child_unit }})
+                    </td>
                     <td>{{$product->status}}</td>
                     <td>
                         

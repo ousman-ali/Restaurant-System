@@ -57,6 +57,17 @@
                 <label for="" class=" control-label" id="print_child_unit"> Child Unit </label>
             </div>
 
+            <div class="form-group">
+                <label class="col-md-2 control-label">Unit Usage<span class="text-danger">*</span></label>
+                <div class="col-md-8">
+                    <select name="usage_type" class="form-control select2" required>
+                        <option value="">Select Type</option>
+                        <option value="recipe">Product Recipe</option>
+                        <option value="ready_dish">Ready Dishs</option>
+                    </select>
+                </div>
+            </div>
+
 
 
             <div class="form-group">

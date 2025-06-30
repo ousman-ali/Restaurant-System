@@ -50,6 +50,9 @@
                     <div class="dish-variant-price"
                          @click.stop="addProductToCart(product)">
                         <div class="variant-price">{{ config.currency.symbol }}{{ product.price }}</div>
+                         <div class="variant-price" v-if="product.unit">
+                            In ({{ product.unit.unit }}) ({{ product.unit.child_unit }})
+                        </div>
                     </div>
                 </div>
             </div>

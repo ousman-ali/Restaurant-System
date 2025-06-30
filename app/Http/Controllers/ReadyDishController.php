@@ -8,6 +8,7 @@ use App\Models\ReadyDish;
 use App\Models\DishInfo;
 use App\Models\Product;
 use App\Models\Recipe; 
+use App\Models\Unit;
 use App\Models\OrderDetails;
 class ReadyDishController extends Controller
 {
@@ -22,7 +23,8 @@ class ReadyDishController extends Controller
      public function add()
     {
         $categories = DishCategory::all();
-        return view('user.admin.ready-dish.add-ready-dish', compact('categories'));
+        $units = Unit::where('usage_type', 'ready_dish')->get();
+        return view('user.admin.ready-dish.add-ready-dish', compact('categories', 'units'));
     }
 
     public function save(Request $request)
@@ -45,6 +47,7 @@ class ReadyDishController extends Controller
             $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; // use forward slashes
         }
         $dish->user_id = auth()->user()->id;
+        $dish->unit_id = $request->unit_id;
         $dish->category_id = $request->category_id;
         $dish->minimum_stock_threshold = $request->minimum_stock_threshold;
         if ($dish->save()) {
@@ -72,6 +75,7 @@ class ReadyDishController extends Controller
             $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; // use forward slashes
         }
         $dish->user_id = auth()->user()->id;
+        $dish->unit_id = $request->unit_id;
         $dish->category_id = $request->category_id;
         $dish->status = $request->get('available') == 'on' ? 1 : 0;
         $dish->minimum_stock_threshold = $request->minimum_stock_threshold;
@@ -84,8 +88,10 @@ class ReadyDishController extends Controller
     {
         $dish = ReadyDish::findOrFail($id);
         $categories = DishCategory::all();
+        $unit = Unit::where('usage_type', 'ready_dish')->get();
         return view('user.admin.ready-dish.edit-ready-dish', [
             'dish' => $dish,
+            'units' => $unit,
             'categories' => $categories
         ]);
     }

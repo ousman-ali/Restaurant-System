@@ -42,6 +42,8 @@ const subTotal = computed(() => {
     }, 0);
 });
 
+
+
 const taxAmount = computed(() => {
     const afterDiscountAmount = subTotal.value - discountAmount.value;
     return afterDiscountAmount * (parseInt(config.value.vat.vat_percentage) / 100);
@@ -128,30 +130,73 @@ const fetchOrderById = async () => {
 };
 
 // Cart manipulation functions
-const addProductToCart = (product) => {
-    // If no specific variant is selected, use the first price option
-    // const variant = selectedVariant || product.dish_prices[0];
+// const addProductToCart = (product) => {
+//     // If no specific variant is selected, use the first price option
+//     // const variant = selectedVariant || product.dish_prices[0];
 
-    // Check if this dish variant is already in the cart
+//     // Check if this dish variant is already in the cart
+//     const existingCartItemIndex = carts.value.findIndex(item =>
+//         item.productId === product.id
+//     );
+
+//     if (existingCartItemIndex !== -1) {
+//         // If the item exists, increase quantity
+//         carts.value[existingCartItemIndex].quantity += 1;
+//     } else {
+//         // If the item doesn't exist, add it to the cart
+//         carts.value.push({
+//             cartItemId: Date.now(), // Unique ID for the cart item
+//             productId: product.id,
+//             name: product.name,
+//             price: product.price,
+//             quantity: 1,
+//             image: product.thumbnail,
+//             unit: product.unit.unit,
+//             child_unit: product.unit.child_unit,
+//             convert_rate: product.unit.convert_rate,
+//         });
+//     }
+
+//     console.log('carts with unit', carts);
+// };
+
+const syncChildUnit = (cart) => {
+    console.log('carts from sync child', carts);
+    cart.child_quantity = parseFloat((cart.quantity * cart.convert_rate).toFixed(2));
+};
+
+const syncMainUnit = (cart) => {
+    console.log('carts from sync main', carts);
+    cart.quantity = parseFloat((cart.child_quantity / cart.convert_rate).toFixed(2));
+};
+
+const addProductToCart = (product) => {
     const existingCartItemIndex = carts.value.findIndex(item =>
         item.productId === product.id
     );
 
     if (existingCartItemIndex !== -1) {
-        // If the item exists, increase quantity
         carts.value[existingCartItemIndex].quantity += 1;
+        carts.value[existingCartItemIndex].child_quantity =
+        carts.value[existingCartItemIndex].quantity * product.unit.convert_rate;
     } else {
-        // If the item doesn't exist, add it to the cart
         carts.value.push({
-            cartItemId: Date.now(), // Unique ID for the cart item
+            cartItemId: Date.now(),
             productId: product.id,
             name: product.name,
             price: product.price,
+            image: product.thumbnail,
+            unit: product.unit.unit,
+            child_unit: product.unit.child_unit,
+            convert_rate: product.unit.convert_rate,
             quantity: 1,
-            image: product.thumbnail
+            child_quantity: 1 * product.unit.convert_rate,
         });
     }
+
+    console.log('carts with unit', carts);
 };
+
 
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
@@ -355,6 +400,8 @@ export default function useStore() {
         saveOrderWithLoading,
         printInvoice,
         showToast,
+        syncChildUnit,
+        syncMainUnit,
 
         // Make these available for manual refresh if needed
         fetchProducts,

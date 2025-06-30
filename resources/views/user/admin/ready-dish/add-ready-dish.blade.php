@@ -91,35 +91,47 @@
                 </div>
             </div>
 
-                <div class="form-group">
-                    <label class="col-md-2 control-label">Category <span class="text-danger">*</span></label>
-                    <div class="col-md-8 category-container">
-                        <div class="input-group">
-                            <select name="category_id" id="category_select" class="form-control select2" required>
-                                <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->name}}</option>
-                                @endforeach
-                            </select>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn add-category" title="Add New Category"
-                                        style="background: transparent">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Category <span class="text-danger">*</span></label>
+                <div class="col-md-8 category-container">
+                    <div class="input-group">
+                        <select name="category_id" id="category_select" class="form-control select2" required>
+                            <option value="">Select Category</option>
+                            @foreach($categories as $category)
+                                <option value="{{$category->id}}">{{$category->name}}</option>
+                            @endforeach
+                        </select>
+                        <div class="input-group-btn">
+                            <button type="button" class="btn add-category" title="Add New Category"
+                                    style="background: transparent">
+                                <i class="fa fa-plus"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="example-email">Unit(Optional) :</label>
+                <div class="col-md-8">
+                    <select name="unit_id" id="" class="form-control select2">
+                        <option value="">Select One</option>
+                        @foreach($units as $unit)
+                            <option value="{{$unit->id}}">{{$unit->unit}}</option>
+                        @endforeach
+                    </select>
 
-                <div class="form-group">
-                    <label class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
-                        <button type="submit" class="ladda-button btn btn-purple" data-style="expand-right">
-                            Save Dish And Go Next
-                        </button>
-                    </div>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <button type="submit" class="ladda-button btn btn-purple" data-style="expand-right">
+                        Save Dish And Go Next
+                    </button>
+                </div>
+            </div>
 
             </form>
         </div>

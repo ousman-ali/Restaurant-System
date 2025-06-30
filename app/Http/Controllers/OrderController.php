@@ -428,7 +428,7 @@ public function updateOrder(OrderRequest $request, $id)
                             $q2->where('source_type', 'inhouse')
                         );
                     },
-                    'orderDetails.readyDish',
+                    'orderDetails.readyDish.unit',
                     'servedBy'
                 ])
                 ->orderBy('id', 'desc')

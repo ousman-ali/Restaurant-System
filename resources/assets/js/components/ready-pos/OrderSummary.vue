@@ -45,6 +45,43 @@
             </div>
 
             <div class="cart-item"
+                    v-for="(cart, index) in carts"
+                    :key="index"
+                    :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }"
+                    style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+                    
+                    <div class="cart-item-details" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div class="cart-item-name"><strong>{{ cart.name }}</strong></div>
+                        <div class="cart-item-price text-success">${{ cart.price }}</div>
+                    </div>
+
+                    <div class="cart-item-quantities" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label>Qty ({{ cart.unit }}):</label>
+                            <input type="number"
+                                step="any"
+                                class="form-control"
+                                v-model.number="cart.quantity"
+                                @input="syncChildUnit(cart)">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Qty ({{ cart.child_unit }}):</label>
+                            <input type="number"
+                                step="any"
+                                class="form-control"
+                                v-model.number="cart.child_quantity"
+                                @input="syncMainUnit(cart)">
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <button  class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
+                    </div>
+                </div>
+
+
+
+            <!-- <div class="cart-item"
                  v-for="(cart, index) in carts"
                  :key="index"
                  :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }">
@@ -60,7 +97,7 @@
                     </button>
                     <button class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <!-- Discount Section -->
@@ -236,6 +273,8 @@ const {
     clearCart,
     saveOrder,
     saveOrderWithLoading,
+    syncMainUnit,
+    syncChildUnit,
 } = useStore();
 
 const tableList = ref(false);
@@ -257,6 +296,9 @@ const payments = ref([]);
 const orderActionText = computed(() => {
     return isSaved.value ? "Pay Now" : "Save & Pay";
 });
+
+
+
 
 // Apply discount function
 const applyDiscount = () => {
@@ -495,13 +537,13 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     color: #888;
 }
 
-.cart-item {
+/* .cart-item {
     padding: 15px;
     border-bottom: 1px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
     animation-duration: 0.5s;
-}
+} */
 
 .cart-item-new {
     animation-name: highlight-new-item;
@@ -564,8 +606,8 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 }
 
 .remove-btn {
-    width: 24px;
-    height: 24px;
+    width: 34px;
+    height: 34px;
     border: none;
     background: none;
     cursor: pointer;

@@ -42,7 +42,9 @@
                 $.each(data, function (index, dish) {
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
-                            $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom"}).append(
+                            $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
+                                style: "height: 360px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                            }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
@@ -55,11 +57,22 @@
                                 $("<div>", {class: "panel-body dish-details"}).append(
                                     $("<ul>", {class: 'list-group'}).append(
                                         $.map(dish.order_details, function (index, dishDetails) {
+                                            const detail = dish.order_details[dishDetails];
+                                            const name = detail.ready_dish?.name || 'Unnamed';
+                                            const quantity = detail.quantity || 0;
+                                            const unit = detail.ready_dish?.unit?.unit || '';
+                                            const childUnit = detail.ready_dish?.unit?.child_unit || '';
+                                            const convertRate = detail.ready_dish?.unit?.convert_rate || 1;
+
+                                            const converted = (quantity * convertRate).toFixed(2);
                                             return $("<li>", {
                                                 class: "list-group-item",
                                                 text: dish.order_details[dishDetails].ready_dish?.name
                                             }).append(
-                                               
+                                               $("<span>", {
+                                                    class: "badge badge-success",
+                                                    text: `${quantity} ${unit} (${converted} ${childUnit})`
+                                                })
                                             )
                                         })
                                     )
@@ -167,6 +180,7 @@
             channel.bind('order-event', function(data) {
                 $.get("/baker-orders", function (data) {
                     orders = data;
+                    console.log('baker data', data);
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(orders);
                 });

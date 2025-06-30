@@ -83,6 +83,7 @@ class UnitController extends Controller
         $unit->unit = $request->get('unit');
         $unit->child_unit = $request->get('child_unit');
         $unit->convert_rate = $request->get('convert_rate');
+        $unit->usage_type = $request->usage_type;
         $unit->status = 1;
         $unit->user_id = auth()->user()->id;
         if($unit->save()){
@@ -102,6 +103,7 @@ class UnitController extends Controller
         $unit->unit = $request->get('unit');
         $unit->child_unit = $request->get('child_unit');
         $unit->convert_rate = $request->get('convert_rate');
+        $unit->usage_type = $request->usage_type;
         $unit->status = 1;
         if($unit->save()){
             return response()->json('Ok', 200);

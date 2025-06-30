@@ -10,6 +10,10 @@ class ReadyDish extends Model
     use HasFactory;
     protected $fillable = ['name', 'thumbnail', 'price', 'stock', 'source_type', 'supplier_id', 'status', 'user_id'];
 
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
     public function producedBatches()
     {
         return $this->hasMany(ProducedReadyDish::class);

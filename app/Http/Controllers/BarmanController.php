@@ -10,13 +10,13 @@ class BarmanController extends Controller
 {
         public function allStock()
     {
-        $stockProducts = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->get();
+        $stockProducts = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->with('unit')->get();
         $data['products'] = $stockProducts;
         return view('user.barman.materials.stock-status', $data);
     }
 
     public function lowStock(){
-        $products = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->get();
+        $products = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->with('unit')->get();
         $lowStockProducts = $products->filter(function ($product) {
             $stock = $product->purchased_batches_sum_ready_quantity ?? 0;
             return $stock <= $product->minimum_stock_threshold;
