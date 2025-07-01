@@ -98,6 +98,7 @@ const fetchOrderById = async () => {
     try {
         console.log('id', window.editOrderId);
         const response = await axios.get(`/get-barman-order-details/${window.editOrderId}`);
+        console.log('response update cart', response.data);
         updateOrder.value = response.data;
         
         console.log('order details', response.data.order_details);
@@ -110,7 +111,11 @@ const fetchOrderById = async () => {
                 name: item.ready_dish?.name,
                 price: item.net_price,
                 quantity: item.quantity,
-                image: item.ready_dish?.thumbnail
+                image: item.ready_dish?.thumbnail,
+                unit: item.ready_dish?.unit.unit,
+                child_unit: item.ready_dish?.unit.child_unit,
+                convert_rate: item.ready_dish?.unit.convert_rate,
+                child_quantity: item.quantity * item.ready_dish?.unit.convert_rate,
             };
         });
 

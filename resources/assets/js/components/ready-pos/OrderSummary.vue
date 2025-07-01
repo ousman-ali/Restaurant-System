@@ -272,6 +272,7 @@ const {
     config,
     clearCart,
     saveOrder,
+    showToast,
     saveOrderWithLoading,
     syncMainUnit,
     syncChildUnit,

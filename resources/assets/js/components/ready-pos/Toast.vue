@@ -12,6 +12,7 @@
 import useStore from './useStore';
 
 const {isToastVisible, toastMessage} = useStore();
+console.log('log from toast', isToastVisible, toastMessage);
 </script>
 
 <style scoped>

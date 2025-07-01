@@ -63,7 +63,7 @@ class ReadyDishOrderController extends Controller
 
     public function getOrderDetails($id)
     {
-        $order = Order::with('orderDetails.readyDish')->findOrFail($id);
+        $order = Order::with('orderDetails.readyDish.unit')->findOrFail($id);
         return response()->json($order);
     }
 
