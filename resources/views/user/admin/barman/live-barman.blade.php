@@ -127,7 +127,7 @@
                                         $.map(dish.order_details, function (index, dishDetails) {
                                             return $("<li>", {
                                                 class: "list-group-item",
-                                                text: dish.order_details[dishDetails].ready_dish.name
+                                                text: dish.order_details[dishDetails].ready_dish?.name
                                             }).append(
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",

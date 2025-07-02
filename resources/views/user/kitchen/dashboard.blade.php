@@ -59,11 +59,11 @@
                                         $.map(dish.order_details, function (index, dishDetails) {
                                             return $("<li>", {
                                                 class: "list-group-item",
-                                                text: dish.order_details[dishDetails].dish.dish
+                                                text: dish.order_details[dishDetails].dish?.dish
                                             }).append(
                                                 $("<span>", {
                                                     class: "badge badge-success",
-                                                    text: dish.order_details[dishDetails].dish_type.dish_type
+                                                    text: dish.order_details[dishDetails].dish_type?.dish_type
                                                 }),
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",

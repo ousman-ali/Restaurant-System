@@ -226,7 +226,7 @@
                                             const converted = (quantity * convertRate).toFixed(2);
                                             return $("<li>", {
                                                 class: "list-group-item",
-                                                text: dish.order_details[dishDetails].ready_dish.name
+                                                text: dish.order_details[dishDetails].ready_dish?.name
                                             }).append(
                                                $("<span>", {
                                                     class: "badge badge-success",
