@@ -55,6 +55,7 @@
             $.get('/live-kitchen-admin-json', function (data) {
 //                console.log(data);
                 orders = data;
+                console.log('kitchen data', data);
                 $("#renderHtmlHear").empty();
                 $(this).renderHTML(data);
             });
@@ -130,7 +131,7 @@
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
-                                style: "height: 360px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                                style: "height: 400px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
                             }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
@@ -154,7 +155,13 @@
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",
                                                     text: "Qty: " + dish.order_details[dishDetails].quantity
-                                                })
+                                                }),
+                                                 dish.table && dish.table.table_no
+                                                    ? $("<span>", {
+                                                        class: "badge badge-primary ml-2",
+                                                        text: "Table: " + dish.table.table_no
+                                                    })
+                                                    : ''
                                             )
                                         })
                                     )

@@ -482,6 +482,7 @@ public function updateOrder(OrderRequest $request, $id)
             $q->whereNotNull('dish_id'); 
         })
         ->with(['orderDetails', 'servedBy'])
+        ->with('table')
         ->orderBy('id', 'desc')
         ->get();
         return response()->json($orders);

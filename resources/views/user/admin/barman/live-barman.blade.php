@@ -112,7 +112,7 @@
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
-                                style: "height: 360px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                                style: "height: 400px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
                             }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {

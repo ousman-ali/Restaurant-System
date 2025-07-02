@@ -92,7 +92,6 @@
 
             var purseCompleted = pusher.subscribe('order-served');
             purseCompleted.bind('order-served-event', function (data) {
-                console.log("Pusher event receivedddddddddddddddddddddddd!", data); // Add this
                 $.get("/baker-status-waiter-json", function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
@@ -204,7 +203,7 @@
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
-                                style: "height: 360px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                                style: "height: 400px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
                             }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
