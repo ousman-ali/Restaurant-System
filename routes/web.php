@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+
 Route::get('/', [WebsiteController::class, 'website']);
 Route::post('/installation-complete', [HomeController::class, 'installSuccess']);
 
@@ -320,7 +321,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/new-barman-order', [ReadyDishOrderController::class, 'newOrder']);
         Route::get('/print-barman-order/{id}', [ReadyDishOrderController::class, 'printOrder']);
         Route::get('/marked-barman-order/{id}', [ReadyDishOrderController::class, 'markOrder']);
-        Route::post('/delete-barman-order', [ReadyDishOrderController::class, 'deleteOrder'])->name('order.delete');
+        Route::post('/delete-barman-order', [ReadyDishOrderController::class, 'deleteOrder'])->name('ready.order.delete');
         Route::post('/delete-barman-supplier-order', [ReadyDishOrderController::class, 'deleteSupplierOrder'])->name('order.supplier.delete');
         Route::post('/delete-barman-inhouse.order', [ReadyDishOrderController::class, 'deleteInhouseOrder'])->name('order.inhouse.delete');
         Route::get('/all-barman-order', [ReadyDishOrderController::class, 'allOrder']);

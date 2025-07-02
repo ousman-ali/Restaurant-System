@@ -121,8 +121,8 @@ class OrderController extends Controller
                 if ($readyDish && $readyDish->source_type == 'supplier') {
                     $orderedQty = $orderDetail->quantity;
                     $totalAvailable = PursesReadyDish::where('ready_dish_id', $readyDish->id)
-                        ->where('quantity', '>', 0)
-                        ->sum('quantity');
+                        ->where('ready_quantity', '>', 0)
+                        ->sum('ready_quantity');
                     if ($totalAvailable < $orderedQty) {
                         $order->delete();
                         return response()->json([
@@ -136,15 +136,31 @@ class OrderController extends Controller
                     if ($readyDish && $readyDish->source_type == 'supplier') {
                         $orderedQty = $orderDetail->quantity;
                         $stocks = PursesReadyDish::where('ready_dish_id', $readyDish->id)
-                            ->where('quantity', '>', 0)
+                            ->where('ready_quantity', '>', 0)
                             ->orderBy('created_at')
                             ->get();
 
                         foreach ($stocks as $stock) {
                             if ($orderedQty <= 0) break;
 
-                            $deductQty = min($stock->quantity, $orderedQty);
-                            $stock->quantity -= $deductQty;
+                            $deductQty = min($stock->ready_quantity, $orderedQty);
+                            $stock->ready_quantity -= $deductQty;
+                            $stock->save();
+
+                            $orderedQty -= $deductQty;
+                        }
+                    }elseif($readyDish && $readyDish->source_type == 'inhouse'){
+                        $orderedQty = $orderDetail->quantity;
+                        $stocks = ProducedReadyDish::where('ready_dish_id', $readyDish->id)
+                            ->where('ready_quantity', '>', 0)
+                            ->orderBy('created_at')
+                            ->get();
+
+                        foreach ($stocks as $stock) {
+                            if ($orderedQty <= 0) break;
+
+                            $deductQty = min($stock->ready_quantity, $orderedQty);
+                            $stock->ready_quantity -= $deductQty;
                             $stock->save();
 
                             $orderedQty -= $deductQty;
@@ -287,8 +303,8 @@ public function updateOrder(OrderRequest $request, $id)
                 $orderedQty = $orderDetail->quantity;
 
                 $totalAvailable = PursesReadyDish::where('ready_dish_id', $readyDish->id)
-                    ->where('quantity', '>', 0)
-                    ->sum('quantity');
+                    ->where('ready_quantity', '>', 0)
+                    ->sum('ready_quantity');
 
                 if ($totalAvailable < $orderedQty) {
                     $order->delete();
@@ -304,15 +320,15 @@ public function updateOrder(OrderRequest $request, $id)
                     $orderedQty = $orderDetail->quantity;
 
                     $stocks = PursesReadyDish::where('ready_dish_id', $readyDish->id)
-                        ->where('quantity', '>', 0)
+                        ->where('ready_quantity', '>', 0)
                         ->orderBy('created_at')
                         ->get();
 
                     foreach ($stocks as $stock) {
                         if ($orderedQty <= 0) break;
 
-                        $deductQty = min($stock->quantity, $orderedQty);
-                        $stock->quantity -= $deductQty;
+                        $deductQty = min($stock->ready_quantity, $orderedQty);
+                        $stock->ready_quantity -= $deductQty;
                         $stock->save();
 
                         $orderedQty -= $deductQty;
@@ -375,16 +391,78 @@ public function updateOrder(OrderRequest $request, $id)
      */
   
 
+    // public function deleteOrder(Request $request)
+    //     {
+    //         $order = Order::findOrFail($request->order_id);
+    //         OrderDetails::where('order_id', $order->id)->delete();
+    //         CookedProduct::where('order_id', $order->id)->delete();
+    //         broadcast(new OrderCancel('orderCancel', $order))->toOthers();
+    //         $order->delete();
+    //         Session::flash('delete_success', 'The order has been deleted successfully');
+    //         return back();
+    //     }
+
     public function deleteOrder(Request $request)
         {
-            $order = Order::findOrFail($request->order_id);
+            $order = Order::with('orderDetails.readyDish')->findOrFail($request->order_id);
+
+            
+            // Loop through each item in the order and restore stock
+            foreach ($order->orderDetails as $detail) {
+                $readyDish = $detail->readyDish;
+
+                if ($readyDish && $readyDish->source_type === 'supplier') {
+                    $remainingQty = $detail->quantity;
+
+                    // Try to add quantity back to existing PursesReadyDish records by oldest first
+                    $stocks = PursesReadyDish::where('ready_dish_id', $readyDish->id)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+
+                    foreach ($stocks as $stock) {
+                        if ($remainingQty <= 0) break;
+
+                        // Just add back the quantity to this record
+                        $stock->ready_quantity += $remainingQty;
+                        $stock->save();
+
+                        // Done restoring this detail
+                        break;
+                    }
+
+                } elseif ($readyDish && $readyDish->source_type === 'inhouse') {
+                    $remainingQty = $detail->quantity;
+
+                    // Add quantity back to oldest ProducedReadyDish record
+                    $stocks = ProducedReadyDish::where('ready_dish_id', $readyDish->id)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
+
+                    foreach ($stocks as $stock) {
+                        if ($remainingQty <= 0) break;
+
+                        $stock->ready_quantity += $remainingQty;
+                        $stock->save();
+
+                        break;
+                    }
+                }
+            }
+
+            // Delete order details and cooked products
             OrderDetails::where('order_id', $order->id)->delete();
             CookedProduct::where('order_id', $order->id)->delete();
+
+            // Broadcast cancel event
             broadcast(new OrderCancel('orderCancel', $order))->toOthers();
+
+            // Delete the order
             $order->delete();
+
             Session::flash('delete_success', 'The order has been deleted successfully');
             return back();
         }
+
 
 
 

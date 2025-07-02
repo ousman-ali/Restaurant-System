@@ -72,7 +72,7 @@
 </div>
 
 <footer class="footer">
-    Restulator © 2025. All rights reserved <a href="https://binarycastle.net" target="_blank">BinaryCastle</a>
+    {{config('app.name') }} © 2025. All rights reserved 
 </footer>
 </body>
 </html>

@@ -150,6 +150,10 @@
                                                 $("<span>", {
                                                     class: "badge badge-success",
                                                     text: dish.order_details[dishDetails].dish_type.dish_type
+                                                }),
+                                                $("<span>", {
+                                                    class: "badge badge-primary ml-2",
+                                                    text: "Qty: " + dish.order_details[dishDetails].quantity
                                                 })
                                             )
                                         })

@@ -67,6 +67,7 @@ class KitchenController extends Controller
             ->with('orderDetails')
             ->with('servedBy')
             ->with('kitchen')
+            ->with('table')
             ->orderBy('id','desc')
             ->get();
         return response()->json($orders);

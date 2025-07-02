@@ -129,7 +129,6 @@
                                                 class: "list-group-item",
                                                 text: dish.order_details[dishDetails].ready_dish.name
                                             }).append(
-                                               
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",
                                                     text: "Requested Stock: " + dish.order_details[dishDetails].quantity

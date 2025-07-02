@@ -120,19 +120,56 @@ class SettingsController extends Controller
      * Save time zone
      * @param Request $request
      */
+    // public function timezoneSetting(Request $request)
+    // {
+    //     $request->validate([
+    //         'timezone' => 'required|timezone'
+    //     ]);
+
+    //     $env = new DotenvEditor();
+    //     $env->changeEnv([
+    //         'APP_TIMEZONE' => $request->get('timezone'),
+    //         'APP_NAME' => '"' . $request->get('app_name') . '"'
+    //     ]);
+
+    // }
+
     public function timezoneSetting(Request $request)
     {
         $request->validate([
-            'timezone' => 'required|timezone'
+            'timezone' => 'required|timezone',
+            'app_name' => 'required|string',
         ]);
 
-        $env = new DotenvEditor();
-        $env->changeEnv([
-            'APP_TIMEZONE' => $request->get('timezone'),
-            'APP_NAME' => '"' . $request->get('app_name') . '"'
-        ]);
+        $envPath = base_path('.env');
 
+        $data = [
+            'APP_TIMEZONE' => $request->input('timezone'),
+            'APP_NAME' => $request->input('app_name'),
+        ];
+
+        $env = file_get_contents($envPath);
+
+        foreach ($data as $key => $value) {
+            $escapedValue = '"' . str_replace('"', '\"', $value) . '"';
+            $pattern = "/^{$key}=.*$/m";
+            $line = "{$key}={$escapedValue}";
+
+            if (preg_match($pattern, $env)) {
+                $env = preg_replace($pattern, $line, $env);
+            } else {
+                $env .= "\n{$line}";
+            }
+        }
+
+        file_put_contents($envPath, $env);
+
+        Artisan::call('config:clear');
+        Artisan::call('config:cache');
+
+        return response()->json(['message' => 'Timezone and app name updated successfully.']);
     }
+
 
     /**
      * Config the application cache

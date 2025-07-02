@@ -50,7 +50,7 @@ class BakerController extends Controller
                 $q->whereHas('readyDish', fn($q2) =>
                     $q2->where('source_type', 'inhouse')
                 ),
-            'orderDetails.readyDish',
+            'orderDetails.readyDish.unit',
             'servedBy',
             'baker',
         ])
