@@ -122,19 +122,19 @@ class DishController extends Controller
             ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
             ->get()
             ->filter(function ($dish) {
-                foreach ($dish->dishRecipes as $recipe) {
-                    $product = $recipe->product;
+                // foreach ($dish->dishRecipes as $recipe) {
+                //     $product = $recipe->product;
 
-                    if (!$product) continue; 
+                //     if (!$product) continue; 
 
-                    $totalPurses = $product->purses->sum('quantity');
-                    $totalCooked = $product->cookedProducts->sum('quantity');
-                    $availableStock = $totalPurses - $totalCooked;
+                //     $totalPurses = $product->purses->sum('quantity');
+                //     $totalCooked = $product->cookedProducts->sum('quantity');
+                //     $availableStock = $totalPurses - $totalCooked;
 
-                    if ($availableStock <= 0) {
-                        return false; 
-                    }
-                }
+                //     if ($availableStock <= 0) {
+                //         return false; 
+                //     }
+                // }
                 $threshold = $dish->minimum_stock_threshold ?? 0;
 
                 if ($dish->source_type === 'inhouse') {
