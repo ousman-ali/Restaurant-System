@@ -204,7 +204,7 @@
                         </div>
                     </div>
 
-                    <div class="summary-row">
+                    <div class="summary-row" v-if="selectedTable">
                             <div class="summary-label">Table:</div>
                             <div class="summary-value">{{ selectedTable.table_no ?? 'No table Selected' }}</div>
                         </div>
