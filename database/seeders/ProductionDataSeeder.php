@@ -28,13 +28,13 @@ class ProductionDataSeeder extends Seeder
             'active' => true,
         ]);
 
-        Supplier::factory()->count(1)->create();
+        // Supplier::factory()->count(1)->create();
         Table::factory()->count(5)->create();
         Unit::factory()->count(3)->create();
         ProductType::factory()->count(3)->create();
-        Product::factory()->count(7)->create();
+        // Product::factory()->count(7)->create();
         DishCategory::factory()->count(3)->create();
-        Dish::factory()->count(7)->create();
+        // Dish::factory()->count(7)->create();
 
         $this->call(WebsiteSeeder::class);
     }
