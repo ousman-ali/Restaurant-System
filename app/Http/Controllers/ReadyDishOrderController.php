@@ -13,10 +13,14 @@ use App\Models\ProducedReadyDish;
 use App\Models\Order;
 use App\Events\OrderServed;
 use App\Events\OrderSubmit;
+use App\Events\SupplierOrderPurchased;
+use App\Events\InhouseOrderServed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Events\OrderCancel;
 use App\Models\PursesReadyDish;
+use App\Models\InhouseOrder;
+use App\Models\SupplierOrder;
 use Session;
 class ReadyDishOrderController extends Controller
 {
@@ -55,7 +59,16 @@ class ReadyDishOrderController extends Controller
 
      public function myOrder()
         {
-            $orders = Order::where('served_by', auth()->user()->id)->where('is_ready', true)->get();
+            // $orders = Order::where('served_by', auth()->user()->id)->where('is_ready', true)->get();
+        $supplierOrders = \App\Models\SupplierOrder::where('order_by', auth()->user()->id)
+        ->get();
+
+    // Get inhouse orders and map to the same format
+    $inhouseOrders = \App\Models\InhouseOrder::where('order_by', auth()->user()->id)
+        ->get();
+
+    // Merge and sort by creation date (optional)
+    $orders = $supplierOrders->merge($inhouseOrders)->sortByDesc('created_at');
             return view('user.barman.order.my-order', [
                 'orders' => $orders
             ]);
@@ -78,54 +91,117 @@ class ReadyDishOrderController extends Controller
     }
 
 
-    public function saveOrder(OrderRequest $request)
+    // public function saveOrder(OrderRequest $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $lastOrder = Order::latest('id')->first();
+    //         $orderNo = $lastOrder ? $lastOrder->order_no + 1 : 1001;
+
+    //         $order = new Order();
+    //         $order->order_no = $orderNo;
+    //         $order->served_by = auth()->user()->id;;
+    //         $order->discount = $request->discount_amount;
+    //         $order->payment = $request->payment;
+    //         $order->vat = $request->vat;
+    //         $order->is_ready = true;
+    //         $order->change_amount = $request->change_amount;
+    //         $order->save();
+
+    //         foreach ($request->items as $item) {
+    //             $orderDetail = new OrderDetails();
+    //             $dish = ReadyDish::findOrFail($item['ready_dish_id']);
+    //             $orderDetail->order_id = $order->id;
+    //             $orderDetail->ready_dish_id = $item['ready_dish_id'];
+    //             $orderDetail->quantity = $item['quantity'];
+    //             $orderDetail->net_price = $item['net_price'];
+    //             $orderDetail->gross_price = $item['quantity'] * $item['net_price'];
+    //             if ($orderDetail->save()) {
+                    
+    //             } else {
+    //                 break;
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         try {
+    //             broadcast(new OrderSubmit($order));
+    //         } catch (\Exception $exception) {
+    //             Log::error("Broadcasting failed: " . $exception->getMessage());
+    //         }
+
+    //         return response()->json($order, 200);
+
+    //     } catch (\Exception $exception) {
+    //         DB::rollBack();
+    //         throw $exception;
+    //     }
+    // }
+
+
+    public function saveOrder(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $lastOrder = Order::latest('id')->first();
-            $orderNo = $lastOrder ? $lastOrder->order_no + 1 : 1001;
+            $lastSOrder = SupplierOrder::latest('id')->first();
+            $lastIOrder = InhouseOrder::latest('id')->first();
+            $orderSNo = $lastSOrder ? $lastSOrder->order_no + 1 : 1001;
+            $orderINo = $lastIOrder ? $lastIOrder->order_no + 1 : 1001;
 
-            $order = new Order();
-            $order->order_no = $orderNo;
-            $order->served_by = auth()->user()->id;;
-            $order->discount = $request->discount_amount;
-            $order->payment = $request->payment;
-            $order->vat = $request->vat;
-            $order->is_ready = true;
-            $order->change_amount = $request->change_amount;
-            $order->save();
+            $userId = auth()->user()->id;
 
-            foreach ($request->items as $item) {
-                $orderDetail = new OrderDetails();
-                $dish = ReadyDish::findOrFail($item['ready_dish_id']);
-                $orderDetail->order_id = $order->id;
-                $orderDetail->ready_dish_id = $item['ready_dish_id'];
-                $orderDetail->quantity = $item['quantity'];
-                $orderDetail->net_price = $item['net_price'];
-                $orderDetail->gross_price = $item['quantity'] * $item['net_price'];
-                if ($orderDetail->save()) {
-                    
-                } else {
-                    break;
+            $supplierOrder = null;
+            if (!empty($request->supplier_items)) {
+                $supplierOrder = new SupplierOrder();
+                $supplierOrder->order_no = $orderSNo;
+                $supplierOrder->order_by = $userId;
+                $supplierOrder->status = 0;
+                $supplierOrder->save();
+
+                foreach ($request->supplier_items as $item) {
+                    OrderDetails::create([
+                        'supplier_order_id' => $supplierOrder->id,
+                        'ready_dish_id' => $item['ready_dish_id'],
+                        'quantity' => $item['quantity'],
+                    ]);
+                }
+            }
+            $inhouseOrder = null;
+            if (!empty($request->inhouse_items)) {
+                $inhouseOrder = new InhouseOrder();
+                $inhouseOrder->order_no = $orderINo;
+                $inhouseOrder->order_by = $userId;
+                $inhouseOrder->baker_id =0;
+                $inhouseOrder->status = 0;
+                $inhouseOrder->save();
+
+                foreach ($request->inhouse_items as $item) {
+                    OrderDetails::create([
+                        'inhouse_order_id' => $inhouseOrder->id,
+                        'ready_dish_id' => $item['ready_dish_id'],
+                        'quantity' => $item['quantity'],
+                    ]);
                 }
             }
 
             DB::commit();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order saved successfully!',
+                'redirect' => route('my-barman.order')
+            ], 200);
 
-            try {
-                broadcast(new OrderSubmit($order));
-            } catch (\Exception $exception) {
-                Log::error("Broadcasting failed: " . $exception->getMessage());
-            }
-
-            return response()->json($order, 200);
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            throw $exception;
+            Log::error("Order save failed: " . $exception->getMessage());
+            return response()->json(['error' => 'Order could not be saved.'], 500);
         }
     }
+
 
     public function updateOrder(OrderRequest $request, $id)
     {
@@ -186,11 +262,10 @@ class ReadyDishOrderController extends Controller
 
      public function orderServed($id)
         { 
-            $order = Order::with('orderDetails')->findOrFail($id);
+            $order = InhouseOrder::with('orderDetails')->findOrFail($id);
             $order->status = 3;
            
             foreach ($order->orderDetails as $o) {
-            if ($o->readyDish->source_type == 'inhouse') {
                 $remainingQty = $o->quantity;
                 $producedDishes = ProducedReadyDish::where('ready_dish_id', $o->ready_dish_id)
                     ->where('order_detail_id', $o->id)
@@ -210,10 +285,22 @@ class ReadyDishOrderController extends Controller
                 if ($remainingQty > 0) {
                     Log::warning("Not enough pending stock for dish ID {$o->ready_dish_id}");
                 }
+        }  
+        if ($order->save()) {
+            try {
+                broadcast(new InhouseOrderServed("success", $order))->toOthers();
+            } catch (\Exception $exception) {
+                Log::error("Broadcasting failed: " . $exception->getMessage());
             }
+            return response()->json('Ok', 200);
+        }
         }
 
-            
+
+    public function readyOrderServed($id)
+    { 
+        $order = Order::findOrFail($id);
+        $order->status = 3;
         if ($order->save()) {
             try {
                 broadcast(new OrderServed("success", $order))->toOthers();
@@ -222,15 +309,14 @@ class ReadyDishOrderController extends Controller
             }
             return response()->json('Ok', 200);
         }
-        }
+    }
 
         public function orderConfirm($id)
         {
-            $order = Order::with('orderDetails')->findOrFail($id);
-            $order->status = 5;
+            $order = SupplierOrder::with('orderDetails')->findOrFail($id);
+            $order->status = 2;
            
             foreach ($order->orderDetails as $o) {
-            if ($o->readyDish->source_type == 'supplier') {
                 $remainingQty = $o->quantity;
                 $purseDishes = PursesReadyDish::where('ready_dish_id', $o->ready_dish_id)
                     ->where('pending_quantity', '>', 0)
@@ -249,13 +335,12 @@ class ReadyDishOrderController extends Controller
                 if ($remainingQty > 0) {
                     Log::warning("Not enough pending stock for dish ID {$o->ready_dish_id}");
                 }
-            }
         }
 
             
         if ($order->save()) {
             try {
-                broadcast(new OrderServed("success", $order))->toOthers();
+                broadcast(new SupplierOrderPurchased("success", $order))->toOthers();
             } catch (\Exception $exception) {
                 Log::error("Broadcasting failed: " . $exception->getMessage());
             }

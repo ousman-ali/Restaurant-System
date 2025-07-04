@@ -18,7 +18,7 @@
                         <span class="cart-icon">🛒</span>
                         <div class="button-text">
                             <div>Order</div>
-                            <div class="total-amount">{{ config.currency.symbol }}{{ finalTotal.toFixed(2) }}</div>
+                            <!-- <div class="total-amount">{{ config.currency.symbol }}{{ finalTotal.toFixed(2) }}</div> -->
                         </div>
                     </div>
                 </div>

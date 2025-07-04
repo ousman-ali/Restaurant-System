@@ -21,9 +21,8 @@
             <tr>
                 {{--<th>#</th>--}}
                 <th>Order No</th>
-                <th>Served By</th>
+                <th>Ordered By</th>
                 <th>Status</th>
-                <th>Order Value</th>
                 <th width="120px">Action</th>
             </tr>
             </thead>
@@ -32,13 +31,10 @@
             @foreach($orders as $oder)
                 <tr>
                     {{--<td>{{$count++}}</td>--}}
-                    <td>{{$oder->id}}</td> 
-                    <td>{{$oder->servedBy->name}}</td>
+                    <td>{{$oder->order_no}}</td> 
+                    <td>{{$oder->orderBy->name}}</td>
                     <td>{{$oder->status == 0 ? 'Due' : 'Paid' }}</td>
-                    <td>
-                        {{$oder->orderPrice->sum('gross_price')}}
-
-                    </td>
+                    
                     <td>
                             @if($oder->user_id ==0)
                                 <div class="btn-group">

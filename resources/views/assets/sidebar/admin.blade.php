@@ -130,6 +130,7 @@
                     <ul class="list-unstyled">
                         <li><a href="{{url('/all-product-type')}}">Product Type Setting</a></li>
                         <li><a href="{{url('/all-unit')}}">Unit Setting</a></li>
+                        <li><a href="{{url('/all-bank')}}">Bank Setting</a></li>
                         <li><a href="{{url('/app-settings')}}">App Setting</a></li>
                         <li><a href="{{url('/website')}}">Website</a></li>
                     </ul>

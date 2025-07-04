@@ -25,10 +25,13 @@ const config = ref({
 });
 
 const carts = ref([]);
+const cartOrderToType = ref(null);
 const tables = ref([]);
+const selectedBank = ref('');
 const products = ref([]);
 const readyProducts = ref([]);
 const productCategories = ref([]);
+const banks = ref([]);
 const discountAmount = ref(0);
 const currentPaymentAmount = ref('');
 const updateOrder = ref(null);
@@ -84,6 +87,32 @@ const fetchDishCategories = async () => {
     }
 }
 
+
+const getCartTypeFromProduct = (product, isReadyDish = false) => {
+    if (isReadyDish) return 'ready';
+    return product.order_to === 'kitchen' ? 'kitchen' : 'barman';
+};
+
+const isCompatible = (newType) => {
+    if (!cartOrderToType.value) return true; // cart empty
+    if (cartOrderToType.value === newType) return true;
+    if (
+        (cartOrderToType.value === 'ready' && newType === 'barman') ||
+        (cartOrderToType.value === 'barman' && newType === 'ready')
+    ) return true;
+    return false;
+};
+
+
+const fetchBanks = async () => {
+    try {
+        const response = await axios.get('/web-api/banks');
+        banks.value = response.data;
+    } catch (err) {
+        console.error('Error fetching banks:', err);
+    }
+}
+
 const fetchConfig = async () => {
     try {
         const response = await axios.get('/web-api/config');
@@ -94,34 +123,37 @@ const fetchConfig = async () => {
 };
 
 const addReadyProductToCart = (product) => {
-    // If no specific variant is selected, use the first price option
-    // const variant = selectedVariant || product.dish_prices[0];
+    const newType = getCartTypeFromProduct(product, true);
 
-    // Check if this dish variant is already in the cart
+    if (!isCompatible(newType)) {
+        showToast('Cannot mix ready dishes with kitchen dishes.');
+        return;
+    }
+
     const existingCartItemIndex = carts.value.findIndex(item =>
         item.productId === product.id
     );
 
     if (existingCartItemIndex !== -1) {
-        // If the item exists, increase quantity
         carts.value[existingCartItemIndex].quantity += 1;
     } else {
-        // If the item doesn't exist, add it to the cart
         carts.value.push({
-            cartItemId: Date.now(), // Unique ID for the cart item
+            cartItemId: Date.now(),
             productId: product.id,
-            ready_dish_id:product.id,
+            ready_dish_id: product.id,
             dish_id: null,
             name: product.name,
             price: product.price,
             quantity: 1,
-            isReadyDish:true,
-            image: product.thumbnail
+            isReadyDish: true,
+            image: product.thumbnail,
+            additional_note: ''
         });
-
-        console.log('carts', carts);
+        cartOrderToType.value = newType;
     }
 };
+
+
 
 const fetchOrderById = async () => {
     if (!window.editOrderId) {
@@ -147,6 +179,8 @@ const fetchOrderById = async () => {
                 quantity: item.quantity,
                 image: item.ready_dish_id ? item.ready_dish.thumbnail : item.dish?.thumbnail,
                 isReadyDish:response.data.is_ready,
+                from_ready: item.from_ready,
+                additional_note: item.additional_note,
             };
         });
 
@@ -181,21 +215,23 @@ const saveOrderWithLoading = async (event, shouldPrint = false) => {
 
 // Cart manipulation functions
 const addProductToCart = (product, selectedVariant = null) => {
-    // If no specific variant is selected, use the first price option
     const variant = selectedVariant || product.dish_prices[0];
+    const newType = getCartTypeFromProduct(product, false);
 
-    // Check if this dish variant is already in the cart
+    if (!isCompatible(newType)) {
+        showToast('Cannot mix dishes from kitchen and bar, or ready dishes with kitchen dishes.');
+        return;
+    }
+
     const existingCartItemIndex = carts.value.findIndex(item =>
         item.productId === product.id && item.variantId === variant.id
     );
 
     if (existingCartItemIndex !== -1) {
-        // If the item exists, increase quantity
         carts.value[existingCartItemIndex].quantity += 1;
     } else {
-        // If the item doesn't exist, add it to the cart
         carts.value.push({
-            cartItemId: Date.now(), // Unique ID for the cart item
+            cartItemId: Date.now(),
             productId: product.id,
             ready_dish_id: null,
             dish_id: product.id,
@@ -206,11 +242,12 @@ const addProductToCart = (product, selectedVariant = null) => {
             quantity: 1,
             image: product.thumbnail,
             isReadyDish: false,
+            additional_note: ''
         });
-
-        console.log('carts', carts);
+        cartOrderToType.value = newType;
     }
 };
+
 
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
@@ -234,6 +271,7 @@ const deleteProductFromCart = (cartItemId) => {
 
 const clearCart = () => {
     carts.value = [];
+    cartOrderToType.value = null;
     discountAmount.value = 0;
     currentPaymentAmount.value = '';
     selectedTable.value = null;
@@ -248,6 +286,7 @@ const saveOrder = async (shouldPrint = false) => {
         vat: taxAmount.value ? taxAmount.value : 0,
         change_amount: currentPaymentAmount.value ? (finalTotal.value - currentPaymentAmount.value) : 0,
         discount_amount: discountAmount.value ? discountAmount.value : 0,
+        bank_id: selectedBank.value || null,
         items: carts.value.map(item => ({
             dish_id: item.dish_id,
             ready_dish_id: item.ready_dish_id ?? null,
@@ -256,6 +295,8 @@ const saveOrder = async (shouldPrint = false) => {
             net_price: item.price,
             gross_price: item.price * item.quantity,
             is_ready:item.isReadyDish,
+            from_ready: item.ready_dish_id != null,
+            additional_note: item.additional_note ?? null,
         }))
         
     };
@@ -355,7 +396,8 @@ const initializeStore = async () => {
                 await fetchProducts(),
                 await fetchTables(),
                 await fetchConfig(),
-                await fetchDishCategories()
+                await fetchDishCategories(),
+                await fetchBanks(),
             ];
 
             await Promise.all(promises);
@@ -382,8 +424,10 @@ export default function useStore() {
         // State
         config,
         products,
+        selectedBank,
         readyProducts,
         productCategories,
+        banks,
         tables,
         selectedTable,
         searchString,

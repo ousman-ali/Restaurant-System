@@ -52,7 +52,6 @@
                     
                     <div class="cart-item-details" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <div class="cart-item-name"><strong>{{ cart.name }}</strong></div>
-                        <div class="cart-item-price text-success">${{ cart.price }}</div>
                     </div>
 
                     <div class="cart-item-quantities" style="display: flex; gap: 10px; margin-bottom: 10px;">
@@ -79,74 +78,10 @@
                     </div>
                 </div>
 
-
-
-            <!-- <div class="cart-item"
-                 v-for="(cart, index) in carts"
-                 :key="index"
-                 :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }">
-                <div class="cart-item-details">
-                    <div class="cart-item-name">{{ cart.name }}</div>
-                    <div class="cart-item-price">${{ cart.price }}</div>
-                </div>
-                <div class="cart-item-actions">
-                    <button class="quantity-btn" @click="updateCartItemQuantity(cart.cartItemId, cart.quantity - 1)">-
-                    </button>
-                    <span class="item-quantity">{{ cart.quantity }}</span>
-                    <button class="quantity-btn" @click="updateCartItemQuantity(cart.cartItemId, cart.quantity + 1)">+
-                    </button>
-                    <button class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
-                </div>
-            </div> -->
         </div>
 
         <!-- Discount Section -->
-        <div class="discount-section">
-            <div class="discount-header">
-                <label>Discount</label>
-            </div>
-            <div class="discount-input-group">
-                <input
-                    type="number"
-                    v-model="discountValue"
-                    placeholder="Enter discount value"
-                    min="0"
-                    :max="discountType === 'percentage' ? 100 : null"
-                />
-                <div class="discount-toggle">
-                    <span
-                        :class="{ active: discountType === 'percentage' }"
-                        @click="discountType = 'percentage'"
-                    >%</span>
-                    <span
-                        :class="{ active: discountType === 'fixed' }"
-                        @click="discountType = 'fixed'"
-                    >{{ config.currency.symbol }}</span>
-                </div>
-                <button class="apply-btn" @click="applyDiscount">Apply</button>
-            </div>
-        </div>
-
-        <div class="order-totals">
-            <div class="total-row">
-                <span>Subtotal</span>
-                <span>{{ config.currency.symbol }}{{ parseFloat(subTotal).toFixed(2) }}</span>
-            </div>
-            <div class="total-row" v-if="discountAmount > 0">
-                <span>Discount</span>
-                <span>-{{ config.currency.symbol }}{{ discountAmount.toFixed(2) }}</span>
-            </div>
-            <div class="total-row">
-                <span>Tax ({{ config.vat.vat_percentage }}%)</span>
-                <span>{{ config.currency.symbol }}{{ taxAmount.toFixed(2) }}</span>
-            </div>
-            <div class="total-row final">
-                <span>Total</span>
-                <span :class="{ 'animate-balance': isBalanceAnimating }">
-                    {{ config.currency.symbol }}{{ finalTotal.toFixed(2) }}
-                </span>
-            </div>
-        </div>
+       
 
         <div class="order-actions">
             <div class="actions-grid">

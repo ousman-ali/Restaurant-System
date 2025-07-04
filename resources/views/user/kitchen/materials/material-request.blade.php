@@ -47,19 +47,20 @@
                     </td>
                     <td>{{$product->product_name}}</td>
                     <td>{{ $product->materialRequests->where('requested_by', auth()->user()->role)->sum('requested_quantity') }}</td>
+                    
                     @php
-                        $sum = $product->materialRequests->where('requested_by', auth()->user()->role)->sum('requested_quantity');
+                        $purses = $product->purses_sum_quantity ?? 0;
+                        $cooked = $product->cooked_products_sum_quantity ?? 0;
+                        $availableStock = $purses - $cooked;
                     @endphp
-
                     <td>
-                        @if ($sum == 0)
+                        @if ($availableStock == 0)
                             0
                         @else
-                            {{ number_format($sum) }} {{ $product?->unit?->unit }}
-                            ({{ number_format($sum * ($product?->unit?->convert_rate ?? 0)) }} {{ $product?->unit?->child_unit }})
+                            {{ number_format($availableStock) }} {{ $product?->unit?->unit }}
+                            ({{ number_format($availableStock * ($product?->unit?->convert_rate ?? 0)) }} {{ $product?->unit?->child_unit }})
                         @endif
                     </td>
-                    <td>{{$product->purses_sum_quantity ?? 0}}</td>
                     <td>{{$product->minimum_stock_threshold ?? 0}}</td>
                     <td>
                         <div class="btn-group">

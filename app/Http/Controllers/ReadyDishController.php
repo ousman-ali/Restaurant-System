@@ -35,6 +35,7 @@ class ReadyDishController extends Controller
             'source_type' =>'required|string',
             'price' =>'required|numeric',
             'category_id' => 'required|numeric|exists:dish_categories,id',
+            'unit_id' => 'required|numeric|exists:units,id',
         ]);
         $dish = new ReadyDish();
         $dish->name = $request->get('dish');
@@ -44,7 +45,7 @@ class ReadyDishController extends Controller
         if ($request->hasFile('thumbnail')) {
             $filename = rand(8000000, 99999999) . '.' . $request->thumbnail->extension();
             $request->file('thumbnail')->move('uploads/dish/thumbnail', $filename);
-            $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; // use forward slashes
+            $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; 
         }
         $dish->user_id = auth()->user()->id;
         $dish->unit_id = $request->unit_id;

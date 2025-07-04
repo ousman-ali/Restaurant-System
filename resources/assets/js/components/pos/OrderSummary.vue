@@ -47,7 +47,9 @@
             <div class="cart-item"
                  v-for="(cart, index) in carts"
                  :key="index"
-                 :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }">
+                 :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }"
+                 style="display: flex; flex-direction: column; gap: 0.5rem">
+                 <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div class="cart-item-details">
                     <div class="cart-item-name">{{ cart.name }}</div>
                     <div class="cart-item-variant">{{ cart.variantName }}</div>
@@ -60,6 +62,15 @@
                     <button class="quantity-btn" @click="updateCartItemQuantity(cart.cartItemId, cart.quantity + 1)">+
                     </button>
                     <button class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
+                </div>
+                </div>
+                 <div class="cart-item-note mt-2">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Additional note"
+                        v-model="cart.additional_note"
+                    />
                 </div>
             </div>
         </div>
@@ -90,6 +101,9 @@
                 <button class="apply-btn" @click="applyDiscount">Apply</button>
             </div>
         </div>
+
+        
+
 
         <div class="order-totals">
             <div class="total-row">
@@ -190,6 +204,10 @@
                         </div>
                     </div>
 
+                    <div class="summary-row">
+                            <div class="summary-label">Table:</div>
+                            <div class="summary-value">{{ selectedTable.table_no ?? 'No table Selected' }}</div>
+                        </div>
 
                     <!-- Add Payment -->
                     <div class="add-payment">
@@ -205,6 +223,25 @@
                                     placeholder="Enter amount"
                                     :max="remainingBalance"
                                 />
+                            </div>
+                        </div>
+
+                         <div class="discount-section">
+                            <h4>Payment Method</h4>
+                            <div class="discount-input-group">
+                                <select
+                                    id="bankSelect"
+                                    v-model="selectedBank"
+                                >
+                                <option disabled value="">Choose Payment Method</option>
+                                <option
+                                    v-for="bank in banks"
+                                    :key="bank.id"
+                                    :value="bank.id"
+                                >
+                                    {{ bank.name }}
+                                </option>
+                            </select>
                             </div>
                         </div>
 
@@ -241,7 +278,9 @@ const {
     subTotal,
     taxAmount,
     finalTotal,
+    selectedBank,
     selectedTable,
+    banks,
     isOrderModalVisible,
     deleteProductFromCart,
     updateCartItemQuantity,
@@ -383,14 +422,14 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 }
 
 .order-header {
-    padding: 15px;
+    padding: 10px;
     border-bottom: 1px solid #e0e0e0;
 }
 
 .current-table {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 1px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -410,7 +449,7 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 }
 
 .table-selection {
-    padding: 15px;
+    padding: 10px;
     border-bottom: 1px solid #e0e0e0;
     display: block;
 }
@@ -475,7 +514,7 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 15px;
+    padding: 6px 8px;
     border-bottom: 1px solid #e0e0e0;
     background-color: #f9f9f9;
 }
@@ -589,17 +628,17 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 
 /* Discount Section */
 .discount-section {
-    padding: 15px;
+    padding: 5px;
     border-top: 1px solid #e0e0e0;
 }
 
 .discount-header {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .discount-header label {
-    font-weight: 500;
-    font-size: 15px;
+    font-weight: 400;
+    font-size: 13px;
     color: #333;
 }
 
@@ -617,6 +656,13 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     outline: none;
 }
 
+.discount-input-group select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
 .discount-toggle {
     display: flex;
     border: 1px solid #ddd;
@@ -645,7 +691,7 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 }
 
 .order-totals {
-    padding: 15px;
+    padding: 10px;
     border-top: 1px solid #e0e0e0;
 }
 
@@ -721,6 +767,9 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     font-size: 11px;
     margin-left: 8px;
 }
+::v-deep(.payment-modal) {
+  z-index: 2147483647;
+}
 
 /* Payment Modal Styles */
 .payment-modal {
@@ -733,6 +782,7 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    margin-top: 20px;
 }
 
 .modal-overlay {
@@ -859,6 +909,7 @@ watch(() => [...carts.value], (newCart, oldCart) => {
 /* Add Payment */
 .add-payment {
     margin-bottom: 20px;
+    z-index: 9999999;
 }
 
 .add-payment h4 {

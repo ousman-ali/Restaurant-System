@@ -26,6 +26,10 @@
 
     </div>
 
+    <div class="row" id="waiterHtml">
+
+    </div>
+
 @endsection
 
 @section('extra-js')
@@ -43,15 +47,20 @@
 
         var orders = [];
         var supplierOrders = [];
+        var waiterOrders = [];
+
         $(document).ready(function () {
             $("#refresh").on('click',function () {
                 $.get('baker-status-waiter-json', function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
             });
 
@@ -59,34 +68,44 @@
             $.get('baker-status-waiter-json', function (data) {
                 orders = data.orders;
                 supplierOrders = data.supplierOrders;
+                waiterOrders = data.waiterOrders;
+                console.log('dataaaaa', data);
                 $("#renderHtmlHear").empty();
                 $("#supplierHtml").empty();
+                $("#waiterHtml").empty();
                 $(this).renderOrders(orders, "#renderHtmlHear");
                 $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
             });
 
-            var startCooking = pusher.subscribe('start-cooking');
-            startCooking.bind('kitchen-event', function (data) {
+            var startCooking = pusher.subscribe('start-inhouse-cooking');
+            startCooking.bind('kitchen-inhouse-event', function (data) {
                 $.get('baker-status-waiter-json', function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
             });
 
 
-            var completeCooking = pusher.subscribe('complete-cooking');
-            completeCooking.bind('complete-cooking-event',function (data) {
+            var completeCooking = pusher.subscribe('complete-inhouse-cooking');
+            completeCooking.bind('complete-inhouse-cooking-event',function (data) {
                 $.get('baker-status-waiter-json', function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
             });
 
@@ -95,10 +114,13 @@
                 $.get("/baker-status-waiter-json", function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $("#renderHtmlHear").renderOrders(orders, "#renderHtmlHear");
                     $("#supplierHtml").renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
             });
 
@@ -109,10 +131,13 @@
                 $.get('baker-status-waiter-json', function (data) {
                     orders = data.orders;
                     supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
             });
 
@@ -123,8 +148,26 @@
                     orders.splice(index,1);
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
+                });
+                setTimeout(() => laddaBtn.stop(), 4000);
+            };
+
+
+            $.fn.serveReadyOrder = function (index) {
+                const laddaBtn = Ladda.create(this[0]); 
+                laddaBtn.start();
+                $.get('/barman-ready-order-served/'+waiterOrders[index].id, function (data) {
+                    waiterOrders.splice(index,1);
+                    $("#renderHtmlHear").empty();
+                    $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
+                    $(this).renderOrders(orders, "#renderHtmlHear");
+                    $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
                 setTimeout(() => laddaBtn.stop(), 4000);
             };
@@ -136,8 +179,10 @@
                     supplierOrders.splice(index,1);
                     $("#renderHtmlHear").empty();
                     $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
                     $(this).renderOrders(orders, "#renderHtmlHear");
                     $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                 });
                 setTimeout(() => laddaBtn.stop(), 4000);
             };
@@ -161,8 +206,10 @@
                         orders.splice(index, 1);
                         $("#renderHtmlHear").empty();
                         $("#supplierHtml").empty();
+                        $("#waiterHtml").empty();
                         $(this).renderOrders(orders, "#renderHtmlHear");
                         $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                        $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                     }
                 ).fail(function (xhr) {
                     console.log('Failed to delete order: ' + xhr.responseText);
@@ -187,8 +234,10 @@
                         supplierOrders.splice(index, 1);
                         $("#renderHtmlHear").empty();
                         $("#supplierHtml").empty();
+                        $("#waiterHtml").empty();
                         $(this).renderOrders(orders, "#renderHtmlHear");
                         $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
+                        $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                     }
                 ).fail(function (xhr) {
                     console.log('Failed to delete order: ' + xhr.responseText);
@@ -203,14 +252,14 @@
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
-                                style: "height: 400px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                                style: "height: 430px;"
                             }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
                                         text: dish.baker ? dish.baker.name : "Baker did not response yet"
                                     }).append(
-                                        $("<span>", {class: "pull-right", text: dish.served_by.name})
+                                        $("<span>", {class: "pull-right", text: dish.order_by.name})
                                     )
                                 ),
                                 $("<div>", {class: "panel-body dish-details"}).append(
@@ -250,8 +299,8 @@
                                             hour12: true 
                                         })})
                                     ),
-                                    dish.cook_start_time ? $("<p>", {text: "Cooking Start Time: "}).append(
-                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_time).toLocaleString("en-US", {
+                                    dish.cook_start_at ? $("<p>", {text: "Cooking Start Time: "}).append(
+                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -262,8 +311,8 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.cook_complete_time ? $("<p>", {text: "Cooking Complete Time: "}).append(
-                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_time).toLocaleString("en-US", {
+                                    dish.cook_complete_at ? $("<p>", {text: "Cooking Complete Time: "}).append(
+                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -274,8 +323,8 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.serve_time ? $("<p>", {text: "Serve Time: "}).append(
-                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.serve_time).toLocaleString("en-US", {
+                                    dish.accepted_time ? $("<p>", {text: "Accept Time: "}).append(
+                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.accepted_time).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -304,7 +353,7 @@
                                     : (dish.status == 2)
                                         ? $("<button>", {
                                             class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
-                                            text: "Complete! waiting for serve ",
+                                            text: "Complete! waiting for accept ",
                                             "data-style": "expand-right",
                                             "data-spinner-color": "#fff",
                                             onClick: "$(this).serve(" + index + ")"
@@ -324,19 +373,30 @@
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
-                                        text: "Admin Response"
+                                        text: dish.admin ? dish.admin.name : "Admin did not response yet"
                                     }).append(
-                                        $("<span>", {class: "pull-right", text: dish.served_by.name})
+                                        $("<span>", {class: "pull-right", text: dish.order_by.name})
                                     )
                                 ),
                                 $("<div>", {class: "panel-body dish-details"}).append(
                                     $("<ul>", {class: 'list-group'}).append(
                                         $.map(dish.order_details, function (index, dishDetails) {
+                                            const detail = dish.order_details[dishDetails];
+                                            const name = detail.ready_dish?.name || 'Unnamed';
+                                            const quantity = detail.quantity || 0;
+                                            const unit = detail.ready_dish?.unit?.unit || '';
+                                            const childUnit = detail.ready_dish?.unit?.child_unit || '';
+                                            const convertRate = detail.ready_dish?.unit?.convert_rate || 1;
+
+                                            const converted = (quantity * convertRate).toFixed(2);
                                             return $("<li>", {
                                                 class: "list-group-item",
-                                                text: dish.order_details[dishDetails].ready_dish.name
+                                                text: dish.order_details[dishDetails].ready_dish?.name
                                             }).append(
-                                               
+                                               $("<span>", {
+                                                    class: "badge badge-success",
+                                                    text: `${quantity} ${unit} (${converted} ${childUnit})`
+                                                })
                                             )
                                         })
                                     )
@@ -389,12 +449,8 @@
                                     text: "Pending ! Click to cancel order",
                                     onClick:"$(this).cancelSupplierOrder("+ index +")"
                                 })
+                                    
                                     : (dish.status == 1)
-                                    ? $("<button>", {
-                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
-                                        text: "Wait for purchase"
-                                    })
-                                    : (dish.status == 4)
                                         ? $("<button>", {
                                             class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
                                             text: "Confirm Purchase",
@@ -408,6 +464,123 @@
                     )
                 })
             }
+
+            $.fn.renderWaiterOrders = function (data) {
+                $.each(data, function (index, dish) {
+                    $("#waiterHtml").append(
+                        $("<div>", {class: "col-lg-6"}).append(
+                            $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
+                                style: "height: 430px;"
+                            }).append(
+                                $("<div>", {class: "panel-heading"}).append(
+                                    $("<h3>", {
+                                        class: "panel-title",
+                                        text: "Waiter Ready Dish Order"
+                                    }).append(
+                                        $("<span>", {class: "pull-right", text: dish.serve_by?.name})
+                                    )
+                                ),
+                                $("<div>", { class: "panel-body dish-details" }).append(
+                                    $("<ul>", { class: 'list-group' }).append(
+                                        $.map(dish.order_details, function (orderDetail) {
+                                            const isDish = orderDetail.dish !== null;
+                                            const isReadyDish = orderDetail.ready_dish !== null;
+
+                                            const dishName = isDish
+                                                ? orderDetail.dish?.dish
+                                                : isReadyDish
+                                                    ? orderDetail.ready_dish?.name
+                                                    : 'Unknown Dish';
+
+                                            const dishType = isDish
+                                                ? orderDetail.dish_type?.dish_type
+                                                : null;
+
+                                            const addtionalNote = orderDetail.additional_note ?? '';
+
+                                            // Create the main list item
+                                            const $li = $("<li>", { class: "list-group-item" });
+
+                                            // Add dish name
+                                            $li.append($("<span>").text(dishName));
+
+                                            // Add dish type badge
+                                            if (dishType) {
+                                                $li.append($("<span>", {
+                                                    class: "badge badge-success ml-2",
+                                                    text: dishType,
+                                                }));
+                                            }
+
+                                            // Add quantity badge
+                                            $li.append($("<span>", {
+                                                class: "badge badge-primary ml-2",
+                                                text: "Qty: " + orderDetail.quantity,
+                                            }));
+
+                                            // Add table badge if exists
+                                            if (dish.table && dish.table.table_no) {
+                                                $li.append($("<span>", {
+                                                    class: "badge badge-primary ml-2",
+                                                    text: "Table: " + dish.table.table_no,
+                                                }));
+                                            }
+
+                                            // Add additional note under the dish name (styled small and muted)
+                                            if (addtionalNote) {
+                                                $li.append($("<div>", {
+                                                    class: "text-muted mt-1 small",
+                                                    text: "Note: " + addtionalNote,
+                                                }));
+                                            }
+
+                                            return $li;
+                                        })
+                                    )
+                                ),
+
+
+                                $("<div>", {class: "panel-body order-info"}).append(
+                                    $("<p>", {text: "Order Time: "}).append(
+                                        $("<span>", {class: "badge badge-info", text: new Date(dish.created_at).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ),
+                                    dish.serve_time ? $("<p>", {text: "Accept Time: "}).append(
+                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.serve_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true 
+                                        })})
+                                    ) : ""
+                                ),
+                            
+                                (dish.status == 0)
+                                    ? $("<button>", {
+                                    class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                    "data-style": "expand-right",
+                                    "data-spinner-color": "#fff",
+                                    text: "Serve Order",
+                                    onClick:"$(this).serveReadyOrder("+ index +")"
+                                }): "Oops"
+                            )
+                        )
+                    )
+                })
+            }
+
 
 
         })

@@ -72,10 +72,21 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="col-md-2 control-label">Order To<span class="text-danger">*</span></label>
+                    <div class="col-md-8">
+                        <select name="order_to" class="form-control select2" required>
+                            <option value="">Select Role</option>
+                            <option value="kitchen">Kitchen</option>
+                            <option value="barman">Barman</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="col-md-2 control-label">Category <span class="text-danger">*</span></label>
                     <div class="col-md-8 category-container">
                         <div class="input-group">
-                            <select name="category_id" id="category_select" class="form-control" required>
+                            <select name="category_id" id="category_select" class="form-control select2" required>
                                 <option value="">Select Category</option>
                                 @foreach($categories as $category)
                                     <option value="{{$category->id}}">{{$category->name}}</option>
@@ -90,6 +101,8 @@
                         </div>
                     </div>
                 </div>
+
+                
 
 
                 <div class="form-group">

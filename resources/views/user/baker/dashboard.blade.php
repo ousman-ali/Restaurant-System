@@ -50,7 +50,7 @@
                                         class: "panel-title",
                                         text: dish.status == 0 ? "Waiting for Baker Response" : "My Baker"
                                     }).append(
-                                        $("<span>", {class: "pull-right", text: dish.served_by.name})
+                                        $("<span>", {class: "pull-right", text: dish.order_by.name})
                                     )
                                 ),
                                 
@@ -90,8 +90,8 @@
                                             hour12: true 
                                         })})
                                     ),
-                                    dish.cook_start_time ? $("<p>", {text: "Cooking Start Time: "}).append(
-                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_time).toLocaleString("en-US", {
+                                    dish.cook_start_at ? $("<p>", {text: "Cooking Start Time: "}).append(
+                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -102,8 +102,8 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.cook_complete_time ? $("<p>", {text: "Cooking Complete Time: "}).append(
-                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_time).toLocaleString("en-US", {
+                                    dish.cook_complete_at ? $("<p>", {text: "Cooking Complete Time: "}).append(
+                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -114,8 +114,8 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.serve_time ? $("<p>", {text: "Serve Time: "}).append(
-                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.serve_time).toLocaleString("en-US", {
+                                    dish.accepted_at ? $("<p>", {text: "Accepted Time: "}).append(
+                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.accepted_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -186,8 +186,8 @@
                 });
             });
 
-            var startCooking = pusher.subscribe('start-cooking');
-            startCooking.bind('kitchen-event',function (data) {
+            var startCooking = pusher.subscribe('start-inhouse-cooking');
+            startCooking.bind('kitchen-inhouse-event',function (data) {
                 $.get("/baker-orders", function (data) {
                     orders = data;
                     $("#renderHtmlHear").empty();

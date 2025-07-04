@@ -112,10 +112,10 @@
             </div>
 
             <div class="form-group">
-                <label class="col-md-2 control-label" for="example-email">Unit(Optional) :</label>
+                <label class="col-md-2 control-label" for="example-email">Unit <span class="text-danger">*</span></label>
                 <div class="col-md-8">
-                    <select name="unit_id" id="" class="form-control select2">
-                        <option value="">Select One</option>
+                    <select name="unit_id" id="" class="form-control select2" required>
+                        <option value="">Select Unit</option>
                         @foreach($units as $unit)
                             <option value="{{$unit->id}}">{{$unit->unit}}</option>
                         @endforeach

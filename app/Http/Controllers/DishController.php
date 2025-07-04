@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Models\Bank;
 
 class DishController extends Controller
 {
@@ -45,46 +46,110 @@ class DishController extends Controller
      */
     public function getDishes(): JsonResponse
     {
-        $dishes = Dish::with(['dishPrices', 'dishImages'])->whereHas('dishRecipes')->get();
-        return response()->json($dishes);
+        $dishes = Dish::with(['dishPrices', 'dishImages', 'dishRecipes.product.purses', 'dishRecipes.product.cookedProducts'])
+            ->whereHas('dishRecipes') 
+            ->get();
+            
+
+        $filteredDishes = $dishes->filter(function ($dish) {
+            foreach ($dish->dishRecipes as $recipe) {
+                $product = $recipe->product;
+                if (!$product) {
+                    return false; 
+                }
+                $totalPurses = $product->purses->sum('quantity');
+                $totalCooked = $product->cookedProducts->sum('quantity');
+                $available = $totalPurses - $totalCooked;
+                if ($available <= 0) {
+                    return false; 
+                }
+            }
+            return true; 
+        })->values();
+        return response()->json($filteredDishes);
+    }
+
+    public function getBanks(){
+        $banks = Bank::where('status', 1)->get();
+        return response()->json($banks);
     }
 
     public function getReadyDishes(): JsonResponse
-    {
-    $dishes = ReadyDish::with(['dishImages', 'dishRecipes', 'unit'])
-    ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
-    ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
-    ->get()
-    ->filter(function ($dish) {
-        if ($dish->source_type === 'inhouse') {
-            return $dish->total_ready_quantity == null || $dish->total_ready_quantity == 0;
-        } elseif ($dish->source_type === 'supplier') {
-            return $dish->total_purchased_quantity == null || $dish->total_purchased_quantity == 0;
+        {
+            $dishes = ReadyDish::with([
+                    'dishImages',
+                    'dishRecipes.product.purses',
+                    'dishRecipes.product.cookedProducts',
+                    'unit'
+                ])
+                ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
+                ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
+                ->get()
+                ->filter(function ($dish) {
+                    foreach ($dish->dishRecipes as $recipe) {
+                        $product = $recipe->product;
+                        if (!$product) continue;
+                        $totalPurses = $product->purses->sum('quantity');
+                        $totalCooked = $product->cookedProducts->sum('quantity');
+                        $availableStock = $totalPurses - $totalCooked;
+                        if ($availableStock <= 0) {
+                            return false;
+                        }
+                    }
+                    $threshold = $dish->minimum_stock_threshold ?? 0;
+                    if ($dish->source_type === 'inhouse') {
+                        return ($dish->total_ready_quantity ?? 0) < $threshold;
+                    } elseif ($dish->source_type === 'supplier') {
+                        return ($dish->total_purchased_quantity ?? 0) < $threshold;
+                    }
+
+                    return false;
+                })
+                ->values();
+
+            return response()->json($dishes);
         }
-        return false;
-    })
-    ->values();
-    return response()->json($dishes);
-    }
 
     public function getReadyProducts(): JsonResponse
     {
-    $dishes = ReadyDish::with(['dishImages', 'dishRecipes', 'unit'])
-        ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
-        ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
-        ->get()
-        ->filter(function ($dish) {
-            if ($dish->source_type === 'inhouse') {
-                return $dish->total_ready_quantity > 0;
-            } elseif ($dish->source_type === 'supplier') {
-                return $dish->total_purchased_quantity > 0;
-            }
-            return false;
-        })
-        ->values();
+        $dishes = ReadyDish::with([
+                'dishImages',
+                'dishRecipes.product.purses',
+                'dishRecipes.product.cookedProducts',
+                'unit'
+            ])
+            ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
+            ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
+            ->get()
+            ->filter(function ($dish) {
+                foreach ($dish->dishRecipes as $recipe) {
+                    $product = $recipe->product;
 
-    return response()->json($dishes);
+                    if (!$product) continue; 
+
+                    $totalPurses = $product->purses->sum('quantity');
+                    $totalCooked = $product->cookedProducts->sum('quantity');
+                    $availableStock = $totalPurses - $totalCooked;
+
+                    if ($availableStock <= 0) {
+                        return false; 
+                    }
+                }
+                $threshold = $dish->minimum_stock_threshold ?? 0;
+
+                if ($dish->source_type === 'inhouse') {
+                    return ($dish->total_ready_quantity ?? 0) > $threshold;
+                } elseif ($dish->source_type === 'supplier') {
+                    return ($dish->total_purchased_quantity ?? 0) > $threshold;
+                }
+
+                return false;
+            })
+            ->values();
+
+        return response()->json($dishes);
     }
+
 
     /**
      * User can able to edit selected dish by this method
@@ -156,16 +221,24 @@ class DishController extends Controller
         $this->validate($request, [
             'dish' => 'required|string',
             'category_id' => 'required|numeric|exists:dish_categories,id',
+            'order_to' =>'required'
         ]);
         $dish = new Dish();
         $dish->dish = $request->get('dish');
+        // if ($request->hasFile('thumbnail')) {
+        //     $dish->thumbnail = $request->file('thumbnail')
+        //         ->move('uploads/dish/thumbnail',
+        //             rand(8000000, 99999999) . '.' . $request->thumbnail->extension());
+        // }
+        $dish->dish = $request->get('dish');
         if ($request->hasFile('thumbnail')) {
-            $dish->thumbnail = $request->file('thumbnail')
-                ->move('uploads/dish/thumbnail',
-                    rand(8000000, 99999999) . '.' . $request->thumbnail->extension());
+            $filename = rand(8000000, 99999999) . '.' . $request->thumbnail->extension();
+            $request->file('thumbnail')->move('uploads/dish/thumbnail', $filename);
+            $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; // use forward slashes
         }
         $dish->user_id = auth()->user()->id;
         $dish->category_id = $request->category_id;
+        $dish->order_to = $request->order_to;
         if ($dish->save()) {
             return redirect()->to('/dish-price/' . $dish->id);
         }
@@ -182,17 +255,19 @@ class DishController extends Controller
         $this->validate($request, [
             'dish' => 'required|string',
             'category_id' => 'required|numeric|exists:dish_categories,id',
+            'order_to' =>'required',
         ]);
 
         $dish = Dish::findOrFail($id);
         $dish->dish = $request->get('dish');
         if ($request->hasFile('thumbnail')) {
-            $dish->thumbnail = $request->file('thumbnail')
-                ->move('uploads/dish/thumbnail',
-                    rand(8000000, 99999999) . '.' . $request->thumbnail->extension());
+            $filename = rand(8000000, 99999999) . '.' . $request->thumbnail->extension();
+            $request->file('thumbnail')->move('uploads/dish/thumbnail', $filename);
+            $dish->thumbnail = 'uploads/dish/thumbnail/' . $filename; // use forward slashes
         }
         $dish->user_id = auth()->user()->id;
         $dish->category_id = $request->category_id;
+        $dish->order_to = $request->order_to;
         $dish->available = $request->get('available') == 'on' ? 1 : 0;
         if ($dish->save()) {
             return response()->json('Ok', 200);

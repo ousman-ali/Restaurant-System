@@ -51,6 +51,7 @@
 
             $.get('/kitchen-status-waiter-json', function (data) {
                 orders = data;
+                console.log('kitchen data', data);
                 $("#renderHtmlHear").empty();
                 $(this).renderHTML(orders);
             });
@@ -84,29 +85,21 @@
             });
 
             $.fn.serve = function (index) {
+                const laddaBtn = Ladda.create(this[0]); // FIX: use [0] to get DOM element
+                laddaBtn.start();
                 $.get('/order-served/'+orders[index].id, function (data) {
                     orders.splice(index,1);
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(orders);
                 });
+                setTimeout(() => laddaBtn.stop(), 2000);
             };
 
-            // $.fn.cancelOrder = function (index) {
-            //     var conf = confirm('Are you sure ?');
-            //     if(conf){
-            //         $.get('/delete-order/'+orders[index].id,function (data) {
-            //             orders.splice(index,1);
-            //             $("#renderHtmlHear").empty();
-            //             $(this).renderHTML(orders);
-            //         });
-
-            //     }
-
-            // };
 
             $.fn.cancelOrder = function (index) {
-            var conf = confirm('Are you sure ?');
-            if (conf) {
+
+                const laddaBtn = Ladda.create(this[0]); // FIX: use [0] to get DOM element
+                laddaBtn.start();
                 var orderId = orders[index].id;
 
                 $.post('/delete-order', 
@@ -122,7 +115,7 @@
                 ).fail(function (xhr) {
                     alert('Failed to delete order: ' + xhr.responseText);
                 });
-            }
+                setTimeout(() => laddaBtn.stop(), 2000);
         };
 
 
@@ -141,28 +134,43 @@
                                         $("<span>", {class: "pull-right", text: dish.served_by.name})
                                     )
                                 ),
-                                $("<div>", {class: "panel-body dish-details"}).append(
-                                    $("<ul>", {class: 'list-group'}).append(
-                                        $.map(dish.order_details, function (index, dishDetails) {
+                                $("<div>", { class: "panel-body dish-details" }).append(
+                                    $("<ul>", { class: 'list-group' }).append(
+                                        $.map(dish.order_details, function (orderDetail) {
+                                            const isDish = orderDetail.dish !== null;
+                                            const isReadyDish = orderDetail.ready_dish !== null;
+
+                                            const dishName = isDish
+                                                ? orderDetail.dish?.dish
+                                                : isReadyDish
+                                                    ? orderDetail.ready_dish?.name
+                                                    : 'Unknown Dish';
+
+                                            const dishType = isDish
+                                                ? orderDetail.dish_type?.dish_type
+                                                : null; // ready_dish may not have dish_type
+
                                             return $("<li>", {
                                                 class: "list-group-item",
-                                                text: dish.order_details[dishDetails].dish?.dish 
+                                                text: dishName,
                                             }).append(
-                                                $("<span>", {
-                                                    class: "badge badge-success",
-                                                    text: dish.order_details[dishDetails].dish_type?.dish_type
-                                                }),
+                                                dishType
+                                                    ? $("<span>", {
+                                                        class: "badge badge-success ml-2",
+                                                        text: dishType,
+                                                    })
+                                                    : "",
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",
-                                                    text: "Qty: " + dish.order_details[dishDetails].quantity
+                                                    text: "Qty: " + orderDetail.quantity,
                                                 }),
                                                 dish.table && dish.table.table_no
                                                     ? $("<span>", {
                                                         class: "badge badge-primary ml-2",
-                                                        text: "Table: " + dish.table.table_no
+                                                        text: "Table: " + dish.table.table_no,
                                                     })
-                                                    : ''
-                                            )
+                                                    : ""
+                                            );
                                         })
                                     )
                                 ),
@@ -220,18 +228,24 @@
                             
                                 (dish.status == 0)
                                     ? $("<button>", {
-                                    class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                    class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                    "data-style": "expand-right",
+                                    "data-spinner-color": "#fff",
                                     text: "Pending ! Click to cancel order",
                                     onClick:"$(this).cancelOrder("+ index +")"
                                 })
                                     : (dish.status == 1)
                                     ? $("<button>", {
-                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                        "data-style": "expand-right",
+                                        "data-spinner-color": "#fff",
                                         text: "Cooking"
                                     })
                                     : (dish.status == 2)
                                         ? $("<button>", {
-                                            class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                            class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                            "data-style": "expand-right",
+                                            "data-spinner-color": "#fff",
                                             text: "Complete! waiting for serve ",
                                             onClick: "$(this).serve(" + index + ")"
                                         })

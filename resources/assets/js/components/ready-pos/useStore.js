@@ -22,7 +22,11 @@ const config = ref({
     }
 });
 
-const carts = ref([]);
+// const carts = ref([]);
+const supplierCarts = ref([]);
+const inhouseCarts = ref([]);
+
+const carts = computed(() => [...supplierCarts.value, ...inhouseCarts.value]);
 const tables = ref([]);
 const products = ref([]);
 const productCategories = ref([]);
@@ -176,31 +180,61 @@ const syncMainUnit = (cart) => {
 };
 
 const addProductToCart = (product) => {
-    const existingCartItemIndex = carts.value.findIndex(item =>
-        item.productId === product.id
-    );
+    const sourceType = product.source_type || 'supplier'; // default fallback
 
-    if (existingCartItemIndex !== -1) {
-        carts.value[existingCartItemIndex].quantity += 1;
-        carts.value[existingCartItemIndex].child_quantity =
-        carts.value[existingCartItemIndex].quantity * product.unit.convert_rate;
+    const targetCart = sourceType === 'inhouse' ? inhouseCarts : supplierCarts;
+
+    const existingIndex = targetCart.value.findIndex(item => item.productId === product.id);
+
+    if (existingIndex !== -1) {
+        const item = targetCart.value[existingIndex];
+        item.quantity += 1;
+        item.child_quantity = item.quantity * item.convert_rate;
     } else {
-        carts.value.push({
+        targetCart.value.push({
             cartItemId: Date.now(),
             productId: product.id,
             name: product.name,
-            price: product.price,
             image: product.thumbnail,
             unit: product.unit.unit,
             child_unit: product.unit.child_unit,
             convert_rate: product.unit.convert_rate,
             quantity: 1,
             child_quantity: 1 * product.unit.convert_rate,
+            source_type: sourceType,
         });
     }
-
-    console.log('carts with unit', carts);
+    console.log('supplierCarts:', supplierCarts.value);
+    console.log('inhouseCarts:', inhouseCarts.value);
 };
+
+
+// const addProductToCart = (product) => {
+//     const existingCartItemIndex = carts.value.findIndex(item =>
+//         item.productId === product.id
+//     );
+
+//     if (existingCartItemIndex !== -1) {
+//         carts.value[existingCartItemIndex].quantity += 1;
+//         carts.value[existingCartItemIndex].child_quantity =
+//         carts.value[existingCartItemIndex].quantity * product.unit.convert_rate;
+//     } else {
+//         carts.value.push({
+//             cartItemId: Date.now(),
+//             productId: product.id,
+//             name: product.name,
+//             price: product.price,
+//             image: product.thumbnail,
+//             unit: product.unit.unit,
+//             child_unit: product.unit.child_unit,
+//             convert_rate: product.unit.convert_rate,
+//             quantity: 1,
+//             child_quantity: 1 * product.unit.convert_rate,
+//         });
+//     }
+
+//     console.log('carts with unit', carts);
+// };
 
 
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
@@ -233,36 +267,39 @@ const clearCart = () => {
 // Order processing functions
 const saveOrder = async (shouldPrint = false) => {
     const orderData = {
-        table_id: selectedTable.value ? selectedTable.value.id : null,
-        payment: currentPaymentAmount.value ? currentPaymentAmount.value : null,
-        vat: taxAmount.value ? taxAmount.value : 0,
-        change_amount: currentPaymentAmount.value ? (finalTotal.value - currentPaymentAmount.value) : 0,
-        discount_amount: discountAmount.value ? discountAmount.value : 0,
-        items: carts.value.map(item => ({
+        supplier_items: supplierCarts.value.map(item => ({
             ready_dish_id: item.productId,
             quantity: item.quantity,
-            net_price: item.price,
-            gross_price: item.price * item.quantity,
-        }))
+        })),
+
+        inhouse_items: inhouseCarts.value.map(item => ({
+            ready_dish_id: item.productId,
+            quantity: item.quantity,
+        })),
+
     };
+
+    console.log('order data', orderData);
 
     try {
         let response;
 
         if (window.editOrderId) {
             response = await axios.put(`/update-barman-order/${window.editOrderId}`, orderData);
-            showToast("Order updated successfully.");
         } else {
             response = await axios.post('/save-barman-order', orderData);
             clearCart();
-            showToast("Order saved successfully.");
         }
 
+        const { message, redirect } = response.data;
+
+        showToast(message || "Order saved successfully.");
         isOrderModalVisible.value = false;
 
-        // if (shouldPrint && response.data.id) {
-        //     printInvoice(response.data.id);
-        // }
+        // Optional redirect
+        if (redirect) {
+            window.location.href = redirect;
+        }
 
         return response.data;
     } catch (err) {

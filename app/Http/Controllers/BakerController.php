@@ -10,9 +10,12 @@ use App\Models\Supplier;
 use App\Models\Unit;
 use App\Models\PursesReadyDish;
 use App\Events\OrderServed;
+use App\Events\SupplierOrderPurchased;
 use App\Models\Purse;
 use App\Models\PursesPayment;
 use App\Models\MaterialRequest;
+use App\Models\InhouseOrder;
+use App\Models\SupplierOrder;
 use Illuminate\Support\Facades\Log;
 class BakerController extends Controller
 {
@@ -23,65 +26,65 @@ class BakerController extends Controller
         return view('user.barman.live-bakery');
     }
 
-    // public function barmanLiveBakerJSON()
-    // {
-    //     $orders = Order::where('status', '!=', 3)
-    //         ->where('served_by', auth()->user()->id)
-    //         ->with('orderDetails.readyDish')
-    //         ->with('servedBy')
-    //         ->with('kitchen')
-    //         ->where('is_ready', true)
-    //         ->orderBy('id','desc')
-    //         ->get();
-    //     return response()->json($orders);
-    // }
+  
 
     public function barmanLiveBakerJSON()
-{
-    // 1. Inhouse orders for the barman (baker)
-    $inhouseOrders = Order::where('status', '!=', 3)
-        ->where('served_by', auth()->user()->id)
-        ->where('is_ready', true)
-        ->whereHas('orderDetails.readyDish', fn($q) =>
-            $q->where('source_type', 'inhouse')
-        )
+    {
+        $inhouseOrders = InhouseOrder::where('status', '!=', 3)
+        ->where('order_by', auth()->user()->id)
         ->with([
-            'orderDetails' => fn($q) =>
-                $q->whereHas('readyDish', fn($q2) =>
-                    $q2->where('source_type', 'inhouse')
-                ),
             'orderDetails.readyDish.unit',
-            'servedBy',
-            'baker',
+            'orderBy',
+            'baker'
         ])
-        ->orderBy('id','desc')
+        ->latest()
         ->get();
 
-    // 2. Supplier orders for admin
-    $supplierOrders = Order::where('status', '!=', 3)
-    ->where('status', '!=', 5)
-        ->where('served_by', auth()->user()->id)
-        ->where('is_ready', true)
-        ->whereHas('orderDetails.readyDish', fn($q) =>
-            $q->where('source_type', 'supplier')
-        )
+        $supplierOrders = SupplierOrder::where('status', '!=', '2')
+        ->where('order_by', auth()->user()->id)
         ->with([
-            'orderDetails' => fn($q) =>
-                $q->whereHas('readyDish', fn($q2) =>
-                    $q2->where('source_type', 'supplier')
-                ),
-            'orderDetails.readyDish',
-            'servedBy',
-            'kitchen',
+            'orderDetails.readyDish.unit',
+            'orderBy',
+            'admin'
         ])
-        ->orderBy('id','desc')
+        ->latest()
         ->get();
 
-    return response()->json([
-        'orders' => $inhouseOrders,         // Inhouse
-        'supplierOrders' => $supplierOrders // Supplier
-    ]);
-}
+        $waiterOrder = Order::whereNotIn('status', [1, 2, 3])
+            ->whereHas('orderDetails', function ($q) {
+                $q->where('from_ready', true)
+                ->orWhere(function ($sub) {
+                    $sub->where('from_ready', false)
+                        ->whereHas('dish', function ($dishQuery) {
+                            $dishQuery->where('order_to', 'barman');
+                        });
+                });
+            })
+            ->with([
+                'orderDetails' => function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('from_ready', true)
+                        ->orWhere(function ($sub) {
+                            $sub->where('from_ready', false)
+                                ->whereHas('dish', function ($dishQuery) {
+                                    $dishQuery->where('order_to', 'barman');
+                                });
+                        });
+                    })->with(['readyDish.unit', 'dish']);
+                },
+                'servedBy',
+            ])
+            ->latest()
+            ->get();
+
+
+        return response()->json([
+            'orders' => $inhouseOrders,
+            'supplierOrders' => $supplierOrders,
+            'waiterOrders' => $waiterOrder,
+        ]);
+        
+    }
 
 
     public function myCookingHistory()
@@ -104,25 +107,12 @@ class BakerController extends Controller
      */
     public function adminLiveBarmanJSON()
     {
-        $orders = Order::where('status', '!=', 4)
-            ->where('status', '!=', 5)
+        $orders = SupplierOrder::where('status', '!=', 1)
+            ->where('status', '!=', 2)
             ->with('orderDetails.readyDish')
-            ->with('servedBy')
-            ->where('is_ready', true)
-            ->whereHas('orderDetails.readyDish', fn($q) => 
-        $q->where('source_type', 'supplier')
-            )
-            // eager-load only the in-house orderDetails
-            ->with([
-                'orderDetails' => function($q) {
-                    $q->whereHas('readyDish', fn($q2) =>
-                        $q2->where('source_type', 'supplier')
-                    );
-                },
-                'orderDetails.readyDish',
-                'servedBy'
-            ])
-            ->orderBy('id', 'desc')
+            ->with('orderBy')
+            ->with('admin')
+            ->latest()
             ->get();
             
         return response()->json($orders);
@@ -147,7 +137,7 @@ class BakerController extends Controller
        
     $request->validate([
         'supplier_id' => 'required|exists:suppliers,id',
-        'order_id' => 'required|exists:orders,id',
+        'order_id' => 'required|exists:supplier_orders,id',
         'items' => 'required|array',
         'items.*.dishId' => 'required|integer',
         'items.*.quantity' => 'required|numeric',
@@ -191,12 +181,12 @@ class BakerController extends Controller
             }
 
             // Mark the order as complete
-            $order = Order::findOrFail($request->order_id);
-            $order->status = 4;
-            $order->purchase_time = now();
+            $order = SupplierOrder::findOrFail($request->order_id);
+            $order->status = 1;
+            $order->purchased_at = now();
             $order->save();
 
-            broadcast(new OrderServed("success", $order))->toOthers();
+            broadcast(new SupplierOrderPurchased("success", $order))->toOthers();
 
             // Handle payment if any
             if ($request->filled('payment') && $request->payment > 0) {
@@ -226,14 +216,7 @@ class BakerController extends Controller
 
 public function getRecipeFormAll($orderId)
 {
-    $order = Order::with([
-        'orderDetails' => function ($q) {
-            $q->whereHas('readyDish', function ($q2) {
-                $q2->where('source_type', 'supplier');
-            });
-        },
-        'orderDetails.readyDish'
-    ])->findOrFail($orderId);
+    $order = SupplierOrder::with('orderDetails.readyDish')->findOrFail($orderId);
 
     $dishs = ReadyDish::where('source_type', 'supplier')->get();
     $suppliers = Supplier::where('status', 1)->get();
@@ -243,7 +226,7 @@ public function getRecipeFormAll($orderId)
 
   public function allStock()
     {
-        $stockProducts = Product::withSum('purses', 'quantity')->where('dish_type', 'ready')->get();
+        $stockProducts = Product::withSum('purses', 'quantity')->withSum('cookedProducts', 'quantity')->where('dish_type', 'ready')->get();
         $data['products'] = $stockProducts;
         return view('user.baker.materials.stock-status', $data);
     }

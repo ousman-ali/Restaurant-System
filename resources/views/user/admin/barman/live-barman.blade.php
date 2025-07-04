@@ -117,9 +117,9 @@
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
-                                        text: dish.kitchen ? dish.kitchen.name : "Admin did not response yet"
+                                        text: dish.status == 0 ? "Waiting for Admin Response" : "Admin"
                                     }).append(
-                                        $("<span>", {class: "pull-right", text: dish.served_by.name})
+                                        $("<span>", {class: "pull-right", text: dish.order_by.name})
                                     )
                                 ),
                                 $("<div>", {class: "panel-body dish-details"}).append(
@@ -153,8 +153,8 @@
                                             hour12: true 
                                         })})
                                     ),
-                                    dish.purchase_time ? $("<p>", {text: "Purchase Time: "}).append(
-                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_time).toLocaleString("en-US", {
+                                    dish.purchased_at ? $("<p>", {text: "Purchase Time: "}).append(
+                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.purchased_at).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -175,8 +175,6 @@
                                             const orderId = dish?.id;
 
                                             $('#add-stock-modal-body').html('<p class="text-center">Loading...</p>');
-
-                                            // Send all order_details to the modal
                                             $.get('/get-ready-recipe-form-all/' + orderId, function (formHtml) {
                                                 $('#add-stock-modal-body').html(formHtml);
                                                 $.getScript('/app_js/PursesController.js', function () {

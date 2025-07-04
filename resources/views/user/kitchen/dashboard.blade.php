@@ -32,7 +32,7 @@
             console.log('ready.............');
 
             $.get("/kitchen-orders", function (data) {
-                console.log(data);
+                console.log('kitchen data', data);
                 orders = data;
                 $("#renderHtmlHear").empty();
                 $(this).renderHTML(orders);
@@ -54,31 +54,53 @@
                                     )
                                 ),
                                 
-                                $("<div>", {class: "panel-body dish-details"}).append(
-                                    $("<ul>", {class: 'list-group'}).append(
-                                        $.map(dish.order_details, function (index, dishDetails) {
-                                            return $("<li>", {
-                                                class: "list-group-item",
-                                                text: dish.order_details[dishDetails].dish?.dish
-                                            }).append(
-                                                $("<span>", {
-                                                    class: "badge badge-success",
-                                                    text: dish.order_details[dishDetails].dish_type?.dish_type
-                                                }),
-                                                $("<span>", {
+                                $("<div>", { class: "panel-body dish-details" }).append(
+                                    $("<ul>", { class: 'list-group' }).append(
+                                        $.map(dish.order_details, function (orderDetail, index) {
+                                            const dishName = orderDetail.dish?.dish ?? 'Unknown Dish';
+                                            const dishType = orderDetail.dish_type?.dish_type;
+                                            const addtionalNote = orderDetail.additional_note ?? '';
+
+                                            const $li = $("<li>", { class: "list-group-item" });
+
+                                            // Add dish name
+                                            $li.append($("<span>").text(dishName));
+
+                                            // Add dish type badge
+                                            if (dishType) {
+                                                $li.append($("<span>", {
+                                                    class: "badge badge-success ml-2",
+                                                    text: dishType,
+                                                }));
+                                            }
+
+                                            // Add quantity badge
+                                            $li.append($("<span>", {
+                                                class: "badge badge-primary ml-2",
+                                                text: "Qty: " + orderDetail.quantity,
+                                            }));
+
+                                            // Add table badge
+                                            if (dish.table && dish.table.table_no) {
+                                                $li.append($("<span>", {
                                                     class: "badge badge-primary ml-2",
-                                                    text: "Qty: " + dish.order_details[dishDetails].quantity
-                                                }),
-                                                dish.table && dish.table.table_no
-                                                    ? $("<span>", {
-                                                        class: "badge badge-primary ml-2",
-                                                        text: "Table: " + dish.table.table_no
-                                                    })
-                                                    : ''
-                                            )
+                                                    text: "Table: " + dish.table.table_no,
+                                                }));
+                                            }
+
+                                            // Add additional note (underneath)
+                                            if (addtionalNote) {
+                                                $li.append($("<div>", {
+                                                    class: "text-muted mt-1 small",
+                                                    text: "Note: " + addtionalNote,
+                                                }));
+                                            }
+
+                                            return $li;
                                         })
                                     )
                                 ),
+
                                 $("<div>", {class: "panel-body order-info"}).append(
                                     $("<p>", {text: "Order Time: "}).append(
                                         $("<span>", {class: "badge badge-info", text: new Date(dish.created_at).toLocaleString("en-US", {
@@ -131,12 +153,16 @@
                                 ),
                                 (dish.status == 0) ?
                                     $("<button>", {
-                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                        "data-style": "expand-right",
+                                        "data-spinner-color": "#fff",
                                         text: "Accept Order",
                                         onClick: "$(this).letsCook(" + dish.id + ")"
                                     })
                                     : $("<button>", {
-                                    class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                    class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                    "data-style": "expand-right",
+                                    "data-spinner-color": "#fff",
                                     text: "Click To Complete",
                                     onClick: "$(this).completeCooking(" + dish.id + ")"
                                 })
@@ -147,19 +173,25 @@
             }
 
             $.fn.letsCook = function (id) {
+                const laddaBtn = Ladda.create(this[0]); // FIX: use [0] to get DOM element
+                laddaBtn.start();
                 console.log("Let's Cook Clicked " + id)
                 $.get("/kitchen-start-cooking/" + id, function (data) {
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(data);
                 });
+                setTimeout(() => laddaBtn.stop(), 2000);
             }
 
             $.fn.completeCooking = function (id) {
+                const laddaBtn = Ladda.create(this[0]); // FIX: use [0] to get DOM element
+                laddaBtn.start();
                 console.log("Compleate Cooking " + id)
                 $.get("/kitchen-complete-cooking/" + id, function (data) {
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(data);
                 });
+                setTimeout(() => laddaBtn.stop(), 2000);
             };
 
 

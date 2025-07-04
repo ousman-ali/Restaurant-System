@@ -86,14 +86,14 @@
                     <label class="col-md-2 control-label" for="example-email">Unit need to cook :</label>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input type="number" name="unit" class="form-control" id="unit_input" step="0.01" required>
+                            <input type="number" name="unit" class="form-control" id="unit_input" step="any" required>
                             <span class="input-group-addon" id="unit">.00</span>
                         </div>
                     </div>
                     <label class="col-md-2 control-label" for="example-email">Child Unit need to cook
                         :</label>
                     <div class="col-md-3 input-group">
-                        <input type="number" name="child_unit" class="form-control" id="child_unit_input" step="0.01"
+                        <input type="number" name="child_unit" class="form-control" id="child_unit_input" step="any"
                                required>
                         <span class="input-group-addon" id="childUnit">.00</span>
                     </div>

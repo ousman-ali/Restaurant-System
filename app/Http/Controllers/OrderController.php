@@ -8,6 +8,8 @@ use App\Events\OrderServed;
 use App\Events\OrderSubmit;
 use App\Events\OrderUpdate;
 use App\Events\StartCooking;
+use App\Events\StartInhouseCooking;
+use App\Events\CompleteInhouseCooking;
 use App\Http\Requests\OrderRequest;
 use App\Models\OrderDetails;
 use App\Models\CookedProduct;
@@ -24,6 +26,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
+
+use App\Models\InhouseOrder;
+use App\Models\SupplierOrder;
 class OrderController extends Controller
 {
     /**
@@ -97,7 +102,7 @@ class OrderController extends Controller
             $order->discount = $request->discount_amount;
             $order->payment = $request->payment;
             $order->vat = $request->vat;
-            $order->is_ready = false;
+            $order->bank_id = $request->bank_id;
             $order->change_amount = $request->change_amount;
             $order->save();
             foreach ($request->items as $item) {
@@ -115,7 +120,8 @@ class OrderController extends Controller
                 $orderDetail->quantity = $item['quantity'];
                 $orderDetail->net_price = $item['ready_dish_id'] ? $item['net_price'] : $dishType->price;
                 $orderDetail->gross_price = $item['ready_dish_id'] ? $item['quantity'] *$item['net_price'] : $item['quantity'] * $dishType->price;
-
+                $orderDetail->from_ready = $item['from_ready'];
+                $orderDetail->additional_note = $item['additional_note'];
                 $readyDish = ReadyDish::find($item['ready_dish_id']);
 
                 if ($readyDish && $readyDish->source_type == 'supplier') {
@@ -276,6 +282,7 @@ public function updateOrder(OrderRequest $request, $id)
         $order->payment = $request->payment;
         $order->vat = $request->vat;
         $order->change_amount = $request->change_amount;
+        $order->bank_id = $request->bank_id;
         $order->save();
 
         // 🧾 STEP 4: Save new items & manage stock
@@ -288,7 +295,8 @@ public function updateOrder(OrderRequest $request, $id)
             $orderDetail->ready_dish_id = $item['ready_dish_id'] ?? null;
             $orderDetail->dish_type_id = $item['dish_type_id'];
             $orderDetail->quantity = $item['quantity'];
-
+            $orderDetail->from_ready = $item['from_ready'];
+            $orderDetail->additional_note = $item['additional_note'];
             if (!empty($item['dish_id']) && $dishType) {
                 $orderDetail->net_price = $dishType->price;
                 $orderDetail->gross_price = $item['quantity'] * $dishType->price;
@@ -369,6 +377,20 @@ public function updateOrder(OrderRequest $request, $id)
         ]);
     }
 
+
+    // app/Http/Controllers/OrderController.php
+public function printMultipleOrders(Request $request)
+{
+    $ids = explode(',', $request->order_ids);
+    $orders = Order::with(['servedBy', 'orderPrice.dish', 'orderPrice.dishType', 'orderPrice.readyDish'])
+                   ->whereIn('id', $ids)
+                   ->get();
+
+    return view('user.admin.order.print-multiple-orders', compact('orders'));
+}
+
+
+
     /**
      * Mark order (if order marked, no one can edit/delete this order)
      * @param $id
@@ -384,6 +406,13 @@ public function updateOrder(OrderRequest $request, $id)
 
     }
 
+    public function payOrder(Request $request, $id){
+        $order = Order::find($id);
+        $order->payment += $request->amount;
+        $order->save();
+        return response()->json('Ok', 200);
+    }
+
     /**
      * Delete order
      * @param $id
@@ -391,16 +420,7 @@ public function updateOrder(OrderRequest $request, $id)
      */
   
 
-    // public function deleteOrder(Request $request)
-    //     {
-    //         $order = Order::findOrFail($request->order_id);
-    //         OrderDetails::where('order_id', $order->id)->delete();
-    //         CookedProduct::where('order_id', $order->id)->delete();
-    //         broadcast(new OrderCancel('orderCancel', $order))->toOthers();
-    //         $order->delete();
-    //         Session::flash('delete_success', 'The order has been deleted successfully');
-    //         return back();
-    //     }
+  
 
     public function deleteOrder(Request $request)
         {
@@ -477,40 +497,46 @@ public function updateOrder(OrderRequest $request, $id)
                 ->orWhere('kitchen_id', auth()->user()->id);
         })
         ->where('status', '!=', 2)
-        ->where('is_ready', false)
-        ->whereHas('orderDetails', function ($q) {
-            $q->whereNotNull('dish_id'); 
+        ->where('status', '!=', 3)
+        ->whereDoesntHave('orderDetails', function ($q) {
+            $q->where(function ($inner) {
+                $inner->where('from_ready', true)
+                    ->orWhereHas('dish', function ($dishQuery) {
+                        $dishQuery->where('order_to', '!=', 'kitchen');
+                    });
+            });
         })
-        ->with(['orderDetails', 'servedBy'])
-        ->with('table')
+        ->with([
+            'orderDetails' => function ($q) {
+                $q->where('from_ready', false)
+                ->whereHas('dish', function ($dishQuery) {
+                    $dishQuery->where('order_to', 'kitchen');
+                })
+                ->with('dish');
+            },
+            'servedBy',
+            'table',
+        ])
         ->orderBy('id', 'desc')
         ->get();
+
         return response()->json($orders);
     }
 
     public function bakerOrderToJSON()
         {
-            $orders = Order::where(function ($query) {
-                    $query->where('baker_id', 0)
+            
+            $orders = InhouseOrder::where(function ($query) {
+                $query->where('baker_id', 0)
                         ->orWhere('baker_id', auth()->user()->id);
                 })
                 ->where('status', '!=', 2)
                 ->where('status', '!=', 3)
-                ->where('is_ready', true)
-                ->whereHas('orderDetails.readyDish', fn($q) => 
-                    $q->where('source_type', 'inhouse')
-                )
-                // eager-load only the in-house orderDetails
                 ->with([
-                    'orderDetails' => function($q) {
-                        $q->whereHas('readyDish', fn($q2) =>
-                            $q2->where('source_type', 'inhouse')
-                        );
-                    },
                     'orderDetails.readyDish.unit',
-                    'servedBy'
+                    'orderBy'
                 ])
-                ->orderBy('id', 'desc')
+                ->latest()
                 ->get();
             return response()->json($orders);
         }
@@ -546,14 +572,30 @@ public function updateOrder(OrderRequest $request, $id)
             $query->where('kitchen_id', 0)
                 ->orWhere('kitchen_id', auth()->user()->id);
         })
+        ->where('status', '!=', 3)
         ->where('status', '!=', 2)
-        ->where('is_ready', false)
-        ->whereHas('orderDetails', function ($q) {
-            $q->whereNotNull('dish_id'); 
+        ->whereDoesntHave('orderDetails', function ($q) {
+            $q->where(function ($inner) {
+                $inner->where('from_ready', true)
+                    ->orWhereHas('dish', function ($dishQuery) {
+                        $dishQuery->where('order_to', '!=', 'kitchen');
+                    });
+            });
         })
-        ->with(['orderDetails', 'servedBy'])
+        ->with([
+            'orderDetails' => function ($q) {
+                $q->where('from_ready', false)
+                ->whereHas('dish', function ($dishQuery) {
+                    $dishQuery->where('order_to', 'kitchen');
+                })
+                ->with('dish');
+            },
+            'servedBy',
+            'table',
+        ])
         ->orderBy('id', 'desc')
         ->get();
+
         try {
             broadcast(new StartCooking($order))->toOthers();
         } catch (\Exception $exception) {
@@ -565,13 +607,13 @@ public function updateOrder(OrderRequest $request, $id)
 
     public function bakerStartCooking($id)
     {
-        $order = Order::findOrfail($id);
+        $order = InhouseOrder::findOrfail($id);
         foreach($order->orderDetails as $orderD){
             $ready_dish_id = $orderD->ready_dish_id;
-            $ready_dish =ReadyDish::find($ready_dish_id);
+            $ready_dish = ReadyDish::find($ready_dish_id);
             foreach ($ready_dish->dishRecipes as $recipe) {
                 $cookedProduct = new CookedProduct();
-                $cookedProduct->order_id = $order->id;
+                $cookedProduct->inhouse_order_id = $order->id;
                 $cookedProduct->product_id = $recipe->product_id;
                 $cookedProduct->quantity = $recipe->unit_needed * $orderD->quantity;
                 $cookedProduct->save();
@@ -580,43 +622,18 @@ public function updateOrder(OrderRequest $request, $id)
         if ($order->status == 0) {
             $order->status = 1;
             $order->baker_id = auth()->user()->id;
-            $order->cook_start_time = now();
+            $order->cook_start_at = now();
             $order->save();
         }
-        // $orders = Order::where(function ($query) {
-        //         $query->where('baker_id', 0)
-        //             ->orWhere('baker_id', auth()->user()->id);
-        //     })
-        //     ->where('status', '!=', 2)
-        //     ->where('status', '!=', 3)
-        //     ->where('is_ready', true)
-        //     ->with('orderDetails.readyDish')
-        //     ->with('servedBy')
-        //     ->orderBy('id', 'desc')
-        //     ->get();
-
-        $orders = Order::where('status', '!=', 2)
+        
+        $orders = InhouseOrder::where('status', '!=', 2)
             ->where('status', '!=', 3)
-            ->with('orderDetails.readyDish')
-            ->with('servedBy')
-            ->where('is_ready', true)
-            ->whereHas('orderDetails.readyDish', fn($q) => 
-        $q->where('source_type', 'inhouse')
-            )
-            // eager-load only the in-house orderDetails
-            ->with([
-                'orderDetails' => function($q) {
-                    $q->whereHas('readyDish', fn($q2) =>
-                        $q2->where('source_type', 'inhouse')
-                    );
-                },
-                'orderDetails.readyDish',
-                'servedBy'
-            ])
-            ->orderBy('id', 'desc')
+            ->with('orderDetails.readyDish.unit')
+            ->with('orderBy')
+            ->latest()
             ->get();
         try {
-            broadcast(new StartCooking($order))->toOthers();
+            broadcast(new StartInhouseCooking($order))->toOthers();
         } catch (\Exception $exception) {
             Log::error("Broadcasting failed: " . $exception->getMessage());
         }
@@ -640,13 +657,29 @@ public function updateOrder(OrderRequest $request, $id)
                 ->orWhere('kitchen_id', auth()->user()->id);
         })
         ->where('status', '!=', 2)
-        ->where('is_ready', false)
-        ->whereHas('orderDetails', function ($q) {
-            $q->whereNotNull('dish_id'); 
+        ->where('status', '!=', 3)
+        ->whereDoesntHave('orderDetails', function ($q) {
+            $q->where(function ($inner) {
+                $inner->where('from_ready', true)
+                    ->orWhereHas('dish', function ($dishQuery) {
+                        $dishQuery->where('order_to', '!=', 'kitchen');
+                    });
+            });
         })
-        ->with(['orderDetails', 'servedBy'])
+        ->with([
+            'orderDetails' => function ($q) {
+                $q->where('from_ready', false)
+                ->whereHas('dish', function ($dishQuery) {
+                    $dishQuery->where('order_to', 'kitchen');
+                })
+                ->with('dish');
+            },
+            'servedBy',
+            'table',
+        ])
         ->orderBy('id', 'desc')
         ->get();
+
         try {
             broadcast(new CompleteCooking($order))->toOthers();
         } catch (\Exception $exception) {
@@ -658,56 +691,29 @@ public function updateOrder(OrderRequest $request, $id)
     public function bakerCompleteCooking($id)
     {
         
-        $order = Order::with('orderDetails.readyDish')->findOrFail($id);
-        
+        $order = InhouseOrder::with('orderDetails.readyDish')->findOrFail($id);
             foreach($order->orderDetails as $o){
-               if($o->readyDish->source_type == 'inhouse'){
                     $preparedDish = new ProducedReadyDish();
                     $preparedDish->ready_dish_id = $o->ready_dish_id;
                     $preparedDish->order_detail_id =$o->id;
                     $preparedDish->pending_quantity = $o->quantity;
                     $preparedDish->user_id = auth()->user()->id;
                     $preparedDish->save();
-               }
-            }
-        $order->status = 2;
-        $order->cook_complete_time = now();
-        $order->save();
-        // $orders = Order::where(function ($query) {
-        //         $query->where('baker_id', 0)
-        //             ->orWhere('baker_id', auth()->user()->id);
-        //     })
-        //     ->where('status', '!=', 2)
-        //     ->where('status', '!=', 3)
-        //     ->where('is_ready', true)
-        //     ->with('orderDetails.readyDish')
-        //     ->with('servedBy')
-        //     ->orderBy('id', 'desc')
-        //     ->get();
+                }
+            $order->status = 2;
+            $order->cook_complete_at = now();
+            $order->save();
+        
 
-        $orders = Order::where('status', '!=', 2)
+        $orders = InhouseOrder::where('status', '!=', 2)
             ->where('status', '!=', 3)
             ->with('orderDetails.readyDish')
-            ->with('servedBy')
-            ->where('is_ready', true)
-            ->whereHas('orderDetails.readyDish', fn($q) => 
-        $q->where('source_type', 'inhouse')
-            )
-            // eager-load only the in-house orderDetails
-            ->with([
-                'orderDetails' => function($q) {
-                    $q->whereHas('readyDish', fn($q2) =>
-                        $q2->where('source_type', 'inhouse')
-                    );
-                },
-                'orderDetails.readyDish',
-                'servedBy'
-            ])
-            ->orderBy('id', 'desc')
+            ->with('orderBy')
+            ->latest()
             ->get();
 
         try {
-            broadcast(new CompleteCooking($order))->toOthers();
+            broadcast(new CompleteInhouseCooking($order))->toOthers();
         } catch (\Exception $exception) {
             Log::error("Broadcasting failed: " . $exception->getMessage());
         }

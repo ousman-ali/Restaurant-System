@@ -32,6 +32,7 @@
                 <th>Product Image</th>
                 <th>Product Name</th>
                 <th>Stock</th>
+                <th>Minimum Stock Threshold</th>
             </tr>
             </thead>
             <?php $count = 1; ?>
@@ -43,7 +44,20 @@
                         <img src="/{{ $product->thumbnail }}" alt="" class="img-responsive" width="100px">
                     </td>
                     <td>{{$product->product_name}}</td>
-                    <td>{{$product->purses_sum_quantity ?? 0}}</td>
+                    @php
+                        $purses = $product->purses_sum_quantity ?? 0;
+                        $cooked = $product->cooked_products_sum_quantity ?? 0;
+                        $availableStock = $purses - $cooked;
+                    @endphp
+                    <td>
+                        @if ($availableStock == 0)
+                            0
+                        @else
+                            {{ number_format($availableStock) }} {{ $product?->unit?->unit }}
+                            ({{ number_format($availableStock * ($product?->unit?->convert_rate ?? 0)) }} {{ $product?->unit?->child_unit }})
+                        @endif
+                    </td>
+                    <td>{{$product->minimum_stock_threshold ?? 0}}</td>
                 </tr>
             @endforeach
             </tbody>

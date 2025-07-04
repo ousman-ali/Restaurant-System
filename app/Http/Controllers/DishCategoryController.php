@@ -53,6 +53,7 @@ class DishCategoryController extends Controller
     public function deleteDishType(Request $request)
     {
         $dishType = DishCategory::findOrFail($request->dish_type_id);
+       
         $dish_type_on_order = OrderDetails::where('dish_type_id', $request->dish_type_id)->first();
         
         if (!$dish_type_on_order) {

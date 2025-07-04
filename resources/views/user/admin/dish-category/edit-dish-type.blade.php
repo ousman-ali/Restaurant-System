@@ -59,7 +59,7 @@
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-8">
                     <button type="submit" class="btn btn-primary waves-effect waves-light">
-                        Save Unit
+                        Save Category
                     </button>
                 </div>
             </div>

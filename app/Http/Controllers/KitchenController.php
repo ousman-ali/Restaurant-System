@@ -70,7 +70,6 @@ class KitchenController extends Controller
             ->with('servedBy')
             ->with('kitchen')
             ->with('table')
-            ->where('is_ready', false)
             ->orderBy('id','desc')
             ->get();
         return response()->json($orders);
@@ -140,13 +139,13 @@ class KitchenController extends Controller
 
     public function allStock()
     {
-        $stockProducts = Product::withSum('purses', 'quantity')->where('dish_type', 'normal')->get();
+        $stockProducts = Product::withSum('purses', 'quantity')->withSum('cookedProducts', 'quantity')->where('dish_type', 'normal')->latest()->get();
         $data['products'] = $stockProducts;
         return view('user.kitchen.materials.stock-status', $data);
     }
 
     public function lowStock(){
-        $products = Product::withSum('purses', 'quantity')->where('dish_type', 'normal')->get();
+        $products = Product::withSum('purses', 'quantity')->where('dish_type', 'normal')->latest()->get();
         $lowStockProducts = $products->filter(function ($product) {
             $stock = $product->purses_sum_quantity ?? 0;
             return $stock <= $product->minimum_stock_threshold;
