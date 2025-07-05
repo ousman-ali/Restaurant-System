@@ -110,11 +110,11 @@ class BakerController extends Controller
         $orders = SupplierOrder::where('status', '!=', 1)
             ->where('status', '!=', 2)
             ->with('orderDetails.readyDish')
+            ->with('orderDetails.unit')
             ->with('orderBy')
             ->with('admin')
             ->latest()
             ->get();
-            
         return response()->json($orders);
     }
 
@@ -186,7 +186,11 @@ class BakerController extends Controller
             $order->purchased_at = now();
             $order->save();
 
-            broadcast(new SupplierOrderPurchased("success", $order))->toOthers();
+            try {
+                broadcast(new SupplierOrderPurchased("success", $order))->toOthers();
+            } catch (\Exception $exception) {
+                Log::error("Broadcasting failed: " . $exception->getMessage());
+            }
 
             // Handle payment if any
             if ($request->filled('payment') && $request->payment > 0) {
@@ -232,12 +236,14 @@ public function getRecipeFormAll($orderId)
     }
 
     public function lowStock(){
-        $products = Product::withSum('purses', 'quantity')->where('dish_type', 'ready')->get();
+        $products = Product::withSum('purses', 'quantity')->withSum('cookedProducts', 'quantity')->where('dish_type', 'ready')->get();
         $lowStockProducts = $products->filter(function ($product) {
-            $stock = $product->purses_sum_quantity ?? 0;
-            return $stock <= $product->minimum_stock_threshold;
+        $purchased = $product->purses_sum_quantity ?? 0;
+        $used = $product->cooked_products_sum_quantity ?? 0;
+        $stock = $purchased - $used;
+        return $stock <= $product->minimum_stock_threshold;
         })->map(function ($product) {
-            $product->stock = $product->purses_sum_quantity ?? 0;
+            $product->stock = ($product->purses_sum_quantity ?? 0) - ($product->cooked_products_sum_quantity ?? 0);
             return $product;
         });
         $data['products'] = $lowStockProducts;

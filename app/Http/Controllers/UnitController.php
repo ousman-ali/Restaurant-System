@@ -109,4 +109,9 @@ class UnitController extends Controller
             return response()->json('Ok', 200);
         }
     }
+
+    public function getUnits(){
+        $units = Unit::where('status', 1)->get();
+        return response()->json($units);
+    }
 }

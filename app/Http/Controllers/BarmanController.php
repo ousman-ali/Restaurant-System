@@ -5,23 +5,41 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MaterialRequest;
 use App\Models\ReadyDish;
+use App\Models\Dish;
+use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 class BarmanController extends Controller
 {
         public function allStock()
     {
-        $stockProducts = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->with('unit')->get();
-        $data['products'] = $stockProducts;
+        $dishes = Dish::where('order_to', 'barman')->with('dishRecipes.product')->get();
+        $productIds = $dishes->flatMap(function ($dish) {
+            return $dish->dishRecipes->pluck('product.id');
+        })->unique()->values();
+        $recipeProducts = Product::whereIn('id', $productIds)
+            ->withSum('purses', 'quantity')
+            ->withSum('cookedProducts', 'quantity')
+            ->get();
+        $data['products'] = $recipeProducts;
         return view('user.barman.materials.stock-status', $data);
     }
 
     public function lowStock(){
-        $products = ReadyDish::where('source_type', 'supplier')->withSum('purchasedBatches', 'ready_quantity')->with('unit')->get();
+        $dishes = Dish::where('order_to', 'barman')->with('dishRecipes.product')->get();
+        $productIds = $dishes->flatMap(function ($dish) {
+            return $dish->dishRecipes->pluck('product.id');
+        })->unique()->values();
+        $products = Product::whereIn('id', $productIds)
+            ->withSum('purses', 'quantity')
+            ->withSum('cookedProducts', 'quantity')
+            ->get();
         $lowStockProducts = $products->filter(function ($product) {
-            $stock = $product->purchased_batches_sum_ready_quantity ?? 0;
+            $purchased = $product->purses_sum_quantity ?? 0;
+            $used = $product->cooked_products_sum_quantity ?? 0;
+            $stock = $purchased - $used;
             return $stock <= $product->minimum_stock_threshold;
         })->map(function ($product) {
-            $product->stock = $product->purchased_batches_sum_ready_quantity ?? 0;
+            $product->stock = ($product->purses_sum_quantity ?? 0) - ($product->cooked_products_sum_quantity ?? 0);
             return $product;
         });
         $data['products'] = $lowStockProducts;

@@ -31,7 +31,7 @@ class RecipeController extends Controller
     public function addRecipe($dish_id)
     {
         $dish = Dish::findOrFail($dish_id);
-        $products = Product::orderBy('product_name', 'desc')->get();
+        $products = Product::where('dish_type', 'normal')->orderBy('product_name', 'desc')->get();
         return view('user.admin.dish.dish-recipe.add-dish-recipe', [
             'dish' => $dish,
             'products' => $products

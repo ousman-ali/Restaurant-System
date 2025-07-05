@@ -43,9 +43,9 @@
                 <tr>
                     <td>{{$count++}} .</td>
                     <td>
-                        <img src="/{{ $product->readyDish->thumbnail }}" alt="" class="img-responsive" width="100px">
+                        <img src="/{{ $product->product->thumbnail }}" alt="" class="img-responsive" width="100px">
                     </td>
-                    <td>{{$product->readyDish->name}}</td>
+                    <td>{{$product->product->product_name}}</td>
                     <td>
                         {{ number_format($product->requested_quantity) }} {{ $product->product->unit->unit }}
                         ({{ number_format($product->requested_quantity * $product->product->unit->convert_rate) }} {{ $product->product->unit->child_unit }})
@@ -60,7 +60,7 @@
                                     data-toggle="modal"
                                     data-target="#requestModal"
                                     data-id="{{ $product->id }}"
-                                    data-name="{{ $product->readyDish->name }}"
+                                    data-name="{{ $product->product_name }}"
                                     data-product-id="{{ $product->product->id }}"
                                     data-requested-quantity="{{ $product->requested_quantity }}">
                                 Approve

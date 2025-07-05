@@ -47,7 +47,7 @@
                     <td>{{$oder->table?->name ?? '_'}}</td>
                     <td>{{$diff}}</td>
                     <td>
-                        {{$oder->orderPrice->sum('gross_price')}}
+                        {{$amount}}
 
                     </td>
                     <td>

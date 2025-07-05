@@ -22,56 +22,39 @@
                 {{--<th>#</th>--}}
                 <th>Order No</th>
                 <th>Ordered By</th>
-                <th>Status</th>
                 <th width="120px">Action</th>
             </tr>
             </thead>
             <?php $count = 1; ?>
             <tbody>
-            @foreach($orders as $oder)
+            @foreach($orders as $order)
                 <tr>
-                    {{--<td>{{$count++}}</td>--}}
-                    <td>{{$oder->order_no}}</td> 
-                    <td>{{$oder->orderBy->name}}</td>
-                    <td>{{$oder->status == 0 ? 'Due' : 'Paid' }}</td>
-                    
+                    <td>{{ $order->order_no }}</td>
+                    <td>{{ $order->orderBy->name }}</td>
                     <td>
-                            @if($oder->user_id ==0)
-                                <div class="btn-group">
-                                    <a href="{{url('/edit-barman-order/'.$oder->id)}}"
-                                       class="btn btn-success waves-effect waves-light">
-                                        <i class="fa fa-pencil"></i>
-                                    </a> 
-                                    <button type="button" onclick="printInvoice({{$oder->id}})"
-                                            href="{{url('/print-barman-order/'.$oder->id)}}"
-                                            class="btn btn-purple waves-effect waves-light">
-                                        <i class="fa fa-print"></i>
-                                    </button>
-                                    @if($oder->status == 0)
-                                        {{-- <a href="#" onclick="$(this).confirmDelete('/delete-order/'+{{$o->id}})"
-                                           class="btn btn-danger waves-effect waves-light">
-                                            <i class="fa fa-trash-o"></i>
-                                        </a> --}}
-
-                                        <form action="{{ route('order.delete')}}" method="post" class="deleteform">
-                                            @csrf
-                                            <input type="hidden" name="order_id" value="{{$oder->id}}">
-                                            <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
-                                                <i class="fa fa-trash-o"></i>
-                                            </button>
-                                        </form>
-
-                                    @endif
-                                </div>
-                            @else
-                                <a href="{{url('/print-order/'.$oder->id)}}"
-                                   class="btn btn-purple waves-effect waves-light">
-                                    <i class="fa fa-print"></i>
+                        <div class="btn-group">
+                            @if($order->status == 0)
+                                <a href="{{ url('/edit-barman-order/' . $order->order_type . '/' . $order->id) }}"
+                                class="btn btn-success waves-effect waves-light">
+                                    <i class="fa fa-pencil"></i>
                                 </a>
                             @endif
-                        </td>
+
+                            @if($order->status == 0)
+                                <form action="{{ route('order.delete') }}" method="post" class="deleteform">
+                                    @csrf
+                                    <input type="hidden" name="order_id" value="{{ $order->id }}">
+                                    <input type="hidden" name="order_type" value="{{ $order->order_type }}">
+                                    <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </td>
                 </tr>
             @endforeach
+
             </tbody>
         </table>
     </div>

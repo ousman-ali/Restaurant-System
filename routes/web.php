@@ -340,8 +340,8 @@ Route::middleware('active.user')->group(function () {
         Route::post('/delete-barman-inhouse.order', [ReadyDishOrderController::class, 'deleteInhouseOrder'])->name('order.inhouse.delete');
         Route::get('/all-barman-order', [ReadyDishOrderController::class, 'allOrder'])->name('all-barman.order');
         Route::get('/non-paid-barman-order', [ReadyDishOrderController::class, 'nonPaidOrder']);
-        Route::get('/get-barman-order-details/{id}', [ReadyDishOrderController::class, 'getOrderDetails']);
-        Route::get('/edit-barman-order/{id}', [ReadyDishOrderController::class, 'editOrder']);
+        Route::get('/get-barman-order-details/{type}/{id}', [ReadyDishOrderController::class, 'getOrderDetails']);
+        Route::get('/edit-barman-order/{type}/{id}', [ReadyDishOrderController::class, 'editOrder']);
         Route::post('/save-barman-order', [ReadyDishOrderController::class, 'saveOrder']);
         Route::put('/update-barman-order/{id}', [ReadyDishOrderController::class, 'updateOrder']);
         // barman Order
@@ -374,6 +374,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/tables', [TableController::class, 'getTables']);
         Route::get('/dishes', [DishController::class, 'getDishes']);
         Route::get('/banks', [DishController::class, 'getBanks']);
+        Route::get('/units', [UnitController::class, 'getUnits']);
         Route::get('/ready-dishes', [DishController::class, 'getReadyDishes']);
         Route::get('/ready-products', [DishController::class, 'getReadyProducts']);
         Route::get('/config', [SettingsController::class, 'getConfig']);

@@ -67,7 +67,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label" for="example-email">Address </label>
                                 <div class="col-md-8">
-                                    <textarea name="address" minlength="10" cols="20" rows="5" class="form-control" placeholder="Supplier Address" required></textarea>
+                                    <textarea name="address"  cols="20" rows="5" class="form-control" placeholder="Supplier Address" required></textarea>
 
                                 </div>
                             </div>

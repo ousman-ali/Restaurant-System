@@ -45,7 +45,7 @@
         $(document).ready(function () {
             $.fn.refreshList = function () {
                 $.get('/live-barman-admin-json', function (data) {
-//                console.log(data);
+               console.log('data', data);
                     orders = data;
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(data);
@@ -53,7 +53,7 @@
             };
 
             $.get('/live-barman-admin-json', function (data) {
-//                console.log(data);
+               console.log('details', data);
                 orders = data;
                 $("#renderHtmlHear").empty();
                 $(this).renderHTML(data);
@@ -74,6 +74,7 @@
             channel.bind('order-event', function (data) {
                 $.get("/live-barman-admin-json", function (data) {
                     orders = data;
+
                     $("#renderHtmlHear").empty();
                     $(this).renderHTML(data);
                 });
@@ -81,6 +82,15 @@
 
             var purseCompleted = pusher.subscribe('order-served');
             purseCompleted.bind('order-served-event',function (data) {
+                $.get("/live-barman-admin-json", function (data) {
+                    orders = data;
+                    $("#renderHtmlHear").empty();
+                    $(this).renderHTML(data);
+                });
+            });
+
+             var newOrderSubmit = pusher.subscribe('supplier-order-submit');
+            newOrderSubmit.bind('supplier-order-submit-event',function (data) {
                 $.get("/live-barman-admin-json", function (data) {
                     orders = data;
                     $("#renderHtmlHear").empty();
@@ -112,7 +122,7 @@
                     $("#renderHtmlHear").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
-                                style: "height: 400px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                                style: "height: 430px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
                             }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
@@ -131,7 +141,7 @@
                                             }).append(
                                                 $("<span>", {
                                                     class: "badge badge-primary ml-2",
-                                                    text: "Requested Stock: " + dish.order_details[dishDetails].quantity
+                                                    text: "Requested Stock: " + dish.order_details[dishDetails].quantity + ' '+ dish.order_details[dishDetails].unit?.unit
                                                 })
                                             );
                                         })

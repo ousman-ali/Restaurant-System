@@ -133,7 +133,7 @@ class ReadyDishController extends Controller
     public function addRecipe($dish_id)
     {
         $dish = ReadyDish::findOrFail($dish_id);
-        $products = Product::orderBy('product_name', 'desc')->get();
+        $products = Product::where('dish_type', 'ready')->orderBy('product_name', 'desc')->get();
         return view('user.admin.ready-dish.dish-recipe.add-dish-recipe', [
             'dish' => $dish,
             'products' => $products

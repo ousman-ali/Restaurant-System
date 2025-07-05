@@ -147,10 +147,12 @@ class KitchenController extends Controller
     public function lowStock(){
         $products = Product::withSum('purses', 'quantity')->where('dish_type', 'normal')->latest()->get();
         $lowStockProducts = $products->filter(function ($product) {
-            $stock = $product->purses_sum_quantity ?? 0;
+            $purchased = $product->purses_sum_quantity ?? 0;
+            $used = $product->cooked_products_sum_quantity ?? 0;
+            $stock = $purchased - $used;
             return $stock <= $product->minimum_stock_threshold;
         })->map(function ($product) {
-            $product->stock = $product->purses_sum_quantity ?? 0;
+            $product->stock = ($product->purses_sum_quantity ?? 0) - ($product->cooked_products_sum_quantity ?? 0);
             return $product;
         });
         $data['products'] = $lowStockProducts;

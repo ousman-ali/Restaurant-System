@@ -16,6 +16,7 @@ class OrderDetails extends Model
         'gross_price',
         'inhouse_order_id',
         'supplier_order_id',
+        'unit_id'
     ];
 
     protected $appends = ['ready_dish_name'];
@@ -40,9 +41,14 @@ class OrderDetails extends Model
     }
 
     public function supplierOrder()
-{
-    return $this->belongsTo(SupplierOrder::class);
-}
+    {
+        return $this->belongsTo(SupplierOrder::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 
 public function inhouseOrder()
 {

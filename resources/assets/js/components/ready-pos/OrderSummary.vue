@@ -43,8 +43,44 @@
                 <p>Your cart is empty</p>
                 <p style="font-size: 12px; margin-top: 8px;">Add items from the menu to get started</p>
             </div>
-
             <div class="cart-item"
+                v-for="(cart, index) in carts"
+                :key="index"
+                :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }"
+                style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+
+                <div class="cart-item-details" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div class="cart-item-name"><strong>{{ cart.name }}</strong></div>
+                </div>
+
+                <div class="cart-item-quantities" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label>Quantity:</label>
+                        <input type="number"
+                            step="any"
+                            class="form-control"
+                            v-model.number="cart.quantity">
+                    </div>
+
+                    <div style="flex: 1;">
+                        <label>Unit:</label>
+                        <select v-model="cart.unit_id" @change="updateCartUnit(cart)" class="form-control">
+                        <option disabled value="">Unit</option>
+                        <option v-for="unit in units" :key="unit.id" :value="unit.id">
+                            {{ unit.unit }}
+                        </option>
+                        </select>
+
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
+                </div>
+            </div>
+
+
+            <!-- <div class="cart-item"
                     v-for="(cart, index) in carts"
                     :key="index"
                     :class="{ 'cart-item-new': animatingItems[cart.cartItemId] }"
@@ -76,7 +112,7 @@
                     <div style="text-align: right;">
                         <button  class="remove-btn" @click="deleteProductFromCart(cart.cartItemId)">×</button>
                     </div>
-                </div>
+                </div> -->
 
         </div>
 
@@ -200,6 +236,7 @@ const {
     subTotal,
     taxAmount,
     finalTotal,
+    units,
     selectedTable,
     isOrderModalVisible,
     deleteProductFromCart,
@@ -211,6 +248,7 @@ const {
     saveOrderWithLoading,
     syncMainUnit,
     syncChildUnit,
+    updateCartUnit,
 } = useStore();
 
 const tableList = ref(false);

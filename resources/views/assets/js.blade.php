@@ -175,6 +175,108 @@
         }
     });
 
+    // inhouse start cooking
+    const bakerStartCooking = pusher.subscribe('start-inhouse-cooking');
+    bakerStartCooking.bind('kitchen-inhouse-event', function(data) {
+        if(window.userRole == data.sender_role){
+            return;
+        }
+        if (window.userRole != 5) {
+            console.log('🔕 Ignored: Not for barman');
+            return;
+        }
+
+        const message = `Order #${data.order_no} started cooking.`;
+        const time = data.updated_at
+            ? new Date(data.updated_at.replace(' ', 'T')).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+            : 'N/A';
+
+        try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+            audio.play().catch(error => {
+                console.error('🔇 Audio playback failed:', error);
+            });
+        } catch (e) {
+            console.error('❌ Error playing notification sound:', e);
+        }
+        const href = '/my-orders';
+        handleNotification(message, time, href);
+    });
+
+    const bakerCompleteCooking = pusher.subscribe('complete-inhouse-cooking');
+    bakerCompleteCooking.bind('complete-inhouse-cooking-event', function(data) {
+        if (window.userRole != 5) {
+            console.log('🔕 Ignored: Not for barman');
+            return;
+        }
+        if(window.userRole == data.sender_role){
+            return;
+        }
+
+        const message = `Order #${data.order_no} is ready for serving.`;
+        const time = data.updated_at
+            ? new Date(data.updated_at.replace(' ', 'T')).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+            : 'N/A';
+
+        try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+            audio.play().catch(error => {
+                console.error('🔇 Audio playback failed:', error);
+            });
+        } catch (e) {
+            console.error('❌ Error playing notification sound:', e);
+        }
+        const href = '/my-orders';
+
+        handleNotification(message, time, href);
+    });
+
+
+    const adminPurchased = pusher.subscribe('supplier-order-purchased');
+
+    adminPurchased.bind('supplier-order-purchased-event', function(data) {
+        console.log('✅ Event received from here:', data);
+    if(window.userRole == data.sender_role){
+                return;
+            }
+        if (![5].includes(window.userRole)) {
+            console.log('🔕 Ignored: Not for admin or manager');
+            return;
+        }
+        const message = `Order #${data.order_no} has been purchased.`;
+        const time = data.purchase_time
+            ? new Date(data.purchase_time.replace(' ', 'T')).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+            : 'N/A';
+
+        try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+            audio.play().catch(error => {
+                console.error('🔇 Audio playback failed:', error);
+            });
+        } catch (e) {
+            console.error('❌ Error playing notification sound:', e);
+        }
+        const href = '/live-barman';
+        handleNotification(message, time, href);
+    });
+
+
+
 
     // complete cooking
 
@@ -268,8 +370,21 @@
 
     newOrderChannel.bind('order-event', function(data) {
         const senderRole = data.sender_role;
+        const orderTo = data.order_to;
 
-        // Ignore if sender and current user share the same role
+        // 👇 Define role-based listening logic
+        const roleNotificationMap = {
+            4: 'kitchen',  // kitchen
+            5: 'barman',   // barman
+        };
+
+        // 👇 Skip notification if not for current user
+        if (window.userRole != orderTo) {
+            console.log(`🔕 Ignored: Order not for this role (order_to: ${orderTo})`);
+            return;
+        }
+
+        // 👇 Skip self-notifications
         if (senderRole === window.userRole) {
             console.log('🔕 Ignored: Notification from same role.');
             return;
@@ -287,13 +402,14 @@
 
         let message = '';
         let time = 'N/A';
-
         let href = '';
+
         if(window.userRole == 1){
             href = '/all-order';
         }else if(window.userRole == 3){
             href = '/my-orders';
         }
+
         if (data.type === 'update') {
             message = `Order #${data.order_no} updated`;
             if (data.updated_at) {
@@ -318,6 +434,7 @@
 
         handleNotification(message, time, href);
     });
+
 
 
     // order served
@@ -432,7 +549,80 @@
         handleNotification(message, time, href);
     });
 
-    
+
+
+    // new inhouse order
+
+    const newInhouseOrder = pusher.subscribe('inhouse-order-submit');
+    newInhouseOrder.bind('inhouse-order-submit-event', function(data){
+        const senderRole = data.sender_role;
+        if (senderRole === window.userRole) {
+            console.log('🔕 Ignored: Notification from same role.');
+            return;
+        }
+        if(window.userRole == 6){
+            try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+                audio.play().catch(error => {
+                    console.error('🔇 Audio playback failed:', error);
+                });
+            } catch (e) {
+                console.error('❌ Error playing notification sound:', e);
+            }
+
+            let message = `New order ${data.order_no} received.`;
+            let time ='';
+            if(data.created_at){
+                const isoTime = data.created_at.replace(' ', 'T');
+                time = new Date(isoTime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+            href = '/home';
+            handleNotification(message, time, href);
+
+        }
+        
+    });
+
+
+    const newSupplierOrder = pusher.subscribe('supplier-order-submit');
+    newSupplierOrder.bind('supplier-order-submit-event', function(data){
+        const senderRole = data.sender_role;
+        if (senderRole === window.userRole) {
+            console.log('🔕 Ignored: Notification from same role.');
+            return;
+        }
+        if(window.userRole == 1){
+            try {
+            const audio = new Audio('{{ asset('sound/notification.mp3') }}');
+            audio.volume = 1.0;
+                audio.play().catch(error => {
+                    console.error('🔇 Audio playback failed:', error);
+                });
+            } catch (e) {
+                console.error('❌ Error playing notification sound:', e);
+            }
+
+            let message = `New order ${data.order_no} received.`;
+            let time ='';
+            if(data.created_at){
+                const isoTime = data.created_at.replace(' ', 'T');
+                time = new Date(isoTime).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+            href = '/live-barman';
+            handleNotification(message, time, href);
+
+        }
+        
+    });
 
     // delete popup
 $(document).on('click', '.deletebtn', function (e) {

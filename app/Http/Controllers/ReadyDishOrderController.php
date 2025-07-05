@@ -15,6 +15,8 @@ use App\Events\OrderServed;
 use App\Events\OrderSubmit;
 use App\Events\SupplierOrderPurchased;
 use App\Events\InhouseOrderServed;
+use App\Events\SupplierOrderSubmit;
+use App\Events\InhouseOrderSubmit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Events\OrderCancel;
@@ -59,87 +61,70 @@ class ReadyDishOrderController extends Controller
 
      public function myOrder()
         {
-            // $orders = Order::where('served_by', auth()->user()->id)->where('is_ready', true)->get();
-        $supplierOrders = \App\Models\SupplierOrder::where('order_by', auth()->user()->id)
-        ->get();
+         $supplierOrders = \App\Models\SupplierOrder::where('order_by', auth()->user()->id)
+            ->get()
+            ->map(function ($order) {
+                $order->order_type = 'supplier';
+                return $order;
+            });
 
-    // Get inhouse orders and map to the same format
-    $inhouseOrders = \App\Models\InhouseOrder::where('order_by', auth()->user()->id)
-        ->get();
+        $inhouseOrders = \App\Models\InhouseOrder::where('order_by', auth()->user()->id)
+            ->get()
+            ->map(function ($order) {
+                $order->order_type = 'inhouse';
+                return $order;
+            });
 
-    // Merge and sort by creation date (optional)
-    $orders = $supplierOrders->merge($inhouseOrders)->sortByDesc('created_at');
+        $orders = $supplierOrders->merge($inhouseOrders)->sortByDesc('created_at');
             return view('user.barman.order.my-order', [
                 'orders' => $orders
             ]);
         }
 
-    public function getOrderDetails($id)
-    {
-        $order = Order::with('orderDetails.readyDish.unit')->findOrFail($id);
-        return response()->json($order);
-    }
+        public function getOrderDetails($type, $id)
+        {
+            switch ($type) {
+                case 'inhouse':
+                    $order = \App\Models\InhouseOrder::with('orderDetails.readyDish.unit')->findOrFail($id);
+                    break;
 
-    public function editOrder($id)
+                case 'supplier':
+                    $order = \App\Models\SupplierOrder::with('orderDetails.readyDish.unit')->findOrFail($id);
+                    break;
+
+                default:
+                    return response()->json(['error' => 'Invalid order type'], 400);
+            }
+
+            return response()->json($order);
+        }
+
+
+    public function editOrder($type, $id)
     {
-        $order = Order::findOrFail($id);
-        $dishes = ReadyDish::all();
+        switch ($type) {
+            case 'supplier':
+                $order = \App\Models\SupplierOrder::findOrFail($id);
+                break;
+            case 'inhouse':
+                $order = \App\Models\InhouseOrder::findOrFail($id);
+                break;
+            default:
+                abort(404);
+        }
+
+        $dishes = ReadyDish::all(); // If shared among types
+
         return view('user.barman.order.edit-order', [
             'order' => $order,
-            'dishes' => $dishes
+            'dishes' => $dishes,
+            'type' => $type,
         ]);
     }
 
 
-    // public function saveOrder(OrderRequest $request)
-    // {
-    //     try {
-    //         DB::beginTransaction();
 
-    //         $lastOrder = Order::latest('id')->first();
-    //         $orderNo = $lastOrder ? $lastOrder->order_no + 1 : 1001;
-
-    //         $order = new Order();
-    //         $order->order_no = $orderNo;
-    //         $order->served_by = auth()->user()->id;;
-    //         $order->discount = $request->discount_amount;
-    //         $order->payment = $request->payment;
-    //         $order->vat = $request->vat;
-    //         $order->is_ready = true;
-    //         $order->change_amount = $request->change_amount;
-    //         $order->save();
-
-    //         foreach ($request->items as $item) {
-    //             $orderDetail = new OrderDetails();
-    //             $dish = ReadyDish::findOrFail($item['ready_dish_id']);
-    //             $orderDetail->order_id = $order->id;
-    //             $orderDetail->ready_dish_id = $item['ready_dish_id'];
-    //             $orderDetail->quantity = $item['quantity'];
-    //             $orderDetail->net_price = $item['net_price'];
-    //             $orderDetail->gross_price = $item['quantity'] * $item['net_price'];
-    //             if ($orderDetail->save()) {
-                    
-    //             } else {
-    //                 break;
-    //             }
-    //         }
-
-    //         DB::commit();
-
-    //         try {
-    //             broadcast(new OrderSubmit($order));
-    //         } catch (\Exception $exception) {
-    //             Log::error("Broadcasting failed: " . $exception->getMessage());
-    //         }
-
-    //         return response()->json($order, 200);
-
-    //     } catch (\Exception $exception) {
-    //         DB::rollBack();
-    //         throw $exception;
-    //     }
-    // }
-
+   
 
     public function saveOrder(Request $request)
     {
@@ -166,7 +151,13 @@ class ReadyDishOrderController extends Controller
                         'supplier_order_id' => $supplierOrder->id,
                         'ready_dish_id' => $item['ready_dish_id'],
                         'quantity' => $item['quantity'],
+                        'unit_id' => $item['unit_id'],
                     ]);
+                }
+                try {
+                    broadcast(new SupplierOrderSubmit($supplierOrder, 'new'));
+                } catch (\Exception $exception) {
+                    Log::error("Broadcasting failed: " . $exception->getMessage());
                 }
             }
             $inhouseOrder = null;
@@ -177,13 +168,19 @@ class ReadyDishOrderController extends Controller
                 $inhouseOrder->baker_id =0;
                 $inhouseOrder->status = 0;
                 $inhouseOrder->save();
-
                 foreach ($request->inhouse_items as $item) {
                     OrderDetails::create([
                         'inhouse_order_id' => $inhouseOrder->id,
                         'ready_dish_id' => $item['ready_dish_id'],
                         'quantity' => $item['quantity'],
+                        'unit_id' => $item['unit_id'],
                     ]);
+                }
+
+                try {
+                    broadcast(new InhouseOrderSubmit($inhouseOrder, 'new'));
+                } catch (\Exception $exception) {
+                    Log::error("Broadcasting failed: " . $exception->getMessage());
                 }
             }
 
@@ -203,62 +200,77 @@ class ReadyDishOrderController extends Controller
     }
 
 
-    public function updateOrder(OrderRequest $request, $id)
+    public function updateOrder(Request $request, $id)
     {
         try {
             DB::beginTransaction();
 
-            $order = Order::findOrFail($id);
-            OrderDetails::where('order_id', $order->id)->delete();
-            CookedProduct::where('order_id', $order->id)->delete();
+            $userId = auth()->user()->id;
 
-            $order->served_by = auth()->user()->id;;
-            $order->discount = $request->discount_amount;
-            $order->payment = $request->payment;
-            $order->vat = $request->vat;
-            $order->change_amount = $request->change_amount;
-            $order->save();
+            // Check which type of order we are updating
+            if (!empty($request->inhouse_items)) {
+                $order = InhouseOrder::findOrFail($id);
+                $order->order_by = $userId;
+                $order->save();
 
-            foreach ($request->items as $item) {
-                $orderDetail = new OrderDetails();
-                $dish = ReadyDish::findOrFail($item['ready_dish_id']);
-                $orderDetail->order_id = $order->id;
-                $orderDetail->ready_dish_id = $item['ready_dish_id'];
-                $orderDetail->quantity = $item['quantity'];
-                $orderDetail->net_price = $item['net_price'];
-                $orderDetail->gross_price = $item['quantity'] * $item['net_price'];
-                if ($orderDetail->save()) {
-                    // if($dish->source_type == 'inhouse'){
-                    //     foreach ($dishType->recipes as $recipe) {
-                    //     $cookedProduct = new CookedProduct();
-                    //     $cookedProduct->order_id = $order->id;
-                    //     $cookedProduct->product_id = $recipe->product_id;
-                    //     $cookedProduct->quantity = $recipe->unit_needed * $orderDetail->quantity;
-                    //     $cookedProduct->save();
-                    // }
-                    // }
-                    
-                } else {
-                    break;
+                // Delete existing details
+                OrderDetails::where('inhouse_order_id', $order->id)->delete();
+
+                foreach ($request->inhouse_items as $item) {
+                    OrderDetails::create([
+                        'inhouse_order_id' => $order->id,
+                        'ready_dish_id' => $item['ready_dish_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_id' => $item['unit_id'],
+                    ]);
                 }
+
+                try {
+                    broadcast(new InhouseOrderSubmit($order, 'update'));
+                } catch (\Exception $e) {
+                    Log::error("Inhouse broadcasting failed: " . $e->getMessage());
+                }
+
+            } elseif (!empty($request->supplier_items)) {
+                $order = SupplierOrder::findOrFail($id);
+                $order->order_by = $userId;
+                $order->save();
+
+                // Delete existing details
+                OrderDetails::where('supplier_order_id', $order->id)->delete();
+
+                foreach ($request->supplier_items as $item) {
+                    OrderDetails::create([
+                        'supplier_order_id' => $order->id,
+                        'ready_dish_id' => $item['ready_dish_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_id' => $item['unit_id'],
+                    ]);
+                }
+
+                try {
+                    broadcast(new SupplierOrderSubmit($order, 'update'));
+                } catch (\Exception $e) {
+                    Log::error("Supplier broadcasting failed: " . $e->getMessage());
+                }
+            } else {
+                return response()->json(['error' => 'No items to update'], 400);
             }
 
             DB::commit();
-
-            try {
-                // broadcast(new OrderSubmit($order, 'update'));
-            } catch (\Exception $exception) {
-                Log::error("Broadcasting failed: " . $exception->getMessage());
-            }
-
-            return response()->json($order, 200);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order updated successfully!',
+                'redirect' => route('my-barman.order')
+            ], 200);
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            throw $exception;
+            Log::error("Order update failed: " . $exception->getMessage());
+            return response()->json(['error' => 'Order could not be updated.'], 500);
         }
-
     }
+
 
      public function orderServed($id)
         { 
@@ -357,9 +369,22 @@ class ReadyDishOrderController extends Controller
         ]);
     }
 
-    public function deleteOrder(Request $request)
+  
+        public function deleteOrder(Request $request)
         {
-            $order = Order::findOrFail($request->order_id);
+            $type = $request->order_type;
+
+            switch ($type) {
+                case 'supplier':
+                    $order = \App\Models\SupplierOrder::findOrFail($request->order_id);
+                    break;
+                case 'inhouse':
+                    $order = \App\Models\InhouseOrder::findOrFail($request->order_id);
+                    break;
+                default:
+                    abort(404);
+            }
+
             OrderDetails::where('order_id', $order->id)->delete();
             CookedProduct::where('order_id', $order->id)->delete();
             broadcast(new OrderCancel('orderCancel', $order))->toOthers();

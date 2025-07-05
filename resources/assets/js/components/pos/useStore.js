@@ -151,6 +151,7 @@ const addReadyProductToCart = (product) => {
         });
         cartOrderToType.value = newType;
     }
+    console.log('type', cartOrderToType.value);
 };
 
 
@@ -246,6 +247,7 @@ const addProductToCart = (product, selectedVariant = null) => {
         });
         cartOrderToType.value = newType;
     }
+    console.log('type', cartOrderToType.value);
 };
 
 
@@ -287,6 +289,7 @@ const saveOrder = async (shouldPrint = false) => {
         change_amount: currentPaymentAmount.value ? (finalTotal.value - currentPaymentAmount.value) : 0,
         discount_amount: discountAmount.value ? discountAmount.value : 0,
         bank_id: selectedBank.value || null,
+        order_to: cartOrderToType.value,
         items: carts.value.map(item => ({
             dish_id: item.dish_id,
             ready_dish_id: item.ready_dish_id ?? null,

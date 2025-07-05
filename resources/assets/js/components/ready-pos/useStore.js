@@ -30,14 +30,15 @@ const carts = computed(() => [...supplierCarts.value, ...inhouseCarts.value]);
 const tables = ref([]);
 const products = ref([]);
 const productCategories = ref([]);
+const units = ref([]);
 const discountAmount = ref(0);
 const currentPaymentAmount = ref('');
 const updateOrder = ref(null);
 const selectedTable = ref(null);
 const searchString = ref('');
 const isOrderModalVisible = ref(false);
-const toastMessage = ref('');
-const isToastVisible = ref(false);
+const toastRMessage = ref('');
+const isToastRVissible = ref(false);
 
 // Computed properties
 const subTotal = computed(() => {
@@ -85,6 +86,15 @@ const fetchDishCategories = async () => {
     }
 }
 
+const fetchUnits = async () => {
+    try {
+        const response = await axios.get('/web-api/units');
+        units.value = response.data;
+    } catch (err) {
+        console.error('Error fetching product categories:', err);
+    }
+}
+
 const fetchConfig = async () => {
     try {
         const response = await axios.get('/web-api/config');
@@ -94,80 +104,64 @@ const fetchConfig = async () => {
     }
 };
 
+console.log('typeee', window.type);
+
 const fetchOrderById = async () => {
-    if (!window.editOrderId) {
-        return;
-    }
+    if (!window.editOrderId) return;
 
     try {
-        console.log('id', window.editOrderId);
-        const response = await axios.get(`/get-barman-order-details/${window.editOrderId}`);
+        console.log('type', window.type);
+        const response = await axios.get(`/get-barman-order-details/${window.type}/${window.editOrderId}`);
         console.log('response update cart', response.data);
+
         updateOrder.value = response.data;
-        
-        console.log('order details', response.data.order_details);
-        // Map order details to cart items
-        const order = response.data.order_details.map((item) => {
-            console.log('ready dish', item.ready_dish);
-            return {
+
+        // Clear both carts first
+        inhouseCarts.value = [];
+        supplierCarts.value = [];
+
+        const orderDetails = response.data.order_details;
+
+        orderDetails.forEach((item) => {
+            const readyDish = item.ready_dish;
+
+            if (!readyDish) return;
+
+            const cartItem = {
                 cartItemId: item.id,
-                productId: item.ready_dish_id,
-                name: item.ready_dish?.name,
+                productId: readyDish.id,
+                name: readyDish.name,
+                image: readyDish.thumbnail,
                 price: item.net_price,
                 quantity: item.quantity,
-                image: item.ready_dish?.thumbnail,
-                unit: item.ready_dish?.unit.unit,
-                child_unit: item.ready_dish?.unit.child_unit,
-                convert_rate: item.ready_dish?.unit.convert_rate,
-                child_quantity: item.quantity * item.ready_dish?.unit.convert_rate,
+                unit: readyDish.unit?.unit || '',
+                child_unit: readyDish.unit?.child_unit || '',
+                convert_rate: readyDish.unit?.convert_rate || 1,
+                child_quantity: item.quantity * (readyDish.unit?.convert_rate || 1),
+                source_type: readyDish.source_type || 'supplier', // This is crucial
             };
+
+            // Push to correct cart
+            if (cartItem.source_type === 'inhouse') {
+                inhouseCarts.value.push(cartItem);
+            } else {
+                supplierCarts.value.push(cartItem);
+            }
         });
 
-        carts.value = order;
-        console.log('carts', carts);
+        console.log('✅ inhouseCarts', inhouseCarts.value);
+        console.log('✅ supplierCarts', supplierCarts.value);
 
-        // Find and set the selected table
-        // if (response.data?.table_id && tables.value.length > 0) {
-        //     selectedTable.value = tables.value.find(el => el.id === response.data.table_id) || null;
-        // }
-
-        // Set discount amount
+        // If discount exists
         discountAmount.value = response.data.discount || 0;
     } catch (err) {
         console.error('Error fetching order details:', err);
     }
 };
 
+
 // Cart manipulation functions
-// const addProductToCart = (product) => {
-//     // If no specific variant is selected, use the first price option
-//     // const variant = selectedVariant || product.dish_prices[0];
 
-//     // Check if this dish variant is already in the cart
-//     const existingCartItemIndex = carts.value.findIndex(item =>
-//         item.productId === product.id
-//     );
-
-//     if (existingCartItemIndex !== -1) {
-//         // If the item exists, increase quantity
-//         carts.value[existingCartItemIndex].quantity += 1;
-//     } else {
-//         // If the item doesn't exist, add it to the cart
-//         carts.value.push({
-//             cartItemId: Date.now(), // Unique ID for the cart item
-//             productId: product.id,
-//             name: product.name,
-//             price: product.price,
-//             quantity: 1,
-//             image: product.thumbnail,
-//             unit: product.unit.unit,
-//             child_unit: product.unit.child_unit,
-//             convert_rate: product.unit.convert_rate,
-//         });
-//     }
-
-//     console.log('carts with unit', carts);
-// };
 
 const syncChildUnit = (cart) => {
     console.log('carts from sync child', carts);
@@ -180,61 +174,40 @@ const syncMainUnit = (cart) => {
 };
 
 const addProductToCart = (product) => {
-    const sourceType = product.source_type || 'supplier'; // default fallback
-
+    const sourceType = product.source_type || 'supplier'; 
     const targetCart = sourceType === 'inhouse' ? inhouseCarts : supplierCarts;
-
     const existingIndex = targetCart.value.findIndex(item => item.productId === product.id);
+    
 
     if (existingIndex !== -1) {
         const item = targetCart.value[existingIndex];
         item.quantity += 1;
-        item.child_quantity = item.quantity * item.convert_rate;
     } else {
         targetCart.value.push({
             cartItemId: Date.now(),
             productId: product.id,
             name: product.name,
             image: product.thumbnail,
-            unit: product.unit.unit,
-            child_unit: product.unit.child_unit,
-            convert_rate: product.unit.convert_rate,
+            unit_id: '',   
             quantity: 1,
-            child_quantity: 1 * product.unit.convert_rate,
             source_type: sourceType,
         });
     }
     console.log('supplierCarts:', supplierCarts.value);
     console.log('inhouseCarts:', inhouseCarts.value);
+
+};
+
+const updateCartUnit = (cart) => {
+    const selectedUnit = units.value.find(unit => unit.id === cart.unit_id);
+    if (!selectedUnit) return;
+
+    cart.unit_id = selectedUnit.id;
+     console.log('supplierCarts:', supplierCarts.value);
+    console.log('inhouseCarts:', inhouseCarts.value);
 };
 
 
-// const addProductToCart = (product) => {
-//     const existingCartItemIndex = carts.value.findIndex(item =>
-//         item.productId === product.id
-//     );
-
-//     if (existingCartItemIndex !== -1) {
-//         carts.value[existingCartItemIndex].quantity += 1;
-//         carts.value[existingCartItemIndex].child_quantity =
-//         carts.value[existingCartItemIndex].quantity * product.unit.convert_rate;
-//     } else {
-//         carts.value.push({
-//             cartItemId: Date.now(),
-//             productId: product.id,
-//             name: product.name,
-//             price: product.price,
-//             image: product.thumbnail,
-//             unit: product.unit.unit,
-//             child_unit: product.unit.child_unit,
-//             convert_rate: product.unit.convert_rate,
-//             quantity: 1,
-//             child_quantity: 1 * product.unit.convert_rate,
-//         });
-//     }
-
-//     console.log('carts with unit', carts);
-// };
 
 
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
@@ -251,14 +224,21 @@ const updateCartItemQuantity = (cartItemId, newQuantity) => {
 };
 
 const deleteProductFromCart = (cartItemId) => {
-    const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
-    if (index !== -1) {
-        carts.value.splice(index, 1);
+    const inhouseIndex = inhouseCarts.value.findIndex(item => item.cartItemId === cartItemId);
+    if (inhouseIndex !== -1) {
+        inhouseCarts.value.splice(inhouseIndex, 1);
+        return;
+    }
+    const supplierIndex = supplierCarts.value.findIndex(item => item.cartItemId === cartItemId);
+    if (supplierIndex !== -1) {
+        supplierCarts.value.splice(supplierIndex, 1);
     }
 };
 
+
 const clearCart = () => {
-    carts.value = [];
+    inhouseCarts.value = [];
+    supplierCarts.value = [];
     discountAmount.value = 0;
     currentPaymentAmount.value = '';
     selectedTable.value = null;
@@ -270,11 +250,13 @@ const saveOrder = async (shouldPrint = false) => {
         supplier_items: supplierCarts.value.map(item => ({
             ready_dish_id: item.productId,
             quantity: item.quantity,
+            unit_id: item.unit_id,
         })),
 
         inhouse_items: inhouseCarts.value.map(item => ({
             ready_dish_id: item.productId,
             quantity: item.quantity,
+            unit_id: item.unit_id,
         })),
 
     };
@@ -293,7 +275,7 @@ const saveOrder = async (shouldPrint = false) => {
 
         const { message, redirect } = response.data;
 
-        showToast(message || "Order saved successfully.");
+        showRToast(message || "Order saved successfully.");
         isOrderModalVisible.value = false;
 
         // Optional redirect
@@ -304,7 +286,7 @@ const saveOrder = async (shouldPrint = false) => {
         return response.data;
     } catch (err) {
         console.error('Error saving order:', err);
-        showToast("Error saving order. Please try again.");
+        showRToast("Error saving order. Please try again.");
         throw err;
     }
 };
@@ -317,7 +299,7 @@ const saveOrderWithLoading = async (event, shouldPrint = false) => {
   try {
     await saveOrder(shouldPrint);
   } catch (err) {
-    showToast("Failed to save order.");
+    showRToast("Failed to save order.");
   } finally {
     laddaBtn.stop();
   }
@@ -325,7 +307,7 @@ const saveOrderWithLoading = async (event, shouldPrint = false) => {
 
 const printInvoice = async (orderId) => {
     if (!orderId) {
-        showToast("Cannot print receipt: Order ID is missing", 3000);
+        showRToast("Cannot print receipt: Order ID is missing", 3000);
         return;
     }
 
@@ -337,7 +319,7 @@ const printInvoice = async (orderId) => {
         // Open a new window for printing
         const printWindow = window.open('', '', 'width=800,height=600,toolbar=0,menubar=0,location=0');
         if (!printWindow) {
-            showToast("Unable to open print window. Please check your pop-up settings.");
+            showRToast("Unable to open print window. Please check your pop-up settings.");
             return;
         }
 
@@ -362,17 +344,17 @@ const printInvoice = async (orderId) => {
         };
     } catch (error) {
         console.error('Error printing invoice:', error);
-        showToast("Error printing receipt. Please try again.");
+        showRToast("Error printing receipt. Please try again.");
     }
 };
 
-const showToast = (message, duration = 3000) => {
-    toastMessage.value = message;
-    isToastVisible.value = true;
+const showRToast = (message, duration = 3000) => {
+    toastRMessage.value = message;
+    isToastRVissible.value = true;
 
     // Auto-hide the toast after the specified duration
     setTimeout(() => {
-        isToastVisible.value = false;
+        isToastRVissible.value = false;
     }, duration);
 };
 
@@ -389,7 +371,8 @@ const initializeStore = async () => {
                 await fetchProducts(),
                 await fetchTables(),
                 await fetchConfig(),
-                await fetchDishCategories()
+                await fetchDishCategories(),
+                await fetchUnits(),
             ];
 
             await Promise.all(promises);
@@ -425,8 +408,9 @@ export default function useStore() {
         currentPaymentAmount,
         updateOrder,
         isOrderModalVisible,
-        toastMessage,
-        isToastVisible,
+        toastRMessage,
+        isToastRVissible,
+        units,
 
         // Computed
         subTotal,
@@ -441,14 +425,16 @@ export default function useStore() {
         saveOrder,
         saveOrderWithLoading,
         printInvoice,
-        showToast,
+        showRToast,
         syncChildUnit,
         syncMainUnit,
+        updateCartUnit,
 
         // Make these available for manual refresh if needed
         fetchProducts,
         fetchTables,
         fetchConfig,
-        fetchOrderById
+        fetchOrderById,
+        fetchUnits,
     };
 }

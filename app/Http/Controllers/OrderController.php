@@ -90,10 +90,9 @@ class OrderController extends Controller
         
         try {
             DB::beginTransaction();
-            
-
             $lastOrder = Order::latest('id')->first();
             $orderNo = $lastOrder ? $lastOrder->order_no + 1 : 1001;
+            $order_to = $request->order_to == 'kitchen' ? 4 : 5;
 
             $order = new Order();
             $order->order_no = $orderNo;
@@ -180,7 +179,7 @@ class OrderController extends Controller
             DB::commit();
 
             try {
-                broadcast(new OrderSubmit($order));
+                broadcast(new OrderSubmit($order, 'new', $order_to));
             } catch (\Exception $exception) {
                 Log::error("Broadcasting failed: " . $exception->getMessage());
             }
@@ -533,7 +532,8 @@ public function printMultipleOrders(Request $request)
                 ->where('status', '!=', 2)
                 ->where('status', '!=', 3)
                 ->with([
-                    'orderDetails.readyDish.unit',
+                    'orderDetails.readyDish',
+                    'orderDetails.unit',
                     'orderBy'
                 ])
                 ->latest()

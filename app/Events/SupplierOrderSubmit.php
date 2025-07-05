@@ -2,31 +2,31 @@
 
 namespace App\Events;
 
-use App\Models\Order;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-
-class OrderSubmit implements ShouldBroadcast
+use App\Models\SupplierOrder;
+class SupplierOrderSubmit implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $order;
     public $type;
-    public $order_to;
 
     /**
      * Create a new event instance.
      *
-     * @param Order $order
+     * @param SupplierOrder $order
      * @param string|null $type
      */
-    public function __construct(Order $order, $type = null, $order_to =null)
+    public function __construct(SupplierOrder $order, $type = null)
     {
         $this->order = $order;
         $this->type = $type;
-        $this->order_to = $order_to;
     }
 
     /**
@@ -36,12 +36,12 @@ class OrderSubmit implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return ['order'];
+        return ['supplier-order-submit'];
     }
 
     public function broadcastAs()
     {
-        return "order-event";
+        return "supplier-order-submit-event";
     }
 
     public function broadcastWith()
@@ -56,22 +56,9 @@ class OrderSubmit implements ShouldBroadcast
         return [ 
             'id'   =>    $this->order->id,
             'order_no'   =>    $this->order->order_no,
-            'status'   =>    $this->order->status,
-            'payment'   =>    $this->order->payment,
-            'table_id'   =>    $this->order->table_id,
-            'user_id'   =>    $this->order->user_id,
-            'vat'   =>    $this->order->vat,
-            'kitchen_id'   =>    $this->order->kitchen_id,
-            'change_amount'   =>    $this->order->change_ammount,
-            'created_at'   =>    $this->order->created_at,
-            'updated_at'   =>    $this->order->updated_at,
-            'order_details'   => $this->order->orderDetails,
-            'served_by'  => $this->order->servedBy,
             'sender_role' => auth()->user()->role,
             'type' => $this->type,
-            'order_to' => $this->order_to,
+            'created_at' => $this->order->created_at,
         ];
     }
-
-
 }

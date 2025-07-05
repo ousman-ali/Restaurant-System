@@ -1,18 +1,18 @@
 <template>
     <div
-        v-if="isToastVisible"
+        v-if="isToastRVissible"
         class="toast-notification"
-        :class="{ 'show': isToastVisible }"
+        :class="{ 'show': isToastRVissible }"
     >
-        {{ toastMessage }}
+        {{ toastRMessage }}
     </div>
 </template>
 
 <script setup>
 import useStore from './useStore';
 
-const {isToastVisible, toastMessage} = useStore();
-console.log('log from toast', isToastVisible, toastMessage);
+const {isToastRVissible, toastRMessage} = useStore();
+console.log('log from toast', isToastRVissible, toastRMessage);
 </script>
 
 <style scoped>

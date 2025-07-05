@@ -122,11 +122,16 @@ class StockController extends Controller
         $item->product_name = $request->get('product_name');
         $item->unit_id = $request->get('unit_id');
         $item->product_type_id = $request->get('product_type_id');
-        if($request->hasFile('thumbnail')){
-            $item->thumbnail = $request->file('thumbnail')
-                ->move('uploads/products/thumbnail',
-                    rand(8000000,99999999).'.'.$request->thumbnail->extension());
+        if ($request->hasFile('thumbnail')) {
+            $filename = rand(8000000, 99999999) . '.' . $request->thumbnail->extension();
+            $request->file('thumbnail')->move('uploads/products/thumbnail', $filename);
+            $item->thumbnail = 'uploads/products/thumbnail/' . $filename; // use forward slashes
         }
+        // if($request->hasFile('thumbnail')){
+        //     $item->thumbnail = $request->file('thumbnail')
+        //         ->move('uploads/products/thumbnail',
+        //             rand(8000000,99999999).'.'.$request->thumbnail->extension());
+        // }
         $item->user_id = auth()->user()->id;
         $item->minimum_stock_threshold = $request->minimum_stock_threshold;
         $item->dish_type = $request->dish_type;

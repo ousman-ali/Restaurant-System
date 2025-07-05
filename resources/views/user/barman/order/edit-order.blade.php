@@ -12,7 +12,10 @@
 
     <script>
         window.componentName = 'readyPos';
-        window.editOrderId = {{$order->id}}
+        window.editOrderId = {{$order->id}};
+        window.type = "{{ $type }}";
+        console.log(window.type, window.editOrderId);
+
     </script>
 
 @endsection

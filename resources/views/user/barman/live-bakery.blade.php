@@ -124,6 +124,37 @@
                 });
             });
 
+            var submitNewOrder = pusher.subscribe('supplier-order-submit');
+            submitNewOrder.bind('supplier-order-submit-event', function (data) {
+                $.get("/baker-status-waiter-json", function (data) {
+                    orders = data.orders;
+                    supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
+                    $("#renderHtmlHear").empty();
+                    $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
+                    $("#renderHtmlHear").renderOrders(orders, "#renderHtmlHear");
+                    $("#supplierHtml").renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
+                });
+            });
+
+
+            var submitNewInhouseOrder = pusher.subscribe('inhouse-order-submit');
+            submitNewInhouseOrder.bind('inhouse-order-submit-event', function (data) {
+                $.get("/baker-status-waiter-json", function (data) {
+                    orders = data.orders;
+                    supplierOrders = data.supplierOrders;
+                    waiterOrders = data.waiterOrders;
+                    $("#renderHtmlHear").empty();
+                    $("#supplierHtml").empty();
+                    $("#waiterHtml").empty();
+                    $("#renderHtmlHear").renderOrders(orders, "#renderHtmlHear");
+                    $("#supplierHtml").renderSupplierOrders(supplierOrders, "#supplierHtml");
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
+                });
+            });
+
 
 
             var updateOrder = pusher.subscribe('update-order');
@@ -369,7 +400,9 @@
                 $.each(data, function (index, dish) {
                     $("#supplierHtml").append(
                         $("<div>", {class: "col-lg-6"}).append(
-                            $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom"}).append(
+                            $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
+                                style: "height: 430px;"
+                            }).append(
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
