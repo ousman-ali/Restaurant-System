@@ -325,6 +325,11 @@ const saveOrder = async (shouldPrint = false) => {
         //     printInvoice(response.data.id);
         // }
 
+        const { message, redirect } = response.data;
+        if (redirect) {
+            window.location.href = redirect;
+        }
+
         return response.data;
     } catch (err) {
         console.error('Error saving order:', err);

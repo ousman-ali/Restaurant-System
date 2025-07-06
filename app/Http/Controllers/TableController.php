@@ -70,7 +70,7 @@ class TableController extends Controller
         $table->status = 1;
         $table->user_id = auth()->user()->id;
         if ($table->save()) {
-            return response()->json('Ok', 200);
+            return redirect('/all-table')->with('save_success', 'Table added successfully.');
         }
     }
 
@@ -88,7 +88,7 @@ class TableController extends Controller
         $table->status = $request->get('status') == 'on' ? 1 : 0;
         $table->user_id = auth()->user()->id;
         if ($table->save()) {
-            return response()->json('Ok', 200);
+            return redirect('/all-table')->with('save_success', 'Table updated successfully.');
         }
     }
 

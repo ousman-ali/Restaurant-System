@@ -35,7 +35,7 @@
         <p class="text-muted font-13 m-b-30">
             Add a new dish category to be used in your menu items
         </p>
-        <form class="form-horizontal" role="form" id="dishTypeForm" method="POST" data-parsley-validate novalidate>
+        <form class="form-horizontal" role="form" action="{{ route('save.dish.type') }}" method="POST" data-parsley-validate novalidate>
             @csrf
             <div class="form-group">
                 <label for="dishName" class="col-sm-2 control-label">Dish Category*</label>

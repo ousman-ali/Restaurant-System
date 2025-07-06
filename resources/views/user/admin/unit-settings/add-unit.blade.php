@@ -29,10 +29,8 @@
 
     <div class="card-box">
         <h4 class="m-t-0 header-title"><b>New Unit</b></h4>
-        <p class="text-muted font-13 m-b-30">
-            Responsive is an extension for DataTables that resolves that problem by optimising the
-        </p>
-        <form class="form-horizontal" role="form" id="unitForm" method="POST" data-parsley-validate novalidate>
+        
+        <form class="form-horizontal" role="form" action="{{ route('save.unit') }}" method="POST" data-parsley-validate novalidate>
             {{csrf_field()}}
             <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Unit <span class="text-danger">*</span> </label>

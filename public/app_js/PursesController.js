@@ -271,6 +271,9 @@ $(document).ready(function () {
            purses = [];
            $("#pursesDetailsRender").empty();
            $(this).renderHtml(purses);
+           setTimeout(function () {
+                window.location.href = '/all-purses';
+            }, 1000);
        });
     }
 

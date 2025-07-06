@@ -31,7 +31,7 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role="form" action="#" id="addItem" method="post"
+                        <form class="form-horizontal" role="form" action="{{ route('update.stock', $item->id) }}"  method="post"
                               enctype="multipart/form-data" data-parsley-validate novalidate>
                             {{csrf_field()}}
                             <input type="hidden" value="{{$item->id}}" id="itemId" />

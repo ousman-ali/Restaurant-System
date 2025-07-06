@@ -209,7 +209,8 @@ class PursesController extends Controller
         $pursesProduct->child_unit_price = $request->get('child_unit_price');
         $pursesProduct->gross_price = $pursesProduct->quantity * $pursesProduct->unit_price;
         if($pursesProduct->save()){
-            return redirect()->back();
+            return redirect('/all-purses')->with('save_success', 'Purses updated successfully.');
+            // return redirect()->back();
         }
     }
 

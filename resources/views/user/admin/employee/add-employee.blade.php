@@ -31,7 +31,7 @@
             <div class="card-box">
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role="form" action="#" id="addEmployee" method="post"
+                        <form class="form-horizontal" role="form" action="{{ route('save.employee') }}"  method="post"
                               enctype="multipart/form-data" data-parsley-validate novalidate>
                             {{csrf_field()}}
 
@@ -102,7 +102,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Address :</label>
                                 <div class="col-md-8">
-                                    <textarea minlength="10" class="form-control" required name="address"
+                                    <textarea  class="form-control" required name="address"
                                               rows="5"></textarea>
 
                                 </div>

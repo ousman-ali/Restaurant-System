@@ -11,7 +11,7 @@ class ProductTypeController extends Controller
 {
     public function allProductType()
     {
-        $product_type = ProductType::all();
+        $product_type = ProductType::latest()->get();
         return view('user.admin.product-type.all-product-type',[
             'product_types' =>  $product_type
         ]);
@@ -62,7 +62,7 @@ class ProductTypeController extends Controller
         $product_type->user_id = auth()->user()->id;
         $product_type->status = 1;
         if($product_type->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-product-type')->with('save_success', 'Product type added successfully.');
         }else{
             return response()->json('Error',500);
         }
@@ -80,7 +80,7 @@ class ProductTypeController extends Controller
         $product_type->user_id = auth()->user()->id;
         $product_type->status = $request->get('status') == 'on' ? 1 : 0;
         if($product_type->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-product-type')->with('save_success', 'Product type updated successfully.');
         }else{
             return response()->json('Error',500);
         }

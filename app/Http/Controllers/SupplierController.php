@@ -64,7 +64,8 @@ class SupplierController extends Controller
         $supplier->status = 1;
         $supplier->user_id = auth()->user()->id;
         if($supplier->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-supplier')->with('save_success', 'Supplier added successfully.');
+            // return response()->json('Ok',200);
         }
     }
 
@@ -84,7 +85,8 @@ class SupplierController extends Controller
         $supplier->status = $request->get('status') == 'on' ? 1 : 0;
         $supplier->user_id = auth()->user()->id;
         if($supplier->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-supplier')->with('save_success', 'Supplier updated successfully.');
+            // return response()->json('Ok',200);
         }
     }
 

@@ -73,8 +73,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/all-employee', [UserController::class, 'allEmployees']);
         Route::get('/edit-employee/{id}', [UserController::class, 'editEmployee']);
         Route::post('/delete-employee', [UserController::class, 'deleteEmployee'])->name('employee.delete');
-        Route::post('/save-employee', [UserController::class, 'saveEmployee']);
-        Route::post('/update-employee/{id}', [UserController::class, 'updateEmployee']);
+        Route::post('/save-employee', [UserController::class, 'saveEmployee'])->name('save.employee');
+        Route::post('/update-employee/{id}', [UserController::class, 'updateEmployee'])->name('update.employee');
 
         // Unit Management
         Route::get('/add-unit', [UnitController::class, 'addUnit']);
@@ -82,8 +82,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/edit-unit/{id}', [UnitController::class, 'editUnit']);
         Route::post('/delete-unit', [UnitController::class, 'deleteUnit'])->name('unit.delete');
         Route::get('/cannot-delete-unit/{id}', [UnitController::class, 'cannotDeleteUnit']);
-        Route::post('/save-unit', [UnitController::class, 'saveUnit']);
-        Route::post('/update-unit/{id}', [UnitController::class, 'updateUnit']);
+        Route::post('/save-unit', [UnitController::class, 'saveUnit'])->name('save.unit');
+        Route::post('/update-unit/{id}', [UnitController::class, 'updateUnit'])->name('update.unit');
         
 
         // Bank Management
@@ -92,8 +92,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/edit-bank/{id}', [BankController::class, 'editBank']);
         Route::post('/delete-bank', [BankController::class, 'deleteBank'])->name('bank.delete');
         Route::get('/cannot-delete-bank/{id}', [BankController::class, 'cannotDeleteBank']);
-        Route::post('/save-bank', [BankController::class, 'saveBank']);
-        Route::post('/update-bank/{id}', [BankController::class, 'updateBank']);
+        Route::post('/save-bank', [BankController::class, 'saveBank'])->name('save.bank');
+        Route::post('/update-bank/{id}', [BankController::class, 'updateBank'])->name('update.bank');
 
         // Product Type Management
         Route::get('/add-product-type', [ProductTypeController::class, 'addProductType']);
@@ -101,16 +101,16 @@ Route::middleware('active.user')->group(function () {
         Route::get('/edit-product-type/{id}', [ProductTypeController::class, 'editProductType']);
         Route::post('/delete-product-type', [ProductTypeController::class, 'deleteProductType'])->name('product-type.delete');
         Route::get('/cannot-delete-product-type/{id}', [ProductTypeController::class, 'cannotDeleteProductType']);
-        Route::post('/save-product-type', [ProductTypeController::class, 'saveProductType']);
-        Route::post('/update-product-type/{id}', [ProductTypeController::class, 'updateProductType']);
+        Route::post('/save-product-type', [ProductTypeController::class, 'saveProductType'])->name('save.product.type');
+        Route::post('/update-product-type/{id}', [ProductTypeController::class, 'updateProductType'])->name('update.product.type');
 
         // Dish Type Management
         Route::get('/add-dish-type', [DishCategoryController::class, 'addDishType']);
         Route::get('/all-dish-type', [DishCategoryController::class, 'allDishType']);
         Route::get('/edit-dish-type/{id}', [DishCategoryController::class, 'editDishType']);
         Route::post('/delete-dish-type', [DishCategoryController::class, 'deleteDishType'])->name('dish-type.delete');
-        Route::post('/save-dish-type', [DishCategoryController::class, 'saveDishType']);
-        Route::post('/update-dish-type/{id}', [DishCategoryController::class, 'updateDishType']);
+        Route::post('/save-dish-type', [DishCategoryController::class, 'saveDishType'])->name('save.dish.type');
+        Route::post('/update-dish-type/{id}', [DishCategoryController::class, 'updateDishType'])->name('update.dish.type');
 
         //Dish Management
         Route::get('/add-dish', [DishController::class, 'addDish']);
@@ -174,8 +174,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/add-table', [TableController::class, 'addTable']);
         Route::get('/edit-table/{id}', [TableController::class, 'editTable']);
         Route::post('/delete-table', [TableController::class, 'deleteTable'])->name('table.delete');
-        Route::post('/save-table', [TableController::class, 'saveTable']);
-        Route::post('/update-table/{id}', [TableController::class, 'updateTable']);
+        Route::post('/save-table', [TableController::class, 'saveTable'])->name('save.table');
+        Route::post('/update-table/{id}', [TableController::class, 'updateTable'])->name('update.table');
 
         // Stock Management
         Route::get('/all-item', [StockController::class, 'allStock']);
@@ -184,12 +184,12 @@ Route::middleware('active.user')->group(function () {
         Route::get('/view-item/{id}', [StockController::class, 'viewStock']);
         Route::post('/delete-item', [StockController::class, 'deleteStock'])->name('item.delete');
         Route::get('/cannot-delete-item/{id}', [StockController::class, 'cannotDeleteStock']);
-        Route::post('/save-item', [StockController::class, 'saveStock']);
-        Route::post('/update-item/{id}', [StockController::class, 'updateStock']);
+        Route::post('/save-item', [StockController::class, 'saveStock'])->name('save.stock');
+        Route::post('/update-item/{id}', [StockController::class, 'updateStock'])->name('update.stock');
 
         // Purses
         Route::get('/new-purses', [PursesController::class, 'addPurses']);
-        Route::get('/all-purses', [PursesController::class, 'allPurses']);
+        Route::get('/all-purses', [PursesController::class, 'allPurses'])->name('all.purses');
         Route::get('/edit-purses/{id}', [PursesController::class, 'editPurses']);
         Route::post('/delete-purses', [PursesController::class, 'deletePurses'])->name('purse.delete');
         Route::get('/delete-purses-product/{id}', [PursesController::class, 'deletePursesProduct']);
@@ -209,8 +209,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/account-summary', [AccountantController::class, 'summary']);
         Route::get('/add-expense', [AccountantController::class, 'addExpanse']);
         Route::get('/edit-expanse/{id}', [AccountantController::class, 'editExpanse']);
-        Route::post('/save-expanse', [AccountantController::class, 'saveExpanse']);
-        Route::post('/update-expanse/{id}', [AccountantController::class, 'updateExpanse']);
+        Route::post('/save-expanse', [AccountantController::class, 'saveExpanse'])->name('save.expanse');
+        Route::post('/update-expanse/{id}', [AccountantController::class, 'updateExpanse'])->name('update.expanse');
         Route::post('/delete-expanse', [AccountantController::class, 'deleteExpanse'])->name('expense.delete');
         Route::get('/all-expanse', [AccountantController::class, 'allExpanse']);
         Route::get('/all-income', [AccountantController::class, 'allIncome']);
@@ -221,8 +221,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/view-supplier/{id}', [SupplierController::class, 'viewSupplier']);
         Route::get('/edit-supplier/{id}', [SupplierController::class, 'editSupplier']);
         Route::post('/delete-supplier', [SupplierController::class, 'deleteSupplier'])->name('delete.supplier');
-        Route::post('/save-supplier', [SupplierController::class, 'saveSupplier']);
-        Route::post('/update-supplier/{id}', [SupplierController::class, 'updateSupplier']);
+        Route::post('/save-supplier', [SupplierController::class, 'saveSupplier'])->name('save.supplier');
+        Route::post('/update-supplier/{id}', [SupplierController::class, 'updateSupplier'])->name('update.supplier');
 
         // Website
         Route::resource('/website', WebsiteController::class);
@@ -307,7 +307,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/print-multiple-orders', [OrderController::class, 'printMultipleOrders'])->name('orders.printMultiple');
         Route::get('/marked-order/{id}', [OrderController::class, 'markOrder']);
         Route::post('/delete-order', [OrderController::class, 'deleteOrder'])->name('order.delete');
-        Route::get('/all-order', [OrderController::class, 'allOrder']);
+        Route::get('/all-order', [OrderController::class, 'allOrder'])->name('all.order');
         Route::get('/non-paid-order', [OrderController::class, 'nonPaidOrder']);
         Route::get('/get-order-details/{id}', [OrderController::class, 'getOrderDetails']);
         Route::get('/edit-order/{id}', [OrderController::class, 'editOrder']);

@@ -28,7 +28,7 @@
     </div>
     <div class="card-box">
 
-        <form class="form-horizontal" role="form" id="unitForm" method="POST" data-parsley-validate novalidate>
+        <form class="form-horizontal" role="form" action="{{ route('update.unit', $unit->id) }}" method="POST" data-parsley-validate novalidate>
             {{csrf_field()}}
             <input type="hidden" id="unitId" value="{{$unit->id}}">
             <div class="form-group">

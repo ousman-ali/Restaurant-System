@@ -183,8 +183,12 @@ class OrderController extends Controller
             } catch (\Exception $exception) {
                 Log::error("Broadcasting failed: " . $exception->getMessage());
             }
-
-            return response()->json($order, 200);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order updated successfully!',
+                'redirect' => route('all.order')
+            ], 200);
+            // return response()->json($order, 200);
 
         } catch (\Exception $exception) {
             DB::rollBack();

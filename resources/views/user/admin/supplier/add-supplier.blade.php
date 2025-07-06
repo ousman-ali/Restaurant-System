@@ -32,7 +32,7 @@
             <div class="card-box">
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role="form" action="#" id="addSupplier" method="post"
+                        <form class="form-horizontal" role="form" action="{{ route('save.supplier') }}"  method="post"
                               enctype="multipart/form-data" data-parsley-validate novalidate>
                             {{csrf_field()}}
 
@@ -99,7 +99,16 @@
                 e.preventDefault();
                 var formData = new FormData(this);
                 $(this).speedPost('/save-supplier', formData, message = {
-                    success: {header: 'Supplier saved successfully', body: 'Supplier saved successfully'},
+                    success: {
+                        header: 'Supplier saved successfully',
+                        body: 'Supplier saved successfully',
+                        callback: function (res) {
+                            console.log('url', res);
+                            if (res.redirect_url) {
+                                window.location.href = res.redirect_url;
+                            }
+                        }
+                        },
                     error: {header: 'Supplier already exist', body: 'Supplier found'},
                     warning: {header: 'Internal Server Error', body: 'Internal server error'}
                 },addSupplier);

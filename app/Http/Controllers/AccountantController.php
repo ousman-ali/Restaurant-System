@@ -42,7 +42,7 @@ class AccountantController extends Controller
         $expanse->expanse = $request->get('expanse');
         $expanse->user_id = auth()->user()->id;
         if($expanse->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-expanse')->with('save_success', 'Expense added successfully.');
         }
     }
 
@@ -100,7 +100,7 @@ class AccountantController extends Controller
         $expanse->expanse = $request->get('expanse');
         $expanse->user_id = auth()->user()->id;
         if($expanse->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-expanse')->with('save_success', 'Expense updated successfully.');
         }
     }
 

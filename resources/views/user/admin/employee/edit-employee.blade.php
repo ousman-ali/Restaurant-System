@@ -31,7 +31,7 @@
             <div class="card-box">
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role="form" action="#" id="addEmployee" method="post"
+                        <form class="form-horizontal" role="form" action="{{ route('update.employee', $employee->id) }}"  method="post"
                               enctype="multipart/form-data" data-parsley-validate novalidate>
                             {{csrf_field()}}
                             <input type="hidden" id="id" value="{{$employee->id}}">

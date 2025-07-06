@@ -136,7 +136,7 @@ class StockController extends Controller
         $item->minimum_stock_threshold = $request->minimum_stock_threshold;
         $item->dish_type = $request->dish_type;
         if($item->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-item')->with('save_success', 'Item added successfully.');
         }
     }
 
@@ -168,7 +168,7 @@ class StockController extends Controller
         $item->dish_type = $request->dish_type;
         $item->user_id = auth()->user()->id;
         if($item->save()){
-            return response()->json('Ok',200);
+            return redirect('/all-item')->with('save_success', 'Item updated successfully.');
         }
     }
 

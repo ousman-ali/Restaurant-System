@@ -28,7 +28,7 @@
     </div>
 
     <div class="card-box">
-        <form class="form-horizontal" role="form" id="unitForm" method="POST" data-parsley-validate novalidate>
+        <form class="form-horizontal" role="form" action="{{ route('save.product.type') }}" method="POST" data-parsley-validate novalidate>
             {{csrf_field()}}
             <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Product Type <span class="text-danger">*</span> </label>

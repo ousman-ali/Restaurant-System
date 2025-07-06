@@ -34,6 +34,9 @@ $(document).ready(function (e) {
                 if(formId){
                     $(this).formReset(formId);
                 };
+                if (typeof messages.success.callback === 'function') {
+                    messages.success.callback(res);
+                }
             },error:function (data) {
                 if(data.status == 422){ $.Notification.notify('error','bottom right',messages.error.header,messages.error.body) };
                 if(data.status >= 500){ $.Notification.notify('warning','button right',messages.warning.header,messages.warning.body)};

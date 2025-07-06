@@ -69,7 +69,7 @@ class BankController extends Controller
         $bank->status = 1;
         $bank->user_id = auth()->user()->id;
         if($bank->save()){
-            return response()->json('Ok', 200);
+            return redirect('/all-bank')->with('save_success', 'Bank added successfully.');
         }
     }
 
@@ -86,7 +86,7 @@ class BankController extends Controller
         $bank->account_number = $request->get('account_number');
         $bank->status = 1;
         if($bank->save()){
-            return response()->json('Ok', 200);
+            return redirect('/all-bank')->with('save_success', 'Bank update successfully.');
         }
     }
 }

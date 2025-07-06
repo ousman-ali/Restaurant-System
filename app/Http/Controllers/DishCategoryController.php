@@ -75,7 +75,7 @@ class DishCategoryController extends Controller
         $dish_type->name = $request->get('name');
         $dish_type->user_id = auth()->user()->id;
         $dish_type->save();
-        return response()->json($dish_type, 200);
+        return redirect('/all-dish-type')->with('save_success', 'Category added successfully.');
     }
 
     /**
@@ -91,7 +91,7 @@ class DishCategoryController extends Controller
         $dish_type->status = $request->get('status') == 'on' ? 1 : 0;
         $dish_type->user_id = auth()->user()->id;
         $dish_type->save();
-        return response()->json($dish_type, 200);
+        return redirect('/all-dish-type')->with('save_success', 'Category updated successfully.');
 
     }
 

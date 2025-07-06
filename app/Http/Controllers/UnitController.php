@@ -87,7 +87,7 @@ class UnitController extends Controller
         $unit->status = 1;
         $unit->user_id = auth()->user()->id;
         if($unit->save()){
-            return response()->json('Ok', 200);
+            return redirect('/all-unit')->with('save_success', 'Unit added successfully.');
         }
     }
 
@@ -106,7 +106,7 @@ class UnitController extends Controller
         $unit->usage_type = $request->usage_type;
         $unit->status = 1;
         if($unit->save()){
-            return response()->json('Ok', 200);
+            return redirect('/all-unit')->with('save_success', 'Unit updated successfully.');
         }
     }
 

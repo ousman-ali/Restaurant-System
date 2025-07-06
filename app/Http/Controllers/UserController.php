@@ -132,7 +132,7 @@ class UserController extends Controller
                 } catch (\Exception $exception) {
                     Log::error("Mail send error" . $exception->getMessage());
                 }
-                return response()->json('Ok', 200);
+                return redirect('/all-employee')->with('save_success', 'Employee added successfully.');
             }
         }
     }
@@ -170,7 +170,7 @@ class UserController extends Controller
             }
             if ($user->save()) {
                 // Mail::to($user->email)->send(new EmployeRegister($user->email, $request->get('password')));
-                return response()->json('Ok', 200);
+                return redirect('/all-employee')->with('save_success', 'Employee updated successfully.');
             }
         }
     }

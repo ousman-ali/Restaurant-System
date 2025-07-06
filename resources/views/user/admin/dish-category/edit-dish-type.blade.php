@@ -35,7 +35,7 @@
         <p class="text-muted font-13 m-b-30">
             Edit dish category
         </p>
-        <form class="form-horizontal" role="form" id="unitForm" method="POST" data-parsley-validate novalidate>
+        <form class="form-horizontal" role="form" action="{{ route('update.dish.type', $dish_type->id) }}" method="POST" data-parsley-validate novalidate>
             {{csrf_field()}}
             <input type="hidden" value="{{$dish_type->id}}" id="id">
             <div class="form-group">

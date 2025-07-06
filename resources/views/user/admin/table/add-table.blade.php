@@ -32,7 +32,7 @@
             <div class="card-box">
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="form-horizontal" role="form" action="#" id="addTable" method="post"
+                        <form class="form-horizontal" role="form" action="{{ route('save.table') }}"  method="post"
                               enctype="multipart/form-data" data-parsley-validate novalidate>
                             {{csrf_field()}}
 
