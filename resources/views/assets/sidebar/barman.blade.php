@@ -56,6 +56,14 @@
                     <a href="{{url('/baker-status')}}" class="waves-effect"><i class="icon icon-fire"></i> <span> Baker Status </span> </a>
                 </li>
 
+                <li class="">
+                    <a href="{{url('/waiter-status')}}" class="waves-effect"><i class="icon icon-user"></i> <span> Waiter Status </span> </a>
+                </li>
+
+                <li class="">
+                    <a href="{{url('/admin-status')}}" class="waves-effect"><i class="icon icon-user"></i> <span> Admin Status </span> </a>
+                </li>
+
             </ul>
             <div class="clearfix"></div>
         </div>

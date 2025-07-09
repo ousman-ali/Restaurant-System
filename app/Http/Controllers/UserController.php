@@ -145,6 +145,7 @@ class UserController extends Controller
      */
     public function updateEmployee(UpdateEmployee $request, $id)
     {
+        
         $this->validate($request, [
             'email' => Rule::unique('users')->ignore($id, 'id'),
             'email' => Rule::unique('employees')->ignore($id, 'id'),
@@ -160,7 +161,7 @@ class UserController extends Controller
             $user->name = $request->get('name');
             $user->email = $request->get('email');
             $user->active = $request->get('status') == 'on' ? 1 : 0;
-            $user->role = $request->get('role');
+            // $user->role = $request->get('role');
             if ($request->get('password') != "") {
                 $user->password = Hash::make($request->get('password'));
             }

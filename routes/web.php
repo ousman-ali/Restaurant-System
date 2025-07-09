@@ -24,6 +24,7 @@ use App\Http\Controllers\BakerController;
 use App\Http\Controllers\MaterialRequestController;
 use App\Http\Controllers\BarmanController;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\CashierController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -327,6 +328,16 @@ Route::middleware('active.user')->group(function () {
         Route::get('/waiter-stat/waiter={id}/start={start_date}/end={end_date}', [WaiterController::class, 'showWaiterStat']);
     });
 
+    // Cashier Only 
+    Route::middleware(['cashier'])->group(function () {
+        Route::get('/cashier-orders', [CashierController::class, 'myOrder']);
+        Route::post('/cashier-pay-order/{id}', [CashierController::class, 'payOrder']);
+
+        Route::get('/cashier-print-order/{id}', [CashierController::class, 'printOrder']);
+        // routes/web.php
+        Route::get('/cashier-print-multiple-orders', [CashierController::class, 'printMultipleOrders'])->name('orders.printMultiple');
+    });
+
     // Barman Only 
     Route::middleware(['barman'])->group(function () {
         //Dish
@@ -352,6 +363,8 @@ Route::middleware('active.user')->group(function () {
         Route::get('/my-barman-orders', [ReadyDishOrderController::class, 'myOrder'])->name('my-barman.order');
         // Live baker for barman
         Route::get('/baker-status', [BakerController::class, 'barmanLiveBaker']);
+        Route::get('/waiter-status', [BakerController::class, 'barmanLiveWaiter']);
+        Route::get('/admin-status', [BakerController::class, 'barmanLiveAdmin']);
         Route::get('/baker-status-waiter-json', [BakerController::class, 'barmanLiveBakerJSON']);
         // Barman Stat
         Route::get('/barman-stat', [BarmanController::class, 'barmanStat']);

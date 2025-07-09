@@ -75,42 +75,6 @@ class DishController extends Controller
     }
 
     public function getReadyDishes(): JsonResponse
-        {
-            $dishes = ReadyDish::with([
-                    'dishImages',
-                    'dishRecipes.product.purses',
-                    'dishRecipes.product.cookedProducts',
-                    'unit'
-                ])
-                ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
-                ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
-                ->get()
-                ->filter(function ($dish) {
-                    // foreach ($dish->dishRecipes as $recipe) {
-                    //     $product = $recipe->product;
-                    //     if (!$product) continue;
-                    //     $totalPurses = $product->purses->sum('quantity');
-                    //     $totalCooked = $product->cookedProducts->sum('quantity');
-                    //     $availableStock = $totalPurses - $totalCooked;
-                    //     if ($availableStock <= 0) {
-                    //         return false;
-                    //     }
-                    // }
-                    $threshold = $dish->minimum_stock_threshold ?? 0;
-                    if ($dish->source_type === 'inhouse') {
-                        return ($dish->total_ready_quantity ?? 0) < $threshold;
-                    } elseif ($dish->source_type === 'supplier') {
-                        return ($dish->total_purchased_quantity ?? 0) < $threshold;
-                    }
-
-                    return false;
-                })
-                ->values();
-
-            return response()->json($dishes);
-        }
-
-    public function getReadyProducts(): JsonResponse
     {
         $dishes = ReadyDish::with([
                 'dishImages',
@@ -124,9 +88,34 @@ class DishController extends Controller
             ->filter(function ($dish) {
                 $threshold = $dish->minimum_stock_threshold ?? 0;
                 if ($dish->source_type === 'inhouse') {
-                    return ($dish->total_ready_quantity ?? 0) > $threshold;
+                    return ($dish->total_ready_quantity ?? 0) < $threshold;
                 } elseif ($dish->source_type === 'supplier') {
-                    return ($dish->total_purchased_quantity ?? 0) > $threshold;
+                    return ($dish->total_purchased_quantity ?? 0) < $threshold;
+                }
+
+                return false;
+            })
+            ->values();
+
+        return response()->json($dishes);
+    }
+
+    public function getReadyProducts(): JsonResponse
+    {
+        $dishes = ReadyDish::with([
+                'dishImages',
+                'dishRecipes.product.purses',
+                'dishRecipes.product.cookedProducts',
+                'unit'
+            ])
+            ->withSum('producedBatches as total_ready_quantity', 'ready_quantity')
+            ->withSum('purchasedBatches as total_purchased_quantity', 'ready_quantity')
+            ->get()
+            ->filter(function ($dish) {
+                if ($dish->source_type === 'inhouse') {
+                    return ($dish->total_ready_quantity ?? 0) > 0;
+                } elseif ($dish->source_type === 'supplier') {
+                    return ($dish->total_purchased_quantity ?? 0) > 0;
                 }
 
                 return false;

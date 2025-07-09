@@ -10,6 +10,7 @@ use App\Http\Middleware\ManagerRoleCheck;
 use App\Http\Middleware\WaiterRoleCheck;
 use App\Http\Middleware\BarmanRoleCheck;
 use App\Http\Middleware\BakerRoleCheck;
+use App\Http\Middleware\CashierRoleCheck;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -72,5 +73,6 @@ class Kernel extends HttpKernel
         'waiter' => WaiterRoleCheck::class,
         'barman' => BarmanRoleCheck::class,
         'baker' => BakerRoleCheck::class,
+        'cashier' => CashierRoleCheck::class,
     ];
 }

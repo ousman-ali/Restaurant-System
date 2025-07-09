@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Live Baker
+    Live Admin
 @endsection
 
 @section('content')
@@ -14,11 +14,12 @@
             <h4 class="page-title">{{config('app.name')}}</h4>
             <ol class="breadcrumb">
                 <li><a href="{{url('/')}}">Dashboard</a></li>
-                <li><a href="{{url('/baker-status')}}">Baker Status</a></li>
+                <li><a href="{{url('/admin-status')}}">Admin Status</a></li>
             </ol>
         </div>
     </div>
-    <div class="row" id="renderHtmlHear">
+
+    <div class="row" id="supplierHtml">
 
     </div>
 
@@ -37,86 +38,87 @@
 
     <script>
 
-        var orders = [];
+        
+        var supplierOrders = [];
 
         $(document).ready(function () {
             $("#refresh").on('click',function () {
                 $.get('baker-status-waiter-json', function (data) {
-                    orders = data.orders;
-                    $("#renderHtmlHear").empty();
-                    $(this).renderOrders(orders, "#renderHtmlHear");
+                    supplierOrders = data.supplierOrders;
+                    $("#supplierHtml").empty();
+                    $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
                 });
             });
 
 
             $.get('baker-status-waiter-json', function (data) {
-                orders = data.orders;
-                $("#renderHtmlHear").empty();
-                $(this).renderOrders(orders, "#renderHtmlHear");
+                supplierOrders = data.supplierOrders;
+                $("#supplierHtml").empty();
+                $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
             });
 
-            var startCooking = pusher.subscribe('start-inhouse-cooking');
-            startCooking.bind('kitchen-inhouse-event', function (data) {
-                $.get('baker-status-waiter-json', function (data) {
-                    orders = data.orders;
-                    $("#renderHtmlHear").empty();
-                    $(this).renderOrders(orders, "#renderHtmlHear");
+            
+
+            var purseCompleted = pusher.subscribe('order-served');
+            purseCompleted.bind('order-served-event', function (data) {
+                $.get("/baker-status-waiter-json", function (data) {
+                    supplierOrders = data.supplierOrders;
+                    $("#supplierHtml").empty();
+                    $("#supplierHtml").renderSupplierOrders(supplierOrders, "#supplierHtml");
+                });
+            });
+
+            var submitNewOrder = pusher.subscribe('supplier-order-submit');
+            submitNewOrder.bind('supplier-order-submit-event', function (data) {
+                $.get("/baker-status-waiter-json", function (data) {
+                    supplierOrders = data.supplierOrders;
+                    $("#supplierHtml").empty();
+                    $("#supplierHtml").renderSupplierOrders(supplierOrders, "#supplierHtml");
                 });
             });
 
 
-            var completeCooking = pusher.subscribe('complete-inhouse-cooking');
-            completeCooking.bind('complete-inhouse-cooking-event',function (data) {
-                $.get('baker-status-waiter-json', function (data) {
-                    orders = data.orders;
-                    $("#renderHtmlHear").empty();
-                    $(this).renderOrders(orders, "#renderHtmlHear");
-                });
-            });
-
-           
+        
             var updateOrder = pusher.subscribe('update-order');
             updateOrder.bind('order-update-event',function (data) {
                 $.get('baker-status-waiter-json', function (data) {
-                    orders = data.orders;
-                    $("#renderHtmlHear").empty();
-                    $(this).renderOrders(orders, "#renderHtmlHear");
+                    supplierOrders = data.supplierOrders;
+                    $("#supplierHtml").empty();
+                    $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
                 });
             });
 
-            $.fn.serve = function (index) {
+         
+
+            $.fn.confirm = function (index) {
                 const laddaBtn = Ladda.create(this[0]); 
                 laddaBtn.start();
-                $.get('/barman-order-served/'+orders[index].id, function (data) {
-                    orders.splice(index,1);
-                    $("#renderHtmlHear").empty();
-                    $(this).renderOrders(orders, "#renderHtmlHear");
+                $.get('/barman-order-confirm/'+supplierOrders[index].id, function (data) {
+                    supplierOrders.splice(index,1);
+                    $("#supplierHtml").empty();
+                    $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
                 });
                 setTimeout(() => laddaBtn.stop(), 4000);
             };
 
+     
 
-            $.fn.cancelOrder = function (index) {
-            
-                var orderId = orders[index].id;
-                var orderDetails = orders[index].order_details;
+        $.fn.cancelSupplierOrder = function (index) {
+                var orderDetails = supplierOrders[index].order_details;
+                var orderId = supplierOrders[index].id;
 
                 const laddaBtn = Ladda.create(this[0]);
                 laddaBtn.start();
-                $.post('/delete-barman-inhouse.order', 
+                $.post('/delete-barman-supplier-order', 
                     {
                         _token: $('meta[name="csrf-token"]').attr('content'),
-                        order_id: orderId,
-                        orderD:orderDetails,
+                        orderD: orderDetails,
+                        order_id:orderId,
                     },
                     function (data) {
-                        orders.splice(index, 1);
-                        $("#renderHtmlHear").empty();
+                        supplierOrders.splice(index, 1);
                         $("#supplierHtml").empty();
-                        $("#waiterHtml").empty();
-                        $(this).renderOrders(orders, "#renderHtmlHear");
                         $(this).renderSupplierOrders(supplierOrders, "#supplierHtml");
-                        $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
                     }
                 ).fail(function (xhr) {
                     console.log('Failed to delete order: ' + xhr.responseText);
@@ -125,10 +127,9 @@
             
         };
 
-    
-            $.fn.renderOrders = function (data) {
+             $.fn.renderSupplierOrders = function (data) {
                 $.each(data, function (index, dish) {
-                    $("#renderHtmlHear").append(
+                    $("#supplierHtml").append(
                         $("<div>", {class: "col-lg-6"}).append(
                             $("<div>", {class: dish.status == 0 ? "panel panel-color panel-warning" : "panel panel-color panel-custom",
                                 style: "height: 430px;"
@@ -136,7 +137,7 @@
                                 $("<div>", {class: "panel-heading"}).append(
                                     $("<h3>", {
                                         class: "panel-title",
-                                        text: dish.baker ? dish.baker.name : "Baker did not response yet"
+                                        text: dish.admin ? dish.admin.name : "Admin did not response yet"
                                     }).append(
                                         $("<span>", {class: "pull-right", text: dish.order_by.name})
                                     )
@@ -178,8 +179,8 @@
                                             hour12: true 
                                         })})
                                     ),
-                                    dish.cook_start_at ? $("<p>", {text: "Cooking Start Time: "}).append(
-                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.cook_start_at).toLocaleString("en-US", {
+                                    dish.purchase_time ? $("<p>", {text: "Purchase Time: "}).append(
+                                        $("<span>", {class: "badge badge-warning", text: new Date(dish.purchase_time).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -190,8 +191,8 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.cook_complete_at ? $("<p>", {text: "Cooking Complete Time: "}).append(
-                                        $("<span>", {class: "badge badge-success", text: new Date(dish.cook_complete_at).toLocaleString("en-US", {
+                                    dish.confirmation_time ? $("<p>", {text: "Confirmation Time: "}).append(
+                                        $("<span>", {class: "badge badge-success", text: new Date(dish.confirmation_time).toLocaleString("en-US", {
                                             weekday: "long",
                                             year: "numeric",
                                             month: "long",
@@ -202,18 +203,6 @@
                                             hour12: true 
                                         })})
                                     ) : "",
-                                    dish.accepted_time ? $("<p>", {text: "Accept Time: "}).append(
-                                        $("<span>", {class: "badge badge-primary", text: new Date(dish.accepted_time).toLocaleString("en-US", {
-                                            weekday: "long",
-                                            year: "numeric",
-                                            month: "long",
-                                            day: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit",
-                                            hour12: true 
-                                        })})
-                                    ) : ""
                                 ),
                             
                                 (dish.status == 0)
@@ -222,20 +211,16 @@
                                     "data-style": "expand-right",
                                     "data-spinner-color": "#fff",
                                     text: "Pending ! Click to cancel order",
-                                    onClick:"$(this).cancelOrder("+ index +")"
+                                    onClick:"$(this).cancelSupplierOrder("+ index +")"
                                 })
+                                    
                                     : (dish.status == 1)
-                                    ? $("<button>", {
-                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
-                                        text: "Cooking"
-                                    })
-                                    : (dish.status == 2)
                                         ? $("<button>", {
                                             class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
-                                            text: "Complete! waiting for accept ",
+                                            text: "Confirm Purchase",
                                             "data-style": "expand-right",
                                             "data-spinner-color": "#fff",
-                                            onClick: "$(this).serve(" + index + ")"
+                                            onClick: "$(this).confirm(" + index + ")"
                                         })
                                         : "Oops"
                             )
@@ -243,6 +228,7 @@
                     )
                 })
             }
+
         })
     </script>
 @endsection

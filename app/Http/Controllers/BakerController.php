@@ -26,6 +26,14 @@ class BakerController extends Controller
         return view('user.barman.live-bakery');
     }
 
+    public function barmanLiveWaiter(){
+        return view('user.barman.live-waiter');
+    }
+
+    public function barmanLiveAdmin(){
+        return view('user.barman.live-admin');
+    }
+
   
 
     public function barmanLiveBakerJSON()

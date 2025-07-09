@@ -87,6 +87,7 @@
                                         <option value="4">Kitchen</option>
                                         <option value="5">Barman</option>
                                         <option value="6">Baker</option>
+                                        <option value="7">Cashier</option>
                                     </select>
 
                                 </div>

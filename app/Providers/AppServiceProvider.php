@@ -45,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('baker', function () {
             return auth()->check() && auth()->user()->role() == 6;
         });
+
+        Blade::if('cashier', function () {
+            return auth()->check() && auth()->user()->role() == 7;
+        });
         
     }
 

@@ -20,7 +20,7 @@
             <thead>
             <tr>
                 {{--<th>#</th>--}}
-                {{-- <th><input type="checkbox" id="selectAllOrders"></th> --}}
+                <th><input type="checkbox" id="selectAllOrders"></th>
                 <th>Order No</th>
                 <th>Served By</th>
                 <th>Status</th>
@@ -35,7 +35,7 @@
             @foreach($orders as $oder)
                 <tr>
                     {{--<td>{{$count++}}</td>--}}
-                    {{-- <td><input type="checkbox" class="order-checkbox" value="{{ $oder->id }}"></td> --}}
+                    <td><input type="checkbox" class="order-checkbox" value="{{ $oder->id }}"></td>
                     <td>{{$oder->id}}</td> 
                     <td>{{$oder->servedBy->name}}</td>
                     @php
@@ -53,27 +53,48 @@
                     <td>
                             
                                 <div class="btn-group">
-                                    @if($oder->status == 0)
-                                    <a href="{{url('/edit-order/'.$oder->id)}}"
-                                       class="btn btn-success waves-effect waves-light">
-                                        <i class="fa fa-pencil"></i>
-                                    </a> 
-                                    @endif
-                                    @if($oder->status == 0)
-                                        <form action="{{ route('order.delete')}}" method="post" class="deleteform">
-                                            @csrf
-                                            <input type="hidden" name="order_id" value="{{$oder->id}}">
-                                            <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
-                                                <i class="fa fa-trash-o"></i>
-                                            </button>
-                                        </form>
-                                    @endif
-
+                                    
+                                    <button type="button" onclick="printInvoice({{$oder->id}})"
+                                            href="{{url('/cashier-print-order/'.$oder->id)}}"
+                                            class="btn btn-purple waves-effect waves-light">
+                                        <i class="fa fa-print"></i>
+                                    </button>
                                    
+
+                                    @if($diff && $diff > 0)
+                                    <button
+                                        class="btn btn-primary waves-effect waves-light pay-btn"
+                                        data-order-id="{{ $oder->id }}"
+                                        data-diff="{{ number_format($diff, 2, '.', '') }}">
+                                        <i class="fa fa-credit-card"></i> Pay
+                                        </button>
+
+                                    @endif
                                 </div>
                         </td>
 
-                        
+                        <div id="paymentModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; 
+                                background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+                                <div style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%;">
+                                    <h4>Make Payment</h4>
+
+                                    <input type="number" id="paymentAmount" class="form-control" placeholder="Enter payment amount" />
+                                    <input type="hidden" id="paymentOrderId" />
+
+                                    <select id="paymentBank" class="form-control" style="margin-top:10px;">
+                                        <option value="">Select Payment Method</option>
+                                        @foreach($banks as $bank)
+                                            <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <div style="margin-top:15px; text-align:right;">
+                                        <button id="cancelPayment" class="btn btn-secondary">Cancel</button>
+                                        <button id="confirmPayment" class="btn btn-success">Confirm Payment</button>
+                                    </div>
+                                </div>
+                            </div>
+
 
 
                 </tr>
@@ -90,9 +111,6 @@
             $("#datatable-responsive").DataTable({
                 "order": [[ 0, "desc" ]]
             });
-
-
-
            function togglePrintButton() {
                 if ($('.order-checkbox:checked').length > 0) {
                     $('#printSelectedOrders').show();
@@ -141,6 +159,7 @@
             $('#confirmPayment').on('click', function() {
                 const orderId = $('#paymentOrderId').val();
                 const amount = $('#paymentAmount').val();
+                const paymentMethod = $('#paymentBank').val();
 
                 if (!amount || amount <= 0) {
                 console.log('Please enter a valid payment amount.');
@@ -148,10 +167,11 @@
                 }
 
                 $.ajax({
-                url: `/pay-order/${orderId}`,
+                url: `/cashier-pay-order/${orderId}`,
                 method: 'POST',
                 data: {
                     amount: amount,
+                    payment_method: paymentMethod,
                     _token: '{{ csrf_token() }}' // Laravel CSRF token
                 },
                 success: function(response) {
@@ -173,7 +193,7 @@
                 return;
             }
             // Fetch the receipt HTML
-            fetch(`/print-order/${orderId}`, {
+            fetch(`/cashier-print-order/${orderId}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'text/html'
@@ -227,7 +247,7 @@
             // Build query string param with comma-separated IDs
             const idsQuery = encodeURIComponent(orderIds.join(','));
 
-            fetch(`/print-multiple-orders?order_ids=${idsQuery}`, {
+            fetch(`/cashier-print-multiple-orders?order_ids=${idsQuery}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'text/html'

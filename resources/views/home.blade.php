@@ -31,4 +31,8 @@
     @include('user.baker.dashboard')
     @endbaker
 
+    @cashier
+    @include('user.cashier.dashboard')
+    @endbaker
+
 @endsection

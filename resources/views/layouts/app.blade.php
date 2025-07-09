@@ -50,6 +50,10 @@
         @include('assets.sidebar.baker')
         @endbaker
 
+        @cashier
+        @include('assets.sidebar.cashier')
+        @endbaker
+
         
 
         <div class="content-page">

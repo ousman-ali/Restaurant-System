@@ -87,9 +87,15 @@
                                 @if($employee->user->role == 2)
                                     <span class="label label-primary">Manager</span>
                                 @elseif($employee->user->role == 3)
-                                    <span class="label label-purple">Kitchen</span>
+                                    <span class="label label-purple">Waiter</span>
                                 @elseif($employee->user->role == 4)
-                                    <span class="label label-pink">Waiter</span>
+                                    <span class="label label-pink">Kitchen</span>
+                                @elseif($employee->user->role == 5)
+                                    <span class="label label-pink">Barman</span>
+                                @elseif ($employee->user->role == 6)
+                                    <span class="label label-pink">Baker</span>
+                                @elseif ($employee->user->role == 7)
+                                    <span class="label label-pink">Cashier</span>
                                 @endif
                             </dd>
                             <dt>

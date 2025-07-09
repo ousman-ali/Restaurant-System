@@ -80,13 +80,14 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Employee Type :</label>
                                 <div class="col-md-6">
-                                    <select name="role" id="" class="form-control select2" required>
+                                    <select name="role" id="" class="form-control select2" readonly>
                                         <option value="" >Select One</option>
                                         <option value="2" {{$employee->user->role == 2 ? 'selected' :''}}>Shop Manager</option>
                                         <option value="3" {{$employee->user->role == 3 ? 'selected' :''}}>Waiter</option>
                                         <option value="4" {{$employee->user->role == 4 ? 'selected' :''}}>Kitchen</option>
                                         <option value="5" {{$employee->user->role == 5 ? 'selected' :''}}>Barman</option>
                                         <option value="6" {{$employee->user->role == 6 ? 'selected' :''}}>Baker</option>
+                                        <option value="7" {{$employee->user->role == 7 ? 'selected' :''}}>Cashier</option>
                                     </select>
 
                                 </div>

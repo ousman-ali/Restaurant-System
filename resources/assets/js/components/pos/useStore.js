@@ -123,6 +123,14 @@ const fetchConfig = async () => {
 };
 
 const addReadyProductToCart = (product) => {
+    console.log('productssssss', product);
+    let stock = 0;
+    if(product.source_type == 'inhouse'){
+        stock = product.total_ready_quantity ?? 0;
+    }else if(product.source_type == 'supplier'){
+        stock = product.total_purchased_quantity ?? 0;
+    }
+
     const newType = getCartTypeFromProduct(product, true);
 
     if (!isCompatible(newType)) {
@@ -147,7 +155,8 @@ const addReadyProductToCart = (product) => {
             quantity: 1,
             isReadyDish: true,
             image: product.thumbnail,
-            additional_note: ''
+            additional_note: '',
+            stock: stock 
         });
         cartOrderToType.value = newType;
     }
@@ -254,6 +263,11 @@ const addProductToCart = (product, selectedVariant = null) => {
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
     if (index !== -1) {
+        const cartItem = carts.value[index];
+        if (newQuantity > cartItem.stock) {
+            showToast('The added amount exceeds available stock.');
+            return;
+        }
         if (newQuantity <= 0) {
             // Remove item if quantity is zero or negative
             carts.value.splice(index, 1);
