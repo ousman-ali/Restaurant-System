@@ -1,5 +1,6 @@
 <?php
 $dish = \App\Models\Dish::all();
+$readyDish = \App\Models\ReadyDish::all();
 $waiter = \App\Models\User::where('role', 4)->get();
 $kitchen = \App\Models\User::where('role', 3)->get();
 
@@ -68,6 +69,15 @@ $kitchen = \App\Models\User::where('role', 3)->get();
 
     </div>
 </div>
+
+<div class="col-lg-12">
+    <div class="card-box">
+        <h4 class="text-dark header-title m-t-0">Ready Dish Sales Today</h4>
+        <div class="text-center"></div>
+        <div id="readyDishChart" style="height: 303px;"></div>
+    </div>
+</div>
+
 
 <div class="col-lg-12">
     <div class="card-box">
@@ -186,6 +196,28 @@ $kitchen = \App\Models\User::where('role', 3)->get();
                 gridTextSize: '15px',
                 resize: true
             });
+
+
+            new Morris.Bar({
+            // ID of the element in which to draw the chart.
+            element: 'readyDishChart',
+            data: [
+                @foreach($readyDish as $rd)
+                {
+                    year: '{{ $rd->name }}' + '({{ count($rd->todaysOrderReadyDish) }})',
+                    value: {{ count($rd->todaysOrderReadyDish) }}
+                },
+                @endforeach
+            ],
+            xkey: 'year',
+            ykeys: ['value'],
+            labels: ['Total Orders'],
+            barColors: ['#ff9800'], // Orange color for ready dishes
+            gridTextColor: '#000',
+            gridTextSize: '15px',
+            resize: true
+        });
+
         })
     </script>
 @endsection

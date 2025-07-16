@@ -72,4 +72,12 @@ class ReadyDish extends Model
         }
 
 
+        public function todaysOrderReadyDish()
+{
+    return $this->hasMany(OrderDetails::class, 'ready_dish_id')
+        ->where('created_at', 'like',
+                \Carbon\Carbon::today()->format('Y-m-d') . '%');
+}
+
+
 }

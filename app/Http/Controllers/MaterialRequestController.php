@@ -161,7 +161,7 @@ class MaterialRequestController extends Controller
 
         public function barmanRequest(){
             $data['requests'] = MaterialRequest::where('requested_by', 5)->get();
-            $data['products'] = ReadyDish::where('source_type', 'supplier')->orderBy('name')->get();
+            $data['products'] = Product::orderBy('product_name')->get();
             $data['suppliers'] = Supplier::where('status', 1)->get();
             return view('user.admin.materials.barman-request', $data);
         }

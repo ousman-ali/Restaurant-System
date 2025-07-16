@@ -44,4 +44,4 @@ class Dish extends Model
             ->where('created_at', 'like',
                 \Carbon\Carbon::today()->format('Y-m-d') . '%');
     }
-}
+} 
