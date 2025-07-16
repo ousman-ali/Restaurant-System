@@ -22,6 +22,10 @@
                     <a href="{{url('/kitchen-status')}}" class="waves-effect"><i class="icon icon-fire"></i> <span> Kitchen Status </span> </a>
                 </li>
 
+                <li class="">
+                    <a href="{{url('/barman-status')}}" class="waves-effect"><i class="icon icon-fire"></i> <span> Barman Status </span> </a>
+                </li>
+
             </ul>
             <div class="clearfix"></div>
         </div>

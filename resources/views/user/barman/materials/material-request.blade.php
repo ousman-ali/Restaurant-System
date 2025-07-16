@@ -82,7 +82,7 @@
                         <form id="materialRequestForm" method="POST" action="{{ route('materials.request.barman.store') }}">
                         @csrf
                         <input type="hidden" name="reference_id" id="reference_id">
-                        <input type="hidden" name="type" id="type" value="ready_dish"> <!-- or ready_dish dynamically if needed -->
+                        <input type="hidden" name="type" id="type" value="recipe_product"> <!-- or ready_dish dynamically if needed -->
 
                         <div class="modal-content">
                             <div class="modal-header">

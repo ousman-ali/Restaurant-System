@@ -321,7 +321,9 @@ Route::middleware('active.user')->group(function () {
         Route::get('/my-orders', [OrderController::class, 'myOrder']);
         // Live Kitchen for waiter
         Route::get('/kitchen-status', [KitchenController::class, 'waiterLiveKitchen']);
+        Route::get('/barman-status', [KitchenController::class, 'waiterLiveBarman']);
         Route::get('/kitchen-status-waiter-json', [KitchenController::class, 'waiterLiveKitchenJSON']);
+        Route::get('/barman-status-waiter-json', [KitchenController::class, 'waiterLiveBarmanJSON']);
         // Waiter Stat
         Route::get('/waiter-stat', [WaiterController::class, 'waiterStat']);
         Route::post('/waiter-stat-post', [WaiterController::class, 'postWaiterStat']);

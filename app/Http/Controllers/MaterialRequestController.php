@@ -169,7 +169,7 @@ class MaterialRequestController extends Controller
     public function approveBarmanRequest(
         Request $request){
         $request->validate([
-            'product_id' => 'required|exists:ready_dishes,id',
+            'product_id' => 'required|exists:products,id',
             'supplier_id' => 'required',
             'quantity' => 'required|numeric',
             'unit_price' => 'required|numeric',
@@ -183,15 +183,16 @@ class MaterialRequestController extends Controller
         $purses->is_payed = 0;
         $purses->user_id = auth()->user()->id;
         if($purses->save()){
-            $pursesProduct = new PursesReadyDish();
+            $pursesProduct = new PursesProduct();
             $pursesProduct->purse_id = $purses->id;
-            $pursesProduct->ready_dish_id = $request->product_id;
-            $pursesProduct->ready_quantity = $request->quantity;
+            $pursesProduct->product_id = $request->product_id;
+            $pursesProduct->quantity = $request->quantity;
             $pursesProduct->unit_price = $request->unit_price;
-            $pursesProduct->total_price = $request->gross_price;
+            $pursesProduct->child_unit_price = $request->child_unit_price;
+            $pursesProduct->gross_price = $request->gross_price;
             $pursesProduct->save();
             if(!$pursesProduct){
-                PursesReadyDish::where('purses_id',$purses->id)->delete();
+                PursesProduct::where('purses_id',$purses->id)->delete();
                 Purse::destroy($purse->id);
                 return response()->json('Internal Serer Error',500);
             }
@@ -210,21 +211,21 @@ class MaterialRequestController extends Controller
             $kReq->save();
 
             try {
-                $product = ReadyDish::find($request->product_id);
-                event(new \App\Events\MaterialRequestEvent([
-                    'type' => $request->type,
-                    'user' =>auth()->user()->name,
-                    'requested' => $request->requested_quantity,
-                    'name' => $product->name ?? 'Unknown',
-                    'minimum_stock_threshold' => $product->minimum_stock_threshold ?? 0,
-                    'time' => now(),
-                    'notify' => $kReq->requested_by,
-                    'not_type' => 'approve',
-                ]));
+            $product = Product::find($request->product_id);
+            event(new \App\Events\MaterialRequestEvent([
+                'type' => 'recipe_product',
+                'user' =>auth()->user()->name,
+                'requested' => $request->quantity,
+                'name' => $product->product_name ?? 'Unknown',
+                'minimum_stock_threshold' => $product->minimum_stock_threshold ?? 0,
+                'time' => now(),
+                'notify' => $kReq->requested_by,
+                'not_type' => 'approve',
+            ]));
 
-                } catch (\Exception $exception) {
-                    Log::error("Broadcasting failed: " . $exception->getMessage());
-                }
+            } catch (\Exception $exception) {
+                Log::error("Broadcasting failed: " . $exception->getMessage());
+            }
             Session::flash('success', 'The request approved successfully');
             return back();
 

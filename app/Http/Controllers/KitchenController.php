@@ -64,15 +64,80 @@ class KitchenController extends Controller
      */ 
     public function waiterLiveKitchenJSON()
     {
+        // $orders = Order::where('status', '!=', 3)
+        //     ->where('served_by', auth()->user()->id)
+        //     ->with('orderDetails')
+        //     ->with('servedBy')
+        //     ->with('kitchen')
+        //     ->with('table')
+        //     ->orderBy('id','desc')
+        //     ->get();
+
         $orders = Order::where('status', '!=', 3)
-            ->where('served_by', auth()->user()->id)
-            ->with('orderDetails')
-            ->with('servedBy')
-            ->with('kitchen')
-            ->with('table')
-            ->orderBy('id','desc')
+            ->whereHas('orderDetails', function ($q) {
+                $q->where('from_ready', false)
+                ->whereHas('dish', function ($dishQuery) {
+                    $dishQuery->where('order_to', 'kitchen');
+                });
+            })
+            ->with([
+                'orderDetails' => function ($query) {
+                    $query->where('from_ready', false)
+                        ->whereHas('dish', function ($dishQuery) {
+                            $dishQuery->where('order_to', 'kitchen');
+                        })
+                        ->with(['readyDish.unit', 'dish']);
+                },
+                'servedBy',
+                'kitchen',
+                'table',
+            ])
+            ->orderBy('id', 'desc')
+            ->get();
+
+
+        
+        return response()->json($orders);
+    }
+
+    public function waiterLiveBarmanJSON(){
+        $orders = Order::where('status','!=', 3)
+            ->whereHas('orderDetails', function ($q) {
+                $q->where(function ($q) {
+                    $q->where('from_ready', true)
+                    ->orWhere(function ($sub) {
+                        $sub->where('from_ready', false)
+                            ->whereHas('dish', function ($dishQuery) {
+                                $dishQuery->where('order_to', 'barman');
+                            });
+                    });
+                });
+            })
+            ->with([
+                'orderDetails' => function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('from_ready', true)
+                        ->orWhere(function ($sub) {
+                            $sub->where('from_ready', false)
+                                ->whereHas('dish', function ($dishQuery) {
+                                    $dishQuery->where('order_to', 'barman');
+                                });
+                        });
+                    })
+                    ->with(['readyDish.unit', 'dish']);
+                },
+                'servedBy',
+                'kitchen',
+                'table',
+            ])
+            ->orderBy('id', 'desc')
             ->get();
         return response()->json($orders);
+
+    }
+
+    public function waiterLiveBarman(){
+        return view('user.waiter.live-barman');
     }
 
     /**
