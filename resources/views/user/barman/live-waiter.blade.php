@@ -67,6 +67,15 @@
                 });
             });
 
+            var dishServed = pusher.subscribe('order-served');
+            dishServed.bind('order-served-event', function (data) {
+                $.get("/baker-status-waiter-json", function (data) {
+                    waiterOrders = data.waiterOrders;
+                    $("#waiterHtml").empty();
+                    $(this).renderWaiterOrders(waiterOrders, "#waiterHtml");
+                });
+            });
+
 
             $.fn.serveReadyOrder = function (index) {
                 const laddaBtn = Ladda.create(this[0]); 

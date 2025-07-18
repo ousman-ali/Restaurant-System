@@ -9,7 +9,7 @@ class CashierController extends Controller
 {
    public function myOrder()
     {
-        $orders = Order::all();
+        $orders = Order::latest()->get();
         $banks = Bank::where('status', 1)->get();
         return view('user.cashier.my-order', [
             'orders' => $orders,

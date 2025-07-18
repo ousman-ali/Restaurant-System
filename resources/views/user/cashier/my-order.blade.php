@@ -27,6 +27,7 @@
                 <th>Table</th>
                 <th>Unpaid Amount</th>
                 <th>Order Value</th>
+                <th>Order Date</th>
                 <th width="120px">Action</th>
             </tr>
             </thead>
@@ -50,28 +51,27 @@
                         {{$amount}}
 
                     </td>
-                    <td>
-                            
-                                <div class="btn-group">
-                                    
-                                    <button type="button" onclick="printInvoice({{$oder->id}})"
-                                            href="{{url('/cashier-print-order/'.$oder->id)}}"
-                                            class="btn btn-purple waves-effect waves-light">
-                                        <i class="fa fa-print"></i>
-                                    </button>
-                                   
+                    <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>
+                    <td>   
+                    <div class="btn-group">
+                        <button type="button" onclick="printInvoice({{$oder->id}})"
+                                href="{{url('/cashier-print-order/'.$oder->id)}}"
+                                class="btn btn-purple waves-effect waves-light">
+                            <i class="fa fa-print"></i>
+                        </button>
+                        
 
-                                    @if($diff && $diff > 0)
-                                    <button
-                                        class="btn btn-primary waves-effect waves-light pay-btn"
-                                        data-order-id="{{ $oder->id }}"
-                                        data-diff="{{ number_format($diff, 2, '.', '') }}">
-                                        <i class="fa fa-credit-card"></i> Pay
-                                        </button>
+                        @if($diff && $diff > 0)
+                        <button
+                            class="btn btn-primary waves-effect waves-light pay-btn"
+                            data-order-id="{{ $oder->id }}"
+                            data-diff="{{ number_format($diff, 2, '.', '') }}">
+                            <i class="fa fa-credit-card"></i> Pay
+                            </button>
 
-                                    @endif
-                                </div>
-                        </td>
+                        @endif
+                    </div>
+                    </td>
 
                         <div id="paymentModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; 
                                 background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
