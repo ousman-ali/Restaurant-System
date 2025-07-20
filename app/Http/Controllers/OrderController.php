@@ -26,9 +26,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 use App\Models\InhouseOrder;
 use App\Models\SupplierOrder;
+use Carbon\Carbon;
+
 class OrderController extends Controller
 {
     /**
@@ -87,8 +90,13 @@ class OrderController extends Controller
     public function saveOrder(OrderRequest $request)
     {
         
-        
         try {
+            if ($request->code === '__generate_new__') {
+                $now = Carbon::now();
+                $request->merge([
+                    'code' => 'ORD-' . $now->format('Y-m-d_H-i-s-u') . '-' . strtoupper(Str::random(5)),
+                ]);
+            }
             DB::beginTransaction();
             $lastOrder = Order::latest('id')->first();
             $orderNo = $lastOrder ? $lastOrder->order_no + 1 : 1001;
@@ -102,6 +110,7 @@ class OrderController extends Controller
             $order->payment = $request->payment;
             $order->vat = $request->vat;
             $order->bank_id = $request->bank_id;
+            $order->code = $request->code;
             $order->change_amount = $request->change_amount;
             $order->save();
             foreach ($request->items as $item) {

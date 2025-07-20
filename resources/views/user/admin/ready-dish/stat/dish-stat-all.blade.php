@@ -7,7 +7,7 @@
 @section('content')
     <link rel="stylesheet" href="{{url('/dashboard/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css')}}">
     <div class="card-box">
-        <form class="form-horizontal" role="form" method="post" action="{{url('/dish-stat-post')}}" id="formMe"
+        <form class="form-horizontal" role="form" method="post" action="{{url('/ready-dish-stat-post')}}" id="formMe"
               data-parsley-validate novalidate>
             {{csrf_field()}}
             <div class="form-group">
@@ -16,7 +16,7 @@
                     <select name="kitchen" id="" class="form-control">
                         <option value="0">All</option>
                         @foreach($dishes as $dish)
-                            <option value="{{$dish->id}}">{{$dish->dish}}</option>
+                            <option value="{{$dish->id}}">{{$dish->name}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -91,8 +91,12 @@
     <script src="{{url('/dashboard/plugins/datatables/buttons.print.min.js')}}"></script>
     <script src="{{url('/dashboard/plugins/datatables/dataTables.buttons.min.js')}}"></script>
     <script src="{{url('/dashboard/plugins/datatables/jszip.min.js')}}"></script>
-    <script src="{{url('/dashboard/plugins/datatables/pdfmake.min.js')}}"></script>
+    <script src="{{ asset('dashboard/plugins/datatables/pdfmake.min.js') }}"></script>
     <script src="{{ asset('dashboard/plugins/datatables/vfs_fonts.js') }}"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script> --}}
+
+    {{-- <script src="{{url('/dashboard/plugins/datatables/pdfmake.min.js')}}"></script> --}}
 
     {{--Chart--}}
     <script src="{{url('/dashboard/plugins/raphael/raphael-min.js')}}"></script>

@@ -6,7 +6,7 @@
             </div>
             <div class="text-right">
                 <h3 class="text-dark"><b class="counter">
-                        {{count(\App\Models\Order::where('served_by',auth()->user()->id)->get())}}
+                        {{count(\App\Models\Order::whereIn('served_by',[1,2,3])->get())}}
                     </b></h3>
                 <p class="text-muted">Total Order</p>
             </div>
@@ -21,7 +21,7 @@
             </div>
             <div class="text-right">
                 <h3 class="text-dark"><b class="counter">
-                        {{count(\App\Models\Order::where('served_by',auth()->user()->id)->where('created_at','like','%'.Carbon\Carbon::now()->format('Y-m-d').'%')->get())}}
+                        {{count(\App\Models\Order::whereIn('served_by',[1,2,3])->where('created_at','like','%'.Carbon\Carbon::now()->format('Y-m-d').'%')->get())}}
                     </b></h3>
                 <p class="text-muted">Order Today</p>
             </div>
@@ -36,7 +36,7 @@
             </div>
             <div class="text-right">
                 <h3 class="text-dark"><b
-                        class="counter">{{count(\App\Models\Order::where('served_by',auth()->user()->id)->where('status',0)->get())}}</b>
+                        class="counter">{{count(\App\Models\Order::whereIn('served_by',[1,2,3])->where('status',0)->get())}}</b>
                 </h3>
                 <p class="text-muted">Pending Order to Kitchen</p>
             </div>
@@ -51,7 +51,7 @@
             </div>
             <div class="text-right">
                 <h3 class="text-dark"><b
-                        class="counter">{{count(\App\Models\Order::where('served_by',auth()->user()->id)->where('status',2)->get())}}</b>
+                        class="counter">{{count(\App\Models\Order::whereIn('served_by',[1,2,3])->where('status',2)->get())}}</b>
                 </h3>
                 <p class="text-muted">Pending Orde to Serve</p>
             </div>

@@ -18,6 +18,7 @@
                         <li><a href="{{url('/kitchen-stat')}}">Kitchen</a></li>
                         <li><a href="{{url('/waiter-stat')}}">Waiter</a></li>
                         <li><a href="{{url('/dish-stat')}}">Dish</a></li>
+                        <li><a href="{{url('/ready-dish-stat')}}">Ready Dish</a></li>
                     </ul>
                 </li>
 

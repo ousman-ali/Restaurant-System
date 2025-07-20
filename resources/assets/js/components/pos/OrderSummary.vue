@@ -132,7 +132,7 @@
                     Order
                     <span class="shortcut-badge">F7</span>
                 </div> -->
-                <button
+                <!-- <button
                     ref="orderBtn"
                     type="button"
                     class="btn btn-outline ladda-button"
@@ -144,8 +144,12 @@
                         Order
                         <span class="shortcut-badge">F7</span>
                     </span>
-                    </button>
+                    </button> -->
 
+                <div role="button" class="btn btn-primary" @click="handleOrderCode">
+                    <span>✓</span> Order
+                    <span class="shortcut-badge">F7</span>
+                </div>
                 <div role="button" class="btn btn-primary" @click="handleOrderAction">
                     <span>✓</span> Order & Pay
                     <span class="shortcut-badge">F6</span>
@@ -247,6 +251,22 @@
 
                     </div>
 
+                    <!-- Code Modal -->
+                     <div class="add-payment">
+                         <div class="discount-section">
+                            <h4>Order Code</h4>
+                            <div class="discount-input-group">
+                              <select id="codeSelect" v-model="selectedCode">
+                                <option disabled value="">Choose Order Code</option>
+                                <option value="__generate_new__">+ Generate New Code</option>
+                                <option v-for="code in codes" :key="code.id" :value="code.code">{{ code.code }}</option>
+                                </select>
+
+                            </div>
+                        </div>
+
+                    </div>
+
                     <!-- Complete Order Button -->
                     <div class="model-footer">
                         <div style="display: flex; gap: 15px; width: 100%;">
@@ -255,6 +275,47 @@
                             </button>
                             <button class="btn btn-success btn-block ladda-button" @click="(e) => saveOrderWithLoading(e, true)" data-style="expand-right" data-spinner-color="#fff" role="button">
                                 Complete & Print Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Code Modal -->
+        <div class="payment-modal" v-if="isOrderCodeVisible">
+            <div class="modal-overlay" @click="isOrderCodeVisible = false"></div>
+            <div class="modal-content">
+                <div class=""
+                     style="display: flex; align-items: center; justify-content: space-between; padding: 5px 15px; border-bottom: 1px solid #e4e4e4;">
+                    <h3>Order</h3>
+                    <button class="close-btn" @click="isOrderCodeVisible = false">×</button>
+                </div>
+                <div class="modal-body">
+                   
+
+                    <!-- Add Payment -->
+                    <div class="add-payment">
+                         <div class="discount-section">
+                            <h4>Order Code</h4>
+                            <div class="discount-input-group">
+                              <select id="codeSelect" v-model="selectedCode">
+                                <option disabled value="">Choose Order Code</option>
+                                <option value="__generate_new__">+ Generate New Code</option>
+                                <option v-for="code in codes" :key="code.id" :value="code.code">{{ code.code }}</option>
+                                </select>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Complete Order Button -->
+                    <div class="model-footer">
+                        <div style="display: flex; gap: 15px; width: 100%;">
+                            <button class="btn btn-outline ladda-button"  role="button" data-style="expand-right" data-spinner-color="#000" @click="(e) => saveOrderWithLoading(e, false)">
+                                Save Order
                             </button>
                         </div>
                     </div>
@@ -279,9 +340,12 @@ const {
     taxAmount,
     finalTotal,
     selectedBank,
+    selectedCode,
     selectedTable,
     banks,
+    codes,
     isOrderModalVisible,
+    isOrderCodeVisible,
     deleteProductFromCart,
     updateCartItemQuantity,
     config,
@@ -341,6 +405,10 @@ const handleOrderAction = () => {
     // Show payment modal
     isOrderModalVisible.value = true;
 };
+
+const handleOrderCode = () => {
+    isOrderCodeVisible.value = true;
+}
 
 // Function to handle keyboard shortcuts
 const handleKeyboardShortcut = (event) => {
@@ -409,6 +477,10 @@ watch(() => [...carts.value], (newCart, oldCart) => {
     previousCartLength.value = newCart.length;
     scrollToBottom();
 }, {deep: true});
+
+
+
+
 </script>
 
 <style scoped>

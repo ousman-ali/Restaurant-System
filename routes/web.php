@@ -134,8 +134,11 @@ Route::middleware('active.user')->group(function () {
 
         // Dish Report
         Route::get('/dish-stat', [DishController::class, 'dishStat']);
+        Route::get('/ready-dish-stat', [DishController::class, 'readyDishStat']);
         Route::post('/dish-stat-post', [DishController::class, 'postDishStat']);
+        Route::post('/ready-dish-stat-post', [DishController::class, 'postReadyDishStat']);
         Route::get('/dish-stat/dish={id}/start={start_date}/end={end_date}', [DishController::class, 'showDishStat']);
+        Route::get('/ready-dish-stat/dish={id}/startd={start_date}/endd={end_date}', [DishController::class, 'showReadyDishStat']);
 
         // Dish Price
         Route::get('/dish-price/{dish_id}', [DishController::class, 'addDishPrice']);
@@ -395,6 +398,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/config', [SettingsController::class, 'getConfig']);
         Route::get('/orders', [OrderController::class, 'getOrders']); // Added for order management
         Route::get('/dish-categories', [DishCategoryController::class, 'getDishCategories']);
+        Route::get('/codes', [DishController::class, 'getOrderCodes']);
     });
 
 });

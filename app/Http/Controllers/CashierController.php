@@ -9,13 +9,25 @@ class CashierController extends Controller
 {
    public function myOrder()
     {
-        $orders = Order::latest()->get();
+        $order = Order::latest()->get();
+        $banks = Bank::where('status', 1)->get();
+
+        $orders = $order->map(function ($order) {
+            $order->bgColor = $order->code ? $this->stringToColorCode($order->code) : null;
+            return $order;
+        });
         $banks = Bank::where('status', 1)->get();
         return view('user.cashier.my-order', [
             'orders' => $orders,
             'banks' => $banks,
         ]);
     }
+
+    function stringToColorCode($string)
+    {
+        return '#' . substr(md5($string), 0, 6); // Generates hex color from string
+    }
+
 
 
     public function payOrder(Request $request, $id){

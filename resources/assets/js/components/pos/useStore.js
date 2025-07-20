@@ -28,16 +28,19 @@ const carts = ref([]);
 const cartOrderToType = ref(null);
 const tables = ref([]);
 const selectedBank = ref('');
+const selectedCode = ref('');
 const products = ref([]);
 const readyProducts = ref([]);
 const productCategories = ref([]);
 const banks = ref([]);
+const codes = ref([]);
 const discountAmount = ref(0);
 const currentPaymentAmount = ref('');
 const updateOrder = ref(null);
 const selectedTable = ref(null);
 const searchString = ref('');
 const isOrderModalVisible = ref(false);
+const isOrderCodeVisible = ref(false);
 const toastMessage = ref('');
 const isToastVisible = ref(false);
 
@@ -78,6 +81,7 @@ const fetchTables = async () => {
     }
 };
 
+
 const fetchDishCategories = async () => {
     try {
         const response = await axios.get('/web-api/dish-categories');
@@ -110,6 +114,16 @@ const fetchBanks = async () => {
         banks.value = response.data;
     } catch (err) {
         console.error('Error fetching banks:', err);
+    }
+}
+
+const fetchCodes = async () => {
+    try {
+        const response = await axios.get('/web-api/codes');
+        console.log('codesssssssssss', response.data);
+        codes.value = response.data;
+    } catch (err) {
+        console.error('Error fetching code:', err);
     }
 }
 
@@ -293,9 +307,15 @@ const clearCart = () => {
     selectedTable.value = null;
 };
 
+
 console.log('carts', carts);
 // Order processing functions
 const saveOrder = async (shouldPrint = false) => {
+    console.log('status', !selectedCode.value || selectedCode.value === '');
+    if(!selectedCode.value || selectedCode.value === ''){
+        showToast('Please select an order code.');
+        return;
+    }
     const orderData = {
         table_id: selectedTable.value ? selectedTable.value.id : null,
         payment: currentPaymentAmount.value ? currentPaymentAmount.value : null,
@@ -303,6 +323,7 @@ const saveOrder = async (shouldPrint = false) => {
         change_amount: currentPaymentAmount.value ? (finalTotal.value - currentPaymentAmount.value) : 0,
         discount_amount: discountAmount.value ? discountAmount.value : 0,
         bank_id: selectedBank.value || null,
+        code : selectedCode.value,
         order_to: cartOrderToType.value,
         items: carts.value.map(item => ({
             dish_id: item.dish_id,
@@ -334,6 +355,7 @@ const saveOrder = async (shouldPrint = false) => {
         }
 
         isOrderModalVisible.value = false;
+        isOrderCodeVisible.value = false;
 
         // if (shouldPrint && response.data.id) {
         //     printInvoice(response.data.id);
@@ -420,6 +442,7 @@ const initializeStore = async () => {
                 await fetchConfig(),
                 await fetchDishCategories(),
                 await fetchBanks(),
+                await fetchCodes(),
             ];
 
             await Promise.all(promises);
@@ -447,9 +470,11 @@ export default function useStore() {
         config,
         products,
         selectedBank,
+        selectedCode,
         readyProducts,
         productCategories,
         banks,
+        codes,
         tables,
         selectedTable,
         searchString,
@@ -458,6 +483,7 @@ export default function useStore() {
         currentPaymentAmount,
         updateOrder,
         isOrderModalVisible,
+        isOrderCodeVisible,
         toastMessage,
         isToastVisible,
 

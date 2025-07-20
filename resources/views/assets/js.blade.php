@@ -379,7 +379,7 @@
         };
 
         // 👇 Skip notification if not for current user
-        if (window.userRole != orderTo) {
+        if (window.userRole != orderTo  && window.userRole != 7) {
             console.log(`🔕 Ignored: Order not for this role (order_to: ${orderTo})`);
             return;
         }
@@ -408,6 +408,8 @@
             href = '/all-order';
         }else if(window.userRole == 3){
             href = '/my-orders';
+        }else if(window.userRole == 7){
+            href = '/cashier-orders';
         }
 
         if (data.type === 'update') {

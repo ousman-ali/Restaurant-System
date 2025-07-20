@@ -15,7 +15,7 @@
                     <select name="kitchen" id="" class="form-control">
                         <option value="0">All</option>
                         @foreach($dishes as $dish)
-                            <option value="{{$dish->id}}">{{$dish->dish}}</option>
+                            <option value="{{$dish->id}}">{{$dish->name}}</option>
                         @endforeach
                     </select>
                 </div>

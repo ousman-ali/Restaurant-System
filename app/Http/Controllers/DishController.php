@@ -73,6 +73,15 @@ class DishController extends Controller
         $banks = Bank::where('status', 1)->get();
         return response()->json($banks);
     }
+    public function getOrderCodes()
+    {
+        $orders = \App\Models\Order::whereNotNull('code')
+            ->selectRaw('MIN(id) as id, code')
+            ->groupBy('code')->get();
+
+        return response()->json($orders);
+    }
+
 
     public function getReadyDishes(): JsonResponse
     {
@@ -370,6 +379,13 @@ class DishController extends Controller
         ]);
     }
 
+    public function readyDishStat(){
+        $dishes = ReadyDish::all();
+        return view('user.admin.ready-dish.stat.dish-stat', [
+            'dishes' => $dishes
+        ]);
+    }
+
     /**
      * This method will redirect to the dish statistic url by requested query
      * @param Request $request
@@ -383,6 +399,17 @@ class DishController extends Controller
         return redirect()
             ->to('/dish-stat/dish=' . $dish . '/start=' . $start_date . '/end=' . $end_date);
     }
+
+    public function postReadyDishStat(Request $request)
+    {
+        
+        $start_date = str_replace('/', '-', $request->get('start') != null ? $request->get('start') : "2017-09-01");
+        $end_date = str_replace('/', '-', $request->get('end') != null ? $request->get('end') : Carbon::now()->format('Y-m-d'));
+        $dish = $request->get('kitchen') == 0 ? 0 : $request->get('kitchen');
+        return redirect()
+            ->to('/ready-dish-stat/dish=' . $dish . '/startd=' . $start_date . '/endd=' . $end_date);
+    }
+    
 
     /**
      * This method will show the statistic using the url query
@@ -418,5 +445,32 @@ class DishController extends Controller
         }
     }
 
+    public function showReadyDishStat($id, $start_date, $end_date): Factory|View
+    {
+       
+        $dishes = ReadyDish::all();
+        if ($id == 0) {
+            $dish_query = ReadyDish::whereBetween('created_at', array($start_date . " 00:00:00", $end_date . " 00:00:00"))
+                ->get();
+            return view('user.admin.ready-dish.stat.dish-stat-all', [
+                'dishes' => $dishes,
+                'dish_query' => $dish_query,
+                'start' => $start_date,
+                'end' => $end_date
+            ]);
+        } else {
+            $selected_dish = ReadyDish::findOrFail($id);
+            $dish_query = ReadyDish::where('id', $id)
+                ->whereBetween('created_at', array($start_date . " 00:00:00", $end_date . " 00:00:00"))
+                ->get();
+            return view('user.admin.ready-dish.stat.dish-stat-selected', [
+                'dishes' => $dishes,
+                'selected_dish' => $selected_dish,
+                'dish_query' => $dish_query,
+                'start' => $start_date,
+                'end' => $end_date
+            ]);
+        }
+    }
 
 }

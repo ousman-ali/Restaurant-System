@@ -34,7 +34,7 @@
             <?php $count = 1; ?>
             <tbody>
             @foreach($orders as $oder)
-                <tr>
+                <tr style="background-color: {{ $oder->bgColor ?? 'transparent' }} !important; color: {{$oder->code ? 'white;' : ''}}">
                     {{--<td>{{$count++}}</td>--}}
                     <td><input type="checkbox" class="order-checkbox" value="{{ $oder->id }}"></td>
                     <td>{{$oder->id}}</td> 
