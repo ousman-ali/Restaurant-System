@@ -5,132 +5,196 @@
 @endsection
 
 @section('content')
+    <div class="card-box table-responsive">
 
-    {{--Page header--}}
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="btn-group pull-right m-t-15">
-                <a href="{{url('/new-order')}}" class="btn btn-default waves-effect">New Order <span class="m-l-5"><i
-                            class="fa fa-plus"></i></span></a>
-            </div>
-
-            <h4 class="page-title">All Order</h4>
-            <ol class="breadcrumb">
-                <li>
-                    <a href="{{url('/')}}">Home</a>
-                </li>
-                <li class="active">
-                    Order
-                </li>
-                <li class="active">
-                    All Order
-                </li>
-            </ol>
+        <h4 class="m-t-0 header-title"><b>All Order</b></h4>
+       
+        <div class="d-flex justify-content-end mb-3">
+        <button id="printSelectedOrders" class="btn btn-info" style="display:none;">
+            Print Selected Orders
+        </button>
         </div>
-    </div>
-    
-    @foreach($orders as $order)
-        <div class="card-box">
-            <h4>{{$order[0]->created_at->format('M-Y')}}</h4>
-            <table class="datatable-responsive table table-striped table-bordered dt-responsive nowrap">
-                <thead>
-                <tr>
-                    <th>Order No</th>
-                    <th>Served By</th>
-                    <th>Order Value</th>
-                    <th>Kitchen</th>
-                    <th>Waiter</th>
-                    <th>Status</th>
-                    <th width="120px">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                    
-                @foreach($order as $o)
-                        <?php
-                        $orderSum = $o->orderPrice->sum('gross_price');
-                        ?>
-                    <tr>
-                        <td>{{str_pad($o->id,4,0,STR_PAD_LEFT)}}</td>
-                        <td>{{$o->servedBy->name}}</td>
-                        <td>{{config('restaurant.currency.symbol')}} {{number_format($orderSum,2)}} {{config('restaurant.currency.currency')}}</td>
-                        <td>{{$o->kitchen ? $o->kitchen->name : "Pending"}}</td>
-                        <td>{{$o->servedBy->name}}</td>
-                        <td>
-                            @if($o->status == 0)
-                                <p class="text-warning">Pending...</p>
-                            @elseif($o->status == 1)
-                                Cooking...
-                            @elseif($o->status == 2) 
-                                <b class="text-custom"><i>Cooked !</i></b>
-                            @elseif($o->status == 3)
-                                <b class="text-danger">Served !</b>
-                            @else
-                                Unknown Status
-                            @endif
-                        </td>
-                        <td>
-                            @if($o->user_id ==0)
+        <table id="datatable-responsive"
+               class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0"
+               width="100%">
+            <thead>
+            <tr>
+                {{--<th>#</th>--}}
+                {{-- <th><input type="checkbox" id="selectAllOrders"></th> --}}
+                <th>Order No</th>
+                <th>Served By</th>
+                <th>Status</th>
+                <th>Table</th>
+                <th>Unpaid Amount</th>
+                <th>Order Value</th>
+                <th>Order Date</th>
+                <th width="120px">Action</th>
+            </tr>
+            </thead>
+            <?php $count = 1; ?>
+            <tbody>
+            @foreach($orders as $oder)
+                <tr style="background-color: {{ $oder->bgColor ?? 'transparent' }} !important; color: {{$oder->code ? 'white;' : ''}}">
+                    {{--<td>{{$count++}}</td>--}}
+                    {{-- <td><input type="checkbox" class="order-checkbox" value="{{ $oder->id }}"></td> --}}
+                    <td>{{$oder->id}}</td> 
+                    <td>{{$oder->servedBy->name}}</td>
+                    @php
+                        $amount = ($oder->orderPrice->sum('gross_price') - $oder->discount) + $oder->vat;
+                        $payment = $oder->payment;
+                        $diff = $amount-$payment;
+                    @endphp
+                    <td>{{$diff== 0 ? 'Paid' : 'Due' }}</td>
+                    <td>{{$oder->table?->name ?? '_'}}</td>
+                    <td>{{config('restaurant.currency.symbol')}} {{$diff}} {{config('restaurant.currency.currency')}}</td>
+                    <td>
+                       {{config('restaurant.currency.symbol')}}  {{$amount}} {{config('restaurant.currency.currency')}}
+
+                    </td>
+                    <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>
+                    <td>
+                            
                                 <div class="btn-group">
-                                    <a href="{{url('/edit-order/'.$o->id)}}"
+                                    @if($oder->status == 0)
+                                    <a href="{{url('/edit-order/'.$oder->id)}}"
                                        class="btn btn-success waves-effect waves-light">
                                         <i class="fa fa-pencil"></i>
                                     </a> 
-                                    <button type="button" onclick="printInvoice({{$o->id}})"
-                                            href="{{url('/print-order/'.$o->id)}}"
-                                            class="btn btn-purple waves-effect waves-light">
-                                        <i class="fa fa-print"></i>
-                                    </button>
-                                    @if($o->status == 0)
-                                        {{-- <a href="#" onclick="$(this).confirmDelete('/delete-order/'+{{$o->id}})"
-                                           class="btn btn-danger waves-effect waves-light">
-                                            <i class="fa fa-trash-o"></i>
-                                        </a> --}}
-
+                                    @endif
+                                    @if($oder->status == 0)
                                         <form action="{{ route('order.delete')}}" method="post" class="deleteform">
                                             @csrf
-                                            <input type="hidden" name="order_id" value="{{$o->id}}">
+                                            <input type="hidden" name="order_id" value="{{$oder->id}}">
                                             <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
                                                 <i class="fa fa-trash-o"></i>
                                             </button>
                                         </form>
+                                    @endif
+
+                                    @if($diff && $diff > 0)
+                                    <button
+                                        class="btn btn-primary waves-effect waves-light pay-btn"
+                                        data-order-id="{{ $oder->id }}"
+                                        data-diff="{{ number_format($diff, 2, '.', '') }}">
+                                        <i class="fa fa-credit-card"></i> Pay
+                                        </button>
 
                                     @endif
-                                </div>
-                            @else
-                                <a href="{{url('/print-order/'.$o->id)}}"
-                                   class="btn btn-purple waves-effect waves-light">
-                                    <i class="fa fa-print"></i>
-                                </a>
-                            @endif
-                        </td>
-                    </tr> 
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endforeach
 
+                                   
+                                </div>
+                        </td>
+                        <div id="paymentModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; 
+                            background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+                            <div style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%;">
+                                <h4>Make Payment</h4>
+
+                                <input type="number" id="paymentAmount" class="form-control" placeholder="Enter payment amount" />
+                                <input type="hidden" id="paymentOrderId" />
+
+                                <select id="paymentBank" class="form-control" style="margin-top:10px;">
+                                    <option value="">Select Payment Method</option>
+                                    @foreach($banks as $bank)
+                                        <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                    @endforeach
+                                </select>
+
+                                <div style="margin-top:15px; text-align:right;">
+                                    <button id="cancelPayment" class="btn btn-secondary">Cancel</button>
+                                    <button id="confirmPayment" class="btn btn-success">Confirm Payment</button>
+                                </div>
+                            </div>
+                        </div>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+    All Order
 @endsection
 
 @section('extra-js')
-
-    <script src="{{url('/dashboard/plugins/datatables/buttons.html5.min.js')}}"></script>
-    <script src="{{url('/dashboard/plugins/datatables/buttons.print.min.js')}}"></script>
-    <script src="{{url('/dashboard/plugins/datatables/dataTables.buttons.min.js')}}"></script>
-    <script src="{{url('/dashboard/plugins/datatables/jszip.min.js')}}"></script>
-    <script src="{{url('/dashboard/plugins/datatables/pdfmake.min.js')}}"></script>
-
     <script>
         $(document).ready(function () {
-            $(".datatable-responsive").DataTable({
-                order: [0, 'desc'],
-                dom: 'Bfrtip',
-                buttons: [
-                    'copy', 'excel', 'pdf', 'print'
-                ],
+            $("#datatable-responsive").DataTable({
+                "order": [[ 0, "desc" ]]
             });
-        })
+
+
+
+           function togglePrintButton() {
+                if ($('.order-checkbox:checked').length > 0) {
+                    $('#printSelectedOrders').show();
+                } else {
+                    $('#printSelectedOrders').hide();
+                }
+            }
+
+            $('#selectAllOrders').on('change', function() {
+                $('.order-checkbox').prop('checked', $(this).prop('checked'));
+                togglePrintButton();
+            });
+
+            $(document).on('change', '.order-checkbox', function() {
+                if (!$(this).prop('checked')) {
+                    $('#selectAllOrders').prop('checked', false);
+                } else if ($('.order-checkbox:checked').length === $('.order-checkbox').length) {
+                    $('#selectAllOrders').prop('checked', true);
+                }
+                togglePrintButton();
+            });
+
+
+            // Handle batch print button click
+            $('#printSelectedOrders').on('click', function () {
+                const selectedOrderIds = $('.order-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
+
+                printMultipleInvoices(selectedOrderIds);
+            });
+
+           $(document).on('click', '.pay-btn', function() {
+                const orderId = $(this).data('order-id');
+                const diff = $(this).data('diff');  // Get the diff amount
+                
+                $('#paymentOrderId').val(orderId);
+                $('#paymentAmount').val(diff); // Autofill with the diff amount
+                $('#paymentModal').css('display', 'flex');
+                });
+
+            $('#cancelPayment').on('click', function() {
+                $('#paymentModal').hide();
+            });
+
+            $('#confirmPayment').on('click', function() {
+                const orderId = $('#paymentOrderId').val();
+                const amount = $('#paymentAmount').val();
+
+                if (!amount || amount <= 0) {
+                console.log('Please enter a valid payment amount.');
+                return;
+                }
+
+                $.ajax({
+                url: `/pay-order/${orderId}`,
+                method: 'POST',
+                data: {
+                    amount: amount,
+                    _token: '{{ csrf_token() }}' // Laravel CSRF token
+                },
+                success: function(response) {
+                    console.log('Payment successful!');
+                    $('#paymentModal').hide();
+                    // Optionally reload page or update UI here
+                    location.reload();
+                },
+                error: function() {
+                    console.log('Payment failed, please try again.');
+                }
+                });
+            });
+        });
 
         function printInvoice(orderId) {
             if (!orderId) {
@@ -183,7 +247,57 @@
                 });
         }
 
-       
+        function printMultipleInvoices(orderIds) {
+            if (!orderIds || orderIds.length === 0) {
+                alert("Cannot print receipt: No order IDs selected");
+                return;
+            }
+
+            // Build query string param with comma-separated IDs
+            const idsQuery = encodeURIComponent(orderIds.join(','));
+
+            fetch(`/print-multiple-orders?order_ids=${idsQuery}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const printWindow = window.open('', '', 'width=800,height=600,toolbar=0,menubar=0,location=0');
+
+                console.log('html', html);
+                printWindow.document.write(html);
+                printWindow.document.close();
+
+                printWindow.onload = function() {
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+
+                        printWindow.onafterprint = function() {
+                            printWindow.close();
+                        };
+
+                        setTimeout(() => {
+                            printWindow.close();
+                        }, 1000);
+                    }, 500);
+                };
+            })
+            .catch(error => {
+                console.error('Error printing receipts:', error);
+                alert("Error printing receipts. Please try again.");
+            });
+}
+
+
+
 
     </script>
 

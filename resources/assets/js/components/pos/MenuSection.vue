@@ -188,16 +188,10 @@ const filteredReadyProducts = computed(() => {
     // Filter by search string if provided
     if (searchString.value) {
         const search = searchString.value.toLowerCase();
-        result = result.filter(product => {
-            // Search by dish name
-            if (product.dish.toLowerCase().includes(search)) {
-                return true;
-            }
 
-            // Search by dish type/variant
-            if (product.dish_prices.some(price =>
-                price.dish_type.toLowerCase().includes(search)
-            )) {
+        result = result.filter(product => {
+            // Search by product name
+            if (product.name && product.name.toLowerCase().includes(search)) {
                 return true;
             }
 
@@ -207,12 +201,10 @@ const filteredReadyProducts = computed(() => {
                 return true;
             }
 
-            // Search by price range (if search is a number)
+            // Search by price (if numeric search string)
             const searchNumber = parseFloat(search);
             if (!isNaN(searchNumber)) {
-                return product.dish_prices.some(price =>
-                    parseFloat(price.price) <= searchNumber
-                );
+                return parseFloat(product.price) <= searchNumber;
             }
 
             return false;
@@ -221,6 +213,7 @@ const filteredReadyProducts = computed(() => {
 
     return result;
 });
+
 
 console.log('products', filteredProducts, filteredReadyProducts);
 </script>

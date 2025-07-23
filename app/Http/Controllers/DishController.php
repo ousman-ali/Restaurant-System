@@ -77,7 +77,7 @@ class DishController extends Controller
     {
         $orders = \App\Models\Order::whereNotNull('code')
             ->selectRaw('MIN(id) as id, code')
-            ->groupBy('code')->get();
+            ->groupBy('code')->latest()->get();
 
         return response()->json($orders);
     }

@@ -11,6 +11,7 @@ use App\Events\StartCooking;
 use App\Events\StartInhouseCooking;
 use App\Events\CompleteInhouseCooking;
 use App\Http\Requests\OrderRequest;
+use App\Models\Bank;
 use App\Models\OrderDetails;
 use App\Models\CookedProduct;
 use App\Models\Dish;
@@ -56,15 +57,19 @@ class OrderController extends Controller
      */
     public function allOrder()
     {
-        $orders = Order::where('id', '!=', 0)->where('is_ready', false)
+        $order = Order::where('id', '!=', 0)->where('is_ready', false)
             ->orderBy('id', 'desc')
-            ->get()
-            ->groupBy(function ($data) {
-                return $data->created_at->format('M-Y');
-            });
+            ->latest()
+            ->get();
+        $banks = Bank::where('status', 1)->get();
+        $orders = $order->map(function ($order) {
+            $order->bgColor = $order->code ? $this->stringToColorCode($order->code) : null;
+            return $order;
+        });
 
         return view('user.admin.order.all-order', [
-            'orders' => $orders
+            'orders' => $orders,
+            'banks' => $banks,
         ]);
     }
 
@@ -74,11 +79,19 @@ class OrderController extends Controller
      */
     public function nonPaidOrder()
     {
-        $orders = Order::where('user_id', 0)
+        $order = Order::where('user_id', 0)
             ->orderBy('id', 'desc')
+            ->latest()
             ->get();
+        $orders = $order->map(function ($order) {
+            $order->bgColor = $order->code ? $this->stringToColorCode($order->code) : null;
+            return $order;
+        });
+        $banks = Bank::where('status', 1)->get();
+
         return view('user.admin.order.non-paid-order', [
-            'orders' => $orders
+            'orders' => $orders,
+            'banks' => $banks,
         ]);
     }
 
@@ -238,10 +251,18 @@ class OrderController extends Controller
      */
     public function myOrder()
     {
-        $orders = Order::where('served_by', auth()->user()->id)->get();
+        $order = Order::where('served_by', auth()->user()->id)->get();
+        $orders = $order->map(function ($order) {
+            $order->bgColor = $order->code ? $this->stringToColorCode($order->code) : null;
+            return $order;
+        });
         return view('user.waiter.order.my-order', [
             'orders' => $orders
         ]);
+    }
+    function stringToColorCode($string)
+    {
+        return '#' . substr(md5($string), 0, 6);
     }
 
     /**
@@ -421,6 +442,7 @@ public function printMultipleOrders(Request $request)
     public function payOrder(Request $request, $id){
         $order = Order::find($id);
         $order->payment += $request->amount;
+        $order->user_id = auth()->user()->id;
         $order->save();
         return response()->json('Ok', 200);
     }

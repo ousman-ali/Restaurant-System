@@ -27,13 +27,14 @@
                 <th>Table</th>
                 <th>Unpaid Amount</th>
                 <th>Order Value</th>
+                <th>Order Date</th>
                 <th width="120px">Action</th>
             </tr>
             </thead>
             <?php $count = 1; ?>
             <tbody>
             @foreach($orders as $oder)
-                <tr>
+                <tr style="background-color: {{ $oder->bgColor ?? 'transparent' }} !important; color: {{$oder->code ? 'white;' : ''}}">
                     {{--<td>{{$count++}}</td>--}}
                     {{-- <td><input type="checkbox" class="order-checkbox" value="{{ $oder->id }}"></td> --}}
                     <td>{{$oder->id}}</td> 
@@ -45,11 +46,12 @@
                     @endphp
                     <td>{{$diff== 0 ? 'Paid' : 'Due' }}</td>
                     <td>{{$oder->table?->name ?? '_'}}</td>
-                    <td>{{$diff}}</td>
+                    <td>{{config('restaurant.currency.symbol')}} {{$diff}} {{config('restaurant.currency.currency')}}</td>
                     <td>
-                        {{$amount}}
+                       {{config('restaurant.currency.symbol')}}  {{$amount}} {{config('restaurant.currency.currency')}}
 
                     </td>
+                    <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>
                     <td>
                             
                                 <div class="btn-group">

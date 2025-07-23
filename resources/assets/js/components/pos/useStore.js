@@ -239,12 +239,32 @@ const saveOrderWithLoading = async (event, shouldPrint = false) => {
 
 // Cart manipulation functions
 const addProductToCart = (product, selectedVariant = null) => {
+    console.log('productttttttttts', product);
     const variant = selectedVariant || product.dish_prices[0];
     const newType = getCartTypeFromProduct(product, false);
 
     if (!isCompatible(newType)) {
         showToast('Cannot mix dishes from kitchen and bar, or ready dishes with kitchen dishes.');
         return;
+    }
+
+    for (const recipe of product.dish_recipes) {
+        const cooked = recipe.product?.cooked_products?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+        const purchased = recipe.product?.purses?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+        const available = purchased - cooked;
+
+        // Get current quantity in cart for this variant
+        const existingCartItem = carts.value.find(item =>
+            item.productId === product.id && item.variantId === variant.id
+        );
+        const currentQty = existingCartItem ? existingCartItem.quantity + 1 : 1;
+
+        const totalNeeded = recipe.unit_needed * currentQty;
+
+        if (totalNeeded > available) {
+            showToast(`Insufficient stock for ingredient "${recipe.product.product_name}". Needed: ${totalNeeded.toFixed(2)}, Available: ${available.toFixed(2)}.`);
+            return;
+        }
     }
 
     const existingCartItemIndex = carts.value.findIndex(item =>
@@ -273,24 +293,71 @@ const addProductToCart = (product, selectedVariant = null) => {
     console.log('type', cartOrderToType.value);
 };
 
-
 const updateCartItemQuantity = (cartItemId, newQuantity) => {
     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
-    if (index !== -1) {
-        const cartItem = carts.value[index];
+    if (index === -1) return;
+
+    const cartItem = carts.value[index];
+
+    // 🔹 For ready dishes
+    if (cartItem.isReadyDish) {
         if (newQuantity > cartItem.stock) {
             showToast('The added amount exceeds available stock.');
             return;
         }
-        if (newQuantity <= 0) {
-            // Remove item if quantity is zero or negative
-            carts.value.splice(index, 1);
-        } else {
-            // Update quantity
-            carts.value[index].quantity = newQuantity;
+    }
+
+    // 🔸 For kitchen-made dishes
+    else {
+        const product = products.value.find(p => p.id === cartItem.productId);
+        const variant = product?.dish_prices?.find(v => v.id === cartItem.variantId);
+
+        if (!product || !variant) {
+            showToast('Product data not found.');
+            return;
+        }
+
+        for (const recipe of product.dish_recipes) {
+            const cooked = recipe.product?.cooked_products?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+            const purchased = recipe.product?.purses?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+            const available = purchased - cooked;
+
+            const totalNeeded = recipe.unit_needed * newQuantity;
+
+            if (totalNeeded > available) {
+                showToast(`Insufficient stock for ingredient "${recipe.product.product_name}". Needed: ${totalNeeded.toFixed(2)}, Available: ${available.toFixed(2)}.`);
+                return;
+            }
         }
     }
+
+    // ✅ Passed validation – proceed
+    if (newQuantity <= 0) {
+        carts.value.splice(index, 1);
+    } else {
+        carts.value[index].quantity = newQuantity;
+    }
 };
+
+
+
+// const updateCartItemQuantity = (cartItemId, newQuantity) => {
+//     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);
+//     if (index !== -1) {
+//         const cartItem = carts.value[index];
+//         if (newQuantity > cartItem.stock) {
+//             showToast('The added amount exceeds available stock.');
+//             return;
+//         }
+//         if (newQuantity <= 0) {
+//             // Remove item if quantity is zero or negative
+//             carts.value.splice(index, 1);
+//         } else {
+//             // Update quantity
+//             carts.value[index].quantity = newQuantity;
+//         }
+//     }
+// };
 
 const deleteProductFromCart = (cartItemId) => {
     const index = carts.value.findIndex(item => item.cartItemId === cartItemId);

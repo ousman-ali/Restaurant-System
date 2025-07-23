@@ -91,7 +91,7 @@
     <script src="{{url('/dashboard/plugins/datatables/buttons.print.min.js')}}"></script>
     <script src="{{url('/dashboard/plugins/datatables/dataTables.buttons.min.js')}}"></script>
     <script src="{{url('/dashboard/plugins/datatables/jszip.min.js')}}"></script>
-    <script src="{{ asset('dashboard/plugins/datatables/pdfmake.min.js') }}"></script>
+    <script src="{{ asset('dashboard/plugins/datatables/pdfmake.min.js') }}"></script>  
     <script src="{{ asset('dashboard/plugins/datatables/vfs_fonts.js') }}"></script>
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script> --}}

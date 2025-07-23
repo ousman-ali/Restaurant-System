@@ -109,15 +109,14 @@ const filteredProducts = computed(() => {
         const search = searchString.value.toLowerCase();
         result = result.filter(product => {
             // Search by dish name
-            if (product.dish.toLowerCase().includes(search)) {
+            if (product.name.toLowerCase().includes(search)) {
                 return true;
             }
 
             // Search by dish type/variant
-            if (product.dish_prices.some(price =>
-                price.dish_type.toLowerCase().includes(search)
-            )) {
-                return true;
+            const searchNumber = parseFloat(search);
+            if (!isNaN(searchNumber)) {
+                return parseFloat(product.price) <= searchNumber;
             }
 
             // Search by category name
@@ -126,13 +125,6 @@ const filteredProducts = computed(() => {
                 return true;
             }
 
-            // Search by price range (if search is a number)
-            const searchNumber = parseFloat(search);
-            if (!isNaN(searchNumber)) {
-                return product.dish_prices.some(price =>
-                    parseFloat(price.price) <= searchNumber
-                );
-            }
 
             return false;
         });
