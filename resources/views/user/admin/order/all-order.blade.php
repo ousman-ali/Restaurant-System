@@ -45,10 +45,10 @@
                         $diff = $amount-$payment;
                     @endphp
                     <td>{{$diff== 0 ? 'Paid' : 'Due' }}</td>
-                    <td>{{$oder->table?->name ?? '_'}}</td>
-                    <td>{{config('restaurant.currency.symbol')}} {{$diff}} {{config('restaurant.currency.currency')}}</td>
+                    <td>{{$oder->table?->table_no ?? '_'}}</td>
+                    <td>{{config('restaurant.currency.symbol')}} {{ number_format($diff, 2) }} {{config('restaurant.currency.currency')}}</td>
                     <td>
-                       {{config('restaurant.currency.symbol')}}  {{$amount}} {{config('restaurant.currency.currency')}}
+                       {{config('restaurant.currency.symbol')}}  {{number_format($amount, 2) }} {{config('restaurant.currency.currency')}}
 
                     </td>
                     <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>

@@ -42,13 +42,14 @@
                     @php
                         $amount = ($oder->orderPrice->sum('gross_price') - $oder->discount) + $oder->vat;
                         $payment = $oder->payment;
-                        $diff = $amount-$payment;
+                        $diff = round($amount - $payment, 2); 
                     @endphp
-                    <td>{{$diff== 0 ? 'Paid' : 'Due' }}</td>
-                    <td>{{$oder->table?->name ?? '_'}}</td>
-                    <td>{{$diff}}</td>
+
+                    <td>{{ $diff == 0 ? 'Paid' : 'Due' }}</td>
+                    <td>{{ $oder->table?->table_no ?? '_' }}</td>
+                    <td>ETB {{ number_format($diff, 2) }} Birr</td>
                     <td>
-                        {{$amount}}
+                        {{ number_format($amount, 2) }}
 
                     </td>
                     <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>

@@ -364,6 +364,7 @@ const deleteProductFromCart = (cartItemId) => {
     if (index !== -1) {
         carts.value.splice(index, 1);
     }
+    cartOrderToType.value = null;
 };
 
 const clearCart = () => {

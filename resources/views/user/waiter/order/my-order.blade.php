@@ -42,38 +42,37 @@
                     @php
                         $amount = ($oder->orderPrice->sum('gross_price') - $oder->discount) + $oder->vat;
                         $payment = $oder->payment;
-                        $diff = $amount-$payment;
+                        $diff = round($amount - $payment, 2);
                     @endphp
                     <td>{{$diff== 0 ? 'Paid' : 'Due' }}</td>
-                    <td>{{$oder->table?->name ?? '_'}}</td>
-                    <td>{{config('restaurant.currency.symbol')}} {{$diff}} {{config('restaurant.currency.currency')}}</td>
+                    <td>{{$oder->table?->table_no ?? '_'}}</td>
+                    <td>{{config('restaurant.currency.symbol')}} {{ number_format($diff, 2) }} {{config('restaurant.currency.currency')}}</td>
                     <td>
-                       {{config('restaurant.currency.symbol')}}  {{$amount}} {{config('restaurant.currency.currency')}}
+                       {{config('restaurant.currency.symbol')}}  {{ number_format($amount, 2) }} {{config('restaurant.currency.currency')}}
 
                     </td>
                     <td>{{ \Carbon\Carbon::parse($oder->created_at)->format('M d, Y h:i A') }}</td>
-                    <td>
-                            
-                                <div class="btn-group">
-                                    @if($oder->status == 0)
-                                    <a href="{{url('/edit-order/'.$oder->id)}}"
-                                       class="btn btn-success waves-effect waves-light">
-                                        <i class="fa fa-pencil"></i>
-                                    </a> 
-                                    @endif
-                                    @if($oder->status == 0)
-                                        <form action="{{ route('order.delete')}}" method="post" class="deleteform">
-                                            @csrf
-                                            <input type="hidden" name="order_id" value="{{$oder->id}}">
-                                            <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
-                                                <i class="fa fa-trash-o"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                    <td>   
+                        <div class="btn-group">
+                            @if($oder->status == 0)
+                            <a href="{{url('/edit-order/'.$oder->id)}}"
+                                class="btn btn-success waves-effect waves-light">
+                                <i class="fa fa-pencil"></i>
+                            </a> 
+                            @endif
+                            @if($oder->status == 0)
+                                <form action="{{ route('order.delete')}}" method="post" class="deleteform">
+                                    @csrf
+                                    <input type="hidden" name="order_id" value="{{$oder->id}}">
+                                    <button type="submit" class="btn btn-danger waves-effect waves-light deletebtn">
+                                        <i class="fa fa-trash-o"></i>
+                                    </button>
+                                </form>
+                            @endif
 
-                                   
-                                </div>
-                        </td>
+                            
+                        </div>
+                    </td>
 
                         
 
