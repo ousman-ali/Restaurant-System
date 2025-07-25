@@ -47,7 +47,7 @@
 
                     <td>{{ $diff == 0 ? 'Paid' : 'Due' }}</td>
                     <td>{{ $oder->table?->table_no ?? '_' }}</td>
-                    <td>ETB {{ number_format($diff, 2) }} Birr</td>
+                    <td>{{config('restaurant.currency.symbol')}} {{ number_format($diff, 2) }} {{config('restaurant.currency.currency')}}</td>
                     <td>
                         {{ number_format($amount, 2) }}
 

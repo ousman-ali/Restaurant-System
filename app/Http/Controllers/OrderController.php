@@ -105,10 +105,16 @@ class OrderController extends Controller
     {
         
         try {
+            $table = \App\Models\Table::find($request->table_id);
             if ($request->code === '__generate_new__') {
                 $now = Carbon::now();
                 $request->merge([
-                    'code' => 'ORD-' . $now->format('Y-m-d_H-i-s-u') . '-' . strtoupper(Str::random(5)),
+                    'code' => 'ORD-' 
+                        . $now->format('Y-m-d_H-i-s-u') 
+                        . '-' 
+                        . strtoupper(Str::random(5))
+                        . '-' 
+                        . (($table->table_no ?? 'no-table')),
                 ]);
             }
             DB::beginTransaction();

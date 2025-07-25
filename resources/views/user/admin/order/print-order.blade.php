@@ -72,7 +72,7 @@
                                     </tr>
                                     <tr>
                                         <td class="text-right">Gross Total :</td>
-                                        <th class="text-right">{{config('restaurant.currency.symbol')}} {{$order->orderPrice->sum('gross_price')+($order->orderPrice->sum('gross_price')*$order->vat)/100}} {{config('restaurant.currency.currency')}}</th>
+                                        <th class="text-right">{{config('restaurant.currency.symbol')}} {{$order->orderPrice->sum('gross_price')+($order->vat) - $order->discount}} {{config('restaurant.currency.currency')}}</th>
                                     </tr>
                                     <tr>
                                         <td class="text-right">Payment :</td>

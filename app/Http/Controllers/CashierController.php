@@ -54,7 +54,7 @@ class CashierController extends Controller
         $ids = explode(',', $request->order_ids);
         $orders = Order::with(['servedBy', 'orderPrice.dish', 'orderPrice.dishType', 'orderPrice.readyDish'])
                     ->whereIn('id', $ids)
-                    ->where('order-to_cafe', $type)
+                    ->where('order_to_cafe', $type)
                     ->get();
 
         return view('user.admin.order.print-multiple-orders', compact('orders'));

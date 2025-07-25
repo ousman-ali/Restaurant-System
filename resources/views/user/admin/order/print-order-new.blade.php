@@ -301,7 +301,7 @@
             <div class="total-row">
                 <div class="total-label">Discount:</div>
                 <div class="total-value">
-                    -{{ config('restaurant.currency.symbol') }}{{ number_format($order->discount_amount, 2) }}</div>
+                    -{{ config('restaurant.currency.symbol') }}{{ number_format($order->discount, 2) }}</div>
             </div>
         @endif
 
@@ -309,11 +309,11 @@
             <div class="total-label">VAT ({{ config('restaurant.vat.vat_percentage') }}%):</div>
             <div class="total-value">{{ config('restaurant.currency.symbol') }}{{ number_format($order->vat, 2) }}</div>
         </div>
-
+ 
         <div class="total-row grand-total">
             <div class="total-label">TOTAL:</div>
             <div
-                class="total-value">{{ config('restaurant.currency.symbol') }}{{ number_format($order->orderPrice->sum('gross_price')+($order->orderPrice->sum('gross_price')*$order->vat)/100 - $order->discount_amount, 2) }}</div>
+                class="total-value">{{ config('restaurant.currency.symbol') }}{{ number_format($order->orderPrice->sum('gross_price')+($order->vat) - $order->discount, 2) }}</div>
         </div>
     </div>
 

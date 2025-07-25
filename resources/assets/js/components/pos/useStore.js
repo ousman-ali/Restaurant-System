@@ -216,6 +216,27 @@ const fetchOrderById = async () => {
             selectedTable.value = tables.value.find(el => el.id === response.data.table_id) || null;
         }
 
+        if (response.data?.bank_id && banks.value.length > 0) {
+            selectedBank.value = banks.value.find(el => el.id === response.data.bank_id) || null;
+        }
+
+        if (response.data?.code && codes.value.length > 0) {
+            selectedCode.value = codes.value.find(el => el.id === response.data.code) || null;
+        }
+
+       
+        selectedRest.value = response.data.order_to_cafe || null;
+
+        
+        cartOrderToType.value = response.data.order_to || null;
+
+
+
+        // bank_id: selectedBank.value || null,
+        // code : selectedCode.value,
+        // order_to_cafe: selectedRest.value,
+        // order_to: cartOrderToType.value,
+
         // Set discount amount
         discountAmount.value = response.data.discount || 0;
     } catch (err) {
@@ -383,6 +404,11 @@ const saveOrder = async (shouldPrint = false) => {
     console.log('status', !selectedCode.value || selectedCode.value === '');
     if(!selectedCode.value || selectedCode.value === ''){
         showToast('Please select an order code.');
+        return;
+    }
+    console.log('table', selectedTable.value);
+    if(!selectedTable.value || selectedTable.value == ''){
+        showToast('Please select an table.');
         return;
     }
     const orderData = {
