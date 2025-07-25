@@ -92,6 +92,18 @@
 
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">Restaurant Type :</label>
+                                <div class="col-md-6">
+                                    <select name="rest_type" id="" class="form-control select2" required>
+                                        <option value="">Select One</option>
+                                        <option value="restaurant">Restaurant</option>
+                                        <option value="cafe">Cafe</option>
+                                    </select>
+
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Phone </label>
                                 <div class="col-md-8">
@@ -141,6 +153,26 @@
                     warning: {header: 'Internal Server Error', body: 'Internal server error'}
                 },addEmployeeForm);
             });
+
+
+            const $roleSelect = $('select[name="role"]');
+                const $restTypeGroup = $('select[name="rest_type"]').closest('.form-group');
+
+                // Initially hide the restaurant type field
+                $restTypeGroup.hide();
+
+                // Define the allowed role values that should show restaurant type
+                const showRestTypeFor = ['4', '5', '7']; // Kitchen, Barman, Cashier
+
+                $roleSelect.change(function () {
+                    const selectedRole = $(this).val();
+                    if (showRestTypeFor.includes(selectedRole)) {
+                        $restTypeGroup.show();
+                    } else {
+                        $restTypeGroup.hide();
+                        $('select[name="rest_type"]').val(""); // optionally reset selection
+                    }
+                });
 
         })
     </script>

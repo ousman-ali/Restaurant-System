@@ -43,7 +43,7 @@ class UserController extends Controller
      */
     public function allEmployees()
     {
-        $employees = Employee::all();
+        $employees = Employee::latest()->get();
         return view('user.admin.employee.all-employees', [
             'employees' => $employees
         ]);
@@ -122,6 +122,7 @@ class UserController extends Controller
         if ($user->save()) {
             $employee = new Employee();
             $employee->name = $user->name;
+            $employee->rest_type = $request->rest_type;
             $employee->phone = $request->get('phone');
             $employee->email = $user->email;
             $employee->address = $request->get('address');
@@ -156,6 +157,7 @@ class UserController extends Controller
         $employee->phone = $request->get('phone');
         $employee->email = $request->get('email');
         $employee->address = $request->get('address');
+        $employee->rest_type = $request->get('rest_type');
         if ($employee->save()) {
             $user = User::find($employee->user->id);
             $user->name = $request->get('name');

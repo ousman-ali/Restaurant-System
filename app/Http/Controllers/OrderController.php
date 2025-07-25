@@ -57,6 +57,7 @@ class OrderController extends Controller
      */
     public function allOrder()
     {
+        
         $order = Order::where('id', '!=', 0)->where('is_ready', false)
             ->orderBy('id', 'desc')
             ->latest()
@@ -125,6 +126,7 @@ class OrderController extends Controller
             $order->bank_id = $request->bank_id;
             $order->code = $request->code;
             $order->change_amount = $request->change_amount;
+            $order->order_to_cafe = $request->order_to_cafe;
             $order->save();
             foreach ($request->items as $item) {
 
@@ -316,6 +318,9 @@ public function updateOrder(OrderRequest $request, $id)
         $order->vat = $request->vat;
         $order->change_amount = $request->change_amount;
         $order->bank_id = $request->bank_id;
+        $order->code = $request->code;
+        $order->change_amount = $request->change_amount;
+        $order->order_to_cafe = $request->order_to_cafe;
         $order->save();
 
         // 🧾 STEP 4: Save new items & manage stock
@@ -526,12 +531,14 @@ public function printMultipleOrders(Request $request)
      */
     public function kitchenOrderToJSON()
     {
+        $type = auth()->user()->employee->rest_type;
         $orders = Order::where(function ($query) {
             $query->where('kitchen_id', 0)
                 ->orWhere('kitchen_id', auth()->user()->id);
         })
         ->where('status', '!=', 2)
         ->where('status', '!=', 3)
+        ->where('order_to_cafe', $type)
         ->whereDoesntHave('orderDetails', function ($q) {
             $q->where(function ($inner) {
                 $inner->where('from_ready', true)

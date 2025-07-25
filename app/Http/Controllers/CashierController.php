@@ -9,7 +9,8 @@ class CashierController extends Controller
 {
    public function myOrder()
     {
-        $order = Order::latest()->get();
+        $type = auth()->user()->employee->rest_type;
+        $order = Order::where('order_to_cafe', $type)->latest()->get();
         $banks = Bank::where('status', 1)->get();
 
         $orders = $order->map(function ($order) {
@@ -49,9 +50,11 @@ class CashierController extends Controller
 
     public function printMultipleOrders(Request $request)
     {
+        $type = auth()->user()->employee->rest_type;
         $ids = explode(',', $request->order_ids);
         $orders = Order::with(['servedBy', 'orderPrice.dish', 'orderPrice.dishType', 'orderPrice.readyDish'])
                     ->whereIn('id', $ids)
+                    ->where('order-to_cafe', $type)
                     ->get();
 
         return view('user.admin.order.print-multiple-orders', compact('orders'));

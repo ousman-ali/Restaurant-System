@@ -35,6 +35,7 @@
                 <th>Photo</th>
                 <th>Info</th>
                 <th>Role</th>
+                <th>Restaurant Type</th>
                 <th width="20px">Action</th>
             </tr>
             </thead>
@@ -112,6 +113,7 @@
                         </dl>
 
                     </td>
+                    <td>{{$employee->rest_type}}</td>
                     <td>
                         <div class="btn-group-vertical">
                             <a href="{{url('/edit-employee/'.$employee->id)}}" class="btn btn-success waves-effect waves-light">

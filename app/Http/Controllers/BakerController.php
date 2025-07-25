@@ -58,6 +58,8 @@ class BakerController extends Controller
         ->latest()
         ->get();
 
+        $type = auth()->user()->employee->rest_type;
+
         $waiterOrder = Order::whereNotIn('status', [1, 2, 3])
             ->whereHas('orderDetails', function ($q) {
                 $q->where('from_ready', true)
@@ -82,9 +84,9 @@ class BakerController extends Controller
                 },
                 'servedBy',
             ])
+            ->where('order_to_cafe', $type)
             ->latest()
             ->get();
-
 
         return response()->json([
             'orders' => $inhouseOrders,
@@ -97,7 +99,8 @@ class BakerController extends Controller
 
     public function myCookingHistory()
     {
-        $orders = Order::where('baker_id', auth()->user()->id)->where('is_ready', true)->get();
+        $type = auth()->user()->employee->rest_type;
+        $orders = Order::where('baker_id', auth()->user()->id)->where('order_to_cafe', $type)->where('is_ready', true)->get();
         return view('user.baker.my-cooking-history', [
             'orders' => $orders
         ]);

@@ -263,6 +263,16 @@
                                 </select>
 
                             </div>
+
+                            <h4>Restaurant Type</h4>
+                            <div class="discount-input-group">
+                              <select id="typeSelect" v-model="selectedRest">
+                                <option disabled value="">Choose Reataurant Type</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="cafe">Cafe</option>
+                                </select>
+
+                            </div>
                         </div>
 
                     </div>
@@ -307,6 +317,16 @@
                                 </select>
 
                             </div>
+
+                            <h4>Restaurant Type</h4>
+                            <div class="discount-input-group">
+                              <select id="typeSelect" v-model="selectedRest">
+                                <option disabled value="">Choose Reataurant Type</option>
+                                <option value="restaurant">Restaurant</option>
+                                <option value="cafe">Cafe</option>
+                                </select>
+
+                            </div>
                         </div>
 
                     </div>
@@ -341,6 +361,7 @@ const {
     finalTotal,
     selectedBank,
     selectedCode,
+    selectedRest,
     selectedTable,
     banks,
     codes,

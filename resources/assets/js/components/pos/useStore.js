@@ -29,6 +29,7 @@ const cartOrderToType = ref(null);
 const tables = ref([]);
 const selectedBank = ref('');
 const selectedCode = ref('');
+const selectedRest = ref('');
 const products = ref([]);
 const readyProducts = ref([]);
 const productCategories = ref([]);
@@ -392,6 +393,7 @@ const saveOrder = async (shouldPrint = false) => {
         discount_amount: discountAmount.value ? discountAmount.value : 0,
         bank_id: selectedBank.value || null,
         code : selectedCode.value,
+        order_to_cafe: selectedRest.value,
         order_to: cartOrderToType.value,
         items: carts.value.map(item => ({
             dish_id: item.dish_id,
@@ -407,8 +409,6 @@ const saveOrder = async (shouldPrint = false) => {
         
     };
     console.log('order data', orderData);
-
-
     try {
         let response;
 
@@ -539,6 +539,7 @@ export default function useStore() {
         products,
         selectedBank,
         selectedCode,
+        selectedRest,
         readyProducts,
         productCategories,
         banks,

@@ -92,6 +92,20 @@
 
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">Restaurant Type :</label>
+                                <div class="col-md-6">
+                                    <select name="rest_type" id="" class="form-control select2" required>
+                                        <option value="">Select One</option>
+                                        <option value="restaurant" {{$employee->rest_type == 'restaurant' ? 'selected' : ''}}>Restaurant</option>
+                                        <option value="cafe" {{$employee->rest_type == 'cafe' ? 'selected' : ''}}>Cafe</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Phone </label>
                                 <div class="col-md-8">
