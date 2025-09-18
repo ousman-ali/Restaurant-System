@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\Bank;
 class CashierController extends Controller
 {
-   public function myOrder()
+    public function myOrder()
     {
         $type = auth()->user()->employee->rest_type;
         $order = Order::where('order_to_cafe', $type)->latest()->get();

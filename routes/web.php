@@ -265,7 +265,7 @@ Route::middleware('active.user')->group(function () {
         Route::get('/kitchen/all-stock', [KitchenController::class, 'allStock'])->name('materials.all_stock');
         Route::get('/kitchen/low-stock', [KitchenController::class, 'lowStock'])->name('materials.low_stock');
         Route::post('/kitchen/request', [KitchenController::class, 'requestStock'])->name('material-requests.store');
-
+    
         Route::get('/get-unit-of-products/{id}', [KitchenController::class, 'getUnitOfProduct']);
     });
 

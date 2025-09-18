@@ -171,9 +171,5 @@ class StockController extends Controller
             return redirect('/all-item')->with('save_success', 'Item updated successfully.');
         }
     }
-
-
-
-
-
+    
 }

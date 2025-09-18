@@ -309,19 +309,19 @@ class ReadyDishOrderController extends Controller
         }
 
 
-    public function readyOrderServed($id)
-    { 
-        $order = Order::findOrFail($id);
-        $order->status = 3;
-        if ($order->save()) {
-            try {
-                broadcast(new OrderServed("success", $order))->toOthers();
-            } catch (\Exception $exception) {
-                Log::error("Broadcasting failed: " . $exception->getMessage());
+        public function readyOrderServed($id)
+        { 
+            $order = Order::findOrFail($id);
+            $order->status = 3;
+            if ($order->save()) {
+                try {
+                    broadcast(new OrderServed("success", $order))->toOthers();
+                } catch (\Exception $exception) {
+                    Log::error("Broadcasting failed: " . $exception->getMessage());
+                }
+                return response()->json('Ok', 200);
             }
-            return response()->json('Ok', 200);
         }
-    }
 
         public function orderConfirm($id)
         {

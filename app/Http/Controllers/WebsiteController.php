@@ -94,6 +94,7 @@ class WebsiteController extends Controller
     {
         $webPages = WebPageSection::where('is_active', 1)->orderBy('order')->get();
         $menus = WebPageSection::where('is_active', 1)->where('in_navbar', 1)->orderBy('order')->get();
+
         return view('welcome', compact('webPages', 'menus'));
     }
 }

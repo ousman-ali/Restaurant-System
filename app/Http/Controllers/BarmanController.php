@@ -10,7 +10,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Log;
 class BarmanController extends Controller
 {
-        public function allStock()
+    public function allStock()
     {
         $dishes = Dish::where('order_to', 'barman')->with('dishRecipes.product')->get();
         $productIds = $dishes->flatMap(function ($dish) {
