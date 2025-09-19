@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+            'roles',        // allow POST /roles without CSRF
+            'roles/*',      // also allow edit/delete endpoints
     ];
 }

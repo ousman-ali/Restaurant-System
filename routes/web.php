@@ -25,6 +25,8 @@ use App\Http\Controllers\MaterialRequestController;
 use App\Http\Controllers\BarmanController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\CashierController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -402,3 +404,6 @@ Route::middleware('active.user')->group(function () {
     });
 
 });
+
+Route::resource('roles', RoleController::class);
+Route::get('/permissions', [PermissionController::class, 'index']);
