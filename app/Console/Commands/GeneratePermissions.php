@@ -20,6 +20,7 @@ class GeneratePermissions extends Command
 
         foreach ($routes as $name) {
             Permission::firstOrCreate(['name' => $name]);
+            $this->info("Permission created: " . $name);
         }
 
         $this->info("Generated " . count($routes) . " permissions.");

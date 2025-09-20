@@ -10,7 +10,6 @@ class PermissionController extends Controller
     // Show all permissions
     public function index()
     {
-        $permissions = Permission::all();
-        return view('permissions.index', compact('permissions'));
+        return response()->json(Permission::all());
     }
 }

@@ -52,6 +52,7 @@ Auth::routes();
 // Account Disable
 Route::get('/account-disable', [HomeController::class, 'accountDisable'])->middleware('inactive.user');
 
+
 //Routes only access with authenticated users
 Route::middleware('active.user')->group(function () {
 
@@ -66,6 +67,10 @@ Route::middleware('active.user')->group(function () {
         Route::post('/save-mail-conf', [SettingsController::class, 'mailSetting']);
         Route::post('/save-timezone', [SettingsController::class, 'timezoneSetting']);
         Route::post('/save-currency', [SettingsController::class, 'currencySetting']);
+
+        Route::resource('roles', RoleController::class);
+        Route::get('/permissions', [PermissionController::class, 'index'])->name('');
+        Route::post('/users/{user}/assign-role', [UserController::class, 'assignRoleToUser']);
     });
 
 
@@ -404,6 +409,3 @@ Route::middleware('active.user')->group(function () {
     });
 
 });
-
-Route::resource('roles', RoleController::class);
-Route::get('/permissions', [PermissionController::class, 'index']);

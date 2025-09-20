@@ -97,9 +97,9 @@ class DishController extends Controller
             ->filter(function ($dish) {
                 $threshold = $dish->minimum_stock_threshold ?? 0;
                 if ($dish->source_type === 'inhouse') {
-                    return ($dish->total_ready_quantity ?? 0) < $threshold;
+                    return (int)($dish->total_ready_quantity ?? 0) < $threshold;
                 } elseif ($dish->source_type === 'supplier') {
-                    return ($dish->total_purchased_quantity ?? 0) < $threshold;
+                    return (int)($dish->total_purchased_quantity ?? 0) < $threshold;
                 }
 
                 return false;

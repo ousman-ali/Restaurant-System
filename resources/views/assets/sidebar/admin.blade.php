@@ -119,6 +119,14 @@
                 <li class="text-muted menu-title">More</li>
 
                 <li class="has_sub">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="ti-lock"></i><span> Roles </span> <span class="menu-arrow"></span></a>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url('/roles/create') }}">New Role</a></li>
+                        <li><a href="{{ url('/roles') }}">All Roles</a></li>
+                    </ul>
+                </li>
+
+                <li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="icon icon-people"></i><span> Employee </span> <span class="menu-arrow"></span></a>
                     <ul class="list-unstyled">
                         <li><a href="{{url('/add-employee')}}">Add Employee</a></li>
@@ -136,8 +144,6 @@
                         <li><a href="{{url('/website')}}">Website</a></li>
                     </ul>
                 </li>
-
-
 
             </ul>
             <div class="clearfix"></div>

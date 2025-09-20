@@ -125,7 +125,7 @@ class OrderController extends Controller
             $order = new Order();
             $order->order_no = $orderNo;
             $order->table_id = $request->table_id ?? null;
-            $order->served_by = auth()->user()->id;;
+            $order->served_by = auth()->user()->id;
             $order->discount = $request->discount_amount;
             $order->payment = $request->payment;
             $order->vat = $request->vat;
@@ -786,6 +786,5 @@ public function printMultipleOrders(Request $request)
             return response()->json('Ok', 200);
         }
     }
-
-
+    
 }
