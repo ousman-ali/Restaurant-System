@@ -27,7 +27,7 @@ class SaveEmployee extends FormRequest
             'name'      =>      'required|max:50',
             'email'     =>      'required|unique:users|max:50',
             'password'  =>      'required|min:5|max:20',
-            'role'      =>      'required|max:1',
+            'role'      =>      'required|integer|exists:roles,id',
             'address'   =>      'required|min:10',
             'phone'     =>      'required',
             'thumbnail' =>      'image'

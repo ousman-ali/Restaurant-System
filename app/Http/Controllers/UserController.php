@@ -35,7 +35,8 @@ class UserController extends Controller
      */
     public function addEmployee()
     {
-        return view('user.admin.employee.add-employee');
+        $roles = Role::all();
+        return view('user.admin.employee.add-employee', compact('roles'));
     }
 
     /**
@@ -110,17 +111,24 @@ class UserController extends Controller
      */
     public function saveEmployee(SaveEmployee $request)
     {
-
         $user = new User();
         $user->name = $request->get('name');
         $user->password = Hash::make($request->get('password'));
         $user->email = $request->get('email');
         $user->role = $request->get('role');
+        // Remove $user->role if using Spatie roles
         if ($request->hasFile('thumbnail')) {
             $user->image = $request->file('thumbnail')
                 ->move('uploads/employee', rand(100000, 900000) . '.' . $request->thumbnail->extension());
         }
         if ($user->save()) {
+            // Assign role using Spatie (needs role name)
+            $role = Role::find($request->get('role'));
+            if ($role) {
+                $user->assignRole($role->name);
+                $user->syncPermissions($role->permissions);
+            }
+
             $employee = new Employee();
             $employee->name = $user->name;
             $employee->rest_type = $request->rest_type;

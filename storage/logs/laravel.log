@@ -1913,3 +1913,5 @@
 #48 C:\\Restaurant\\vendor\\laravel\\framework\\src\\Illuminate\\Foundation\\resources\\server.php(16): require_once('C:\\\\Restaurant\\\\p...')
 #49 {main}
 "} 
+[2025-09-22 08:33:49] local.ERROR: Mail send errorExpected response code "250" but got code "530", with message "530 5.7.1 Authentication required".  
+[2025-09-22 08:38:12] local.ERROR: Mail send errorExpected response code "250" but got code "530", with message "530 5.7.1 Authentication required".  

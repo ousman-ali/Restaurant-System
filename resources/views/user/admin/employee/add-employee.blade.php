@@ -78,32 +78,35 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-md-2 control-label">Employee Type :</label>
+                                <label class="col-md-2 control-label">Role :</label>
                                 <div class="col-md-6">
-                                    <select name="role" id="" class="form-control select2" required>
+                                    <select name="role" class="form-control select2" required>
                                         <option value="">Select One</option>
-                                        <option value="2">Shop Manager</option>
-                                        <option value="3">Waiter</option>
-                                        <option value="4">Kitchen</option>
-                                        <option value="5">Barman</option>
-                                        <option value="6">Baker</option>
-                                        <option value="7">Cashier</option>
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->id }}">{{ ucfirst($role->name) }}</option>
+                                        @endforeach
                                     </select>
-
                                 </div>
                             </div>
 
                             <div class="form-group">
+                                <label class="col-md-2 control-label">Has Restaurant Type?</label>
+                                <div class="col-md-6">
+                                    <input type="checkbox" id="has_rest_type" name="has_rest_type" value="1">
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="rest_type_group" style="display: none;">
                                 <label class="col-md-2 control-label">Restaurant Type :</label>
                                 <div class="col-md-6">
-                                    <select name="rest_type" id="" class="form-control select2" required>
+                                    <select name="rest_type" class="form-control select2">
                                         <option value="">Select One</option>
                                         <option value="restaurant">Restaurant</option>
                                         <option value="cafe">Cafe</option>
                                     </select>
-
                                 </div>
                             </div>
+
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Phone </label>
                                 <div class="col-md-8">
@@ -142,38 +145,16 @@
 @section('extra-js')
 
     <script>
-        $(document).ready(function (e) {
-            var addEmployeeForm = $("#addEmployee");
-            addEmployeeForm.on('submit', function (e) {
-                e.preventDefault();
-                var formData = new FormData(this);
-                $(this).speedPost('/save-employee', formData, message = {
-                    success: {header: 'Employee Update successfully', body: 'Employee updated successfully'},
-                    error: {header: 'Email address already exist', body: 'Email address found'},
-                    warning: {header: 'Internal Server Error', body: 'Internal server error'}
-                },addEmployeeForm);
-            });
-
-
-            const $roleSelect = $('select[name="role"]');
-                const $restTypeGroup = $('select[name="rest_type"]').closest('.form-group');
-
-                // Initially hide the restaurant type field
-                $restTypeGroup.hide();
-
-                // Define the allowed role values that should show restaurant type
-                const showRestTypeFor = ['4', '5', '7']; // Kitchen, Barman, Cashier
-
-                $roleSelect.change(function () {
-                    const selectedRole = $(this).val();
-                    if (showRestTypeFor.includes(selectedRole)) {
-                        $restTypeGroup.show();
-                    } else {
-                        $restTypeGroup.hide();
-                        $('select[name="rest_type"]').val(""); // optionally reset selection
-                    }
-                });
-
-        })
-    </script>
+    $(document).ready(function () {
+        // Show/hide restaurant type based on checkbox
+        $('#has_rest_type').change(function () {
+            if ($(this).is(':checked')) {
+                $('#rest_type_group').show();
+            } else {
+                $('#rest_type_group').hide();
+                $('select[name="rest_type"]').val("");
+            }
+        });
+    });
+</script>
 @endsection
