@@ -11,7 +11,7 @@
                 <a href="{{url('/all-employee')}}" class="btn btn-default waves-effect">All Employee <span class="m-l-5"></span></a>
             </div>
 
-            <h4 class="page-title">All Employee </h4>
+            <h4 class="page-title">Edit Employee</h4>
             <ol class="breadcrumb">
                 <li>
                     <a href="{{url('/')}}">Home</a>
@@ -37,8 +37,8 @@
                             <input type="hidden" id="id" value="{{$employee->id}}">
                             <div class="form-group">
                                 <label for="" class="col-md-2 control-label">Photo</label>
-                                <div class="col md-10">
-                                    <div id="image-preview" style="background-image: url({{url($employee->user->image != "" | null ? $employee->user->image : '/img_assets/avater.png')}})">
+                                <div class="col-md-10">
+                                    <div id="image-preview" style="background-image: url({{url($employee->user->image ? $employee->user->image : '/img_assets/avater.png')}})">
                                         <label for="image-upload" id="image-label">Choose Photo</label>
                                         <input type="file"  name="thumbnail" id="image-upload"/>
                                     </div>
@@ -50,7 +50,6 @@
                                 <div class="col-md-8">
                                     <input type="text" name="name" class="form-control" value="{{$employee->name}}"
                                            placeholder="Employee Name" parsley-trigger="change" maxlength="50" required>
-
                                 </div>
                             </div>
                             <div class="form-group">
@@ -58,7 +57,6 @@
                                 <div class="col-md-8">
                                     <input type="email" name="email" class="form-control" placeholder="Employee Email"
                                            parsley-trigger="change" maxlength="50" value="{{$employee->email}}" required>
-
                                 </div>
                             </div>
                             <div class="form-group">
@@ -66,7 +64,6 @@
                                 <div class="col-md-8">
                                     <input type="password" minlength="5" maxlength="20" name="password" placeholder="Password" class="form-control"
                                            value="" id="pass1">
-
                                 </div>
                             </div>
                             <div class="form-group">
@@ -78,40 +75,35 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="col-md-2 control-label">Employee Type :</label>
+                                <label class="col-md-2 control-label">Role :</label>
                                 <div class="col-md-6">
-                                    <select name="role" id="" class="form-control select2" readonly>
-                                        <option value="" >Select One</option>
-                                        <option value="2" {{$employee->user->role == 2 ? 'selected' :''}}>Shop Manager</option>
-                                        <option value="3" {{$employee->user->role == 3 ? 'selected' :''}}>Waiter</option>
-                                        <option value="4" {{$employee->user->role == 4 ? 'selected' :''}}>Kitchen</option>
-                                        <option value="5" {{$employee->user->role == 5 ? 'selected' :''}}>Barman</option>
-                                        <option value="6" {{$employee->user->role == 6 ? 'selected' :''}}>Baker</option>
-                                        <option value="7" {{$employee->user->role == 7 ? 'selected' :''}}>Cashier</option>
+                                    <select name="role" class="form-control select2" required>
+                                        <option value="">Select One</option>
+                                        @foreach($roles as $role)
+                                            <option value="{{ $role->id }}" {{ $currentRoleId == $role->id ? 'selected' : '' }}>
+                                                {{ ucfirst($role->name) }}
+                                            </option>
+                                        @endforeach
                                     </select>
-
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Restaurant Type :</label>
                                 <div class="col-md-6">
-                                    <select name="rest_type" id="" class="form-control select2" required>
+                                    <select name="rest_type" class="form-control select2" required>
                                         <option value="">Select One</option>
                                         <option value="restaurant" {{$employee->rest_type == 'restaurant' ? 'selected' : ''}}>Restaurant</option>
                                         <option value="cafe" {{$employee->rest_type == 'cafe' ? 'selected' : ''}}>Cafe</option>
                                     </select>
-
                                 </div>
                             </div>
-
 
                             <div class="form-group">
                                 <label class="col-md-2 control-label">Phone </label>
                                 <div class="col-md-8">
                                     <input type="text" maxlength="20" name="phone" placeholder="Phone number" class="form-control"
                                            value="{{$employee->phone}}" data-parsley-type="digits" required>
-
                                 </div>
                             </div>
                             <div class="form-group">
@@ -119,7 +111,6 @@
                                 <div class="col-md-8">
                                     <textarea minlength="10" class="form-control" required name="address"
                                               rows="5">{{$employee->address}}</textarea>
-
                                 </div>
                             </div>
 
@@ -139,7 +130,6 @@
                                 <label class="col-md-2 control-label"></label>
                                 <div class="col-md-10">
                                     <button type="submit" class="ladda-button btn btn-purple"  data-style="expand-right">Save Employee
-
                                     </button>
                                 </div>
                             </div>
@@ -151,25 +141,4 @@
         </div>
     </div>
 
-@endsection
-
-@section('extra-js')
-
-    <script>
-        $(document).ready(function (e) {
-            var addEmployeeForm = $("#addEmployee");
-            var id = $("#id").val();
-            addEmployeeForm.on('submit', function (e) {
-                $("#loader").show();
-                e.preventDefault();
-                var formData = new FormData(this);
-                $(this).speedPost('/update-employee/'+id, formData, message = {
-                    success: {header: 'Employee Save successfully', body: 'Employee saved'},
-                    error: {header: 'Email address already exist', body: 'Email address found'},
-                    warning: {header: 'Internal Server Error', body: 'Internal server error'}
-                });
-            });
-
-        })
-    </script>
 @endsection

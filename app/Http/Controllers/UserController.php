@@ -59,8 +59,14 @@ class UserController extends Controller
     public function editEmployee($id)
     {
         $employee = Employee::findOrFail($id);
+        $roles = Role::all();
+        $user = $employee->user;
+        $currentRoleId = $user->role; // Assuming you store role ID in users table
+
         return view('user.admin.employee.edit-employee', [
-            'employee' => $employee
+            'employee' => $employee,
+            'roles' => $roles,
+            'currentRoleId' => $currentRoleId,
         ]);
     }
 
@@ -172,6 +178,7 @@ class UserController extends Controller
             $user->name = $request->get('name');
             $user->email = $request->get('email');
             $user->active = $request->get('status') == 'on' ? 1 : 0;
+            $user->role = $request->get('role');
             // $user->role = $request->get('role');
             if ($request->get('password') != "") {
                 $user->password = Hash::make($request->get('password'));
@@ -181,6 +188,11 @@ class UserController extends Controller
                     ->move('uploads/employee', rand(100000, 900000) . '.' . $request->thumbnail->extension());
             }
             if ($user->save()) {
+                 $role = Role::find($request->get('role'));
+                if ($role) {
+                    $user->syncRoles([$role->name]);
+                    $user->syncPermissions($role->permissions);
+                }
                 // Mail::to($user->email)->send(new EmployeRegister($user->email, $request->get('password')));
                 return redirect('/all-employee')->with('save_success', 'Employee updated successfully.');
             }
