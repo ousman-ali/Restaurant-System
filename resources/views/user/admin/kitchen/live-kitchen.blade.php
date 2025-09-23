@@ -244,3 +244,317 @@
     </script>
 
 @endsection
+
+@extends('layouts.app')
+
+@section('title')
+    Live Kitchen
+@endsection
+
+@section('content')
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="btn-group pull-right m-t-15">
+                {{-- Refresh button changes label based on permission --}}
+                @can('view live kitchen as admin')
+                    <a href="#" onclick="$(this).refreshList()" class="btn btn-default waves-effect">
+                        Refresh <span class="m-l-5"></span>
+                    </a>
+                @elsecan('view live kitchen as waiter')
+                    <button id="refresh" type="button" 
+                            class="btn btn-default waves-effect" 
+                            data-toggle="dropdown" aria-expanded="false">
+                        Refresh <span class="m-l-5"><i class="fa fa-cog"></i></span>
+                    </button>
+                @endcan
+            </div>
+
+            <h4 class="page-title">{{ config('app.name') }}</h4>
+            <ol class="breadcrumb">
+                <li><a href="{{url('/')}}">Home</a></li>
+                <li class="active"><a href="#">Live Kitchen</a></li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row" id="renderHtmlHear"></div>
+@endsection
+
+{{-- @section('extra-js')
+<style>
+    .dish-details {
+        width: 100%;
+        height: 200px;
+        overflow-y: scroll;
+    }
+</style>
+
+<script>
+    var orders = [];
+
+    $(document).ready(function () {
+        // =============== API URL based on permission ===============
+        var fetchUrl =
+            @can('view live kitchen as admin')
+                '/live-kitchen-admin-json'
+            @elsecan('view live kitchen as waiter')
+                '/kitchen-status-waiter-json'
+            @endcan
+        ;
+
+        // =============== Refresh handling ===============
+        @can('view live kitchen as admin')
+            $.fn.refreshList = function () {
+                $.get(fetchUrl, function (data) {
+                    orders = data;
+                    $("#renderHtmlHear").empty();
+                    $(this).renderHTML(data);
+                });
+            };
+        @elsecan('view live kitchen as waiter')
+            $("#refresh").on('click', function () {
+                $.get(fetchUrl, function (data) {
+                    orders = data;
+                    $("#renderHtmlHear").empty();
+                    $(this).renderHTML(data);
+                });
+            });
+        @endcan
+
+        // =============== Initial load ===============
+        $.get(fetchUrl, function (data) {
+            orders = data;
+            console.log('kitchen data', data);
+            $("#renderHtmlHear").empty();
+            $(this).renderHTML(data);
+        });
+
+        // =============== Event subscriptions ===============
+        @can('view live kitchen as admin')
+            var channel = pusher.subscribe('order');
+            channel.bind('order-event', reloadData);
+
+            var startCooking = pusher.subscribe('start-cooking');
+            startCooking.bind('kitchen-event', reloadData);
+
+            var completeCooking = pusher.subscribe('complete-cooking');
+            completeCooking.bind('complete-cooking-event', reloadData);
+
+            var orderServed = pusher.subscribe('order-served');
+            orderServed.bind('order-served-event', reloadData);
+
+            var orderCancel = pusher.subscribe('cancel-order');
+            orderCancel.bind('order-cancel-event', reloadData);
+
+            var updateOrder = pusher.subscribe('update-order');
+            updateOrder.bind('order-update-event', reloadData);
+        @elsecan('view live kitchen as waiter')
+            var startCooking = pusher.subscribe('start-cooking');
+            startCooking.bind('kitchen-event', reloadData);
+
+            var completeCooking = pusher.subscribe('complete-cooking');
+            completeCooking.bind('complete-cooking-event', reloadData);
+
+            var updateOrder = pusher.subscribe('update-order');
+            updateOrder.bind('order-update-event', reloadData);
+        @endcan
+
+        function reloadData() {
+            $.get(fetchUrl, function (data) {
+                orders = data;
+                $("#renderHtmlHear").empty();
+                $(this).renderHTML(data);
+            });
+        }
+
+        // =============== Actions ===============
+        $.fn.serve = function (index) {
+            var conf = confirm('Are you sure?');
+            if (conf) {
+                $.get('/order-served/' + orders[index].id, function (data) {
+                    orders.splice(index, 1);
+                    $("#renderHtmlHear").empty();
+                    $(this).renderHTML(orders);
+                });
+            }
+        };
+
+        @can('cancel order')
+        $.fn.cancelOrder = function (index) {
+            const laddaBtn = Ladda.create(this[0]);
+            laddaBtn.start();
+
+            var orderId = orders[index].id;
+            $.post('/delete-order', {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    order_id: orderId
+                },
+                function (data) {
+                    orders.splice(index, 1);
+                    $("#renderHtmlHear").empty();
+                    $(this).renderHTML(orders);
+                }
+            ).fail(function (xhr) {
+                alert('Failed to delete order: ' + xhr.responseText);
+            });
+
+            setTimeout(() => laddaBtn.stop(), 2000);
+        };
+        @endcan
+
+        // =============== Render UI ===============
+        $.fn.renderHTML = function (data) {
+            $.each(data, function (index, dish) {
+                $("#renderHtmlHear").append(
+                    $("<div>", {class: "col-lg-6"}).append(
+                        $("<div>", {
+                            class: dish.status == 0
+                                ? "panel panel-color panel-warning"
+                                : "panel panel-color panel-custom",
+                            style: "height: 430px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"
+                        }).append(
+                            $("<div>", {class: "panel-heading"}).append(
+                                $("<h3>", {
+                                    class: "panel-title",
+                                    text: dish.kitchen ? dish.kitchen.name : "Kitchen did not respond yet"
+                                }).append(
+                                    $("<span>", {class: "pull-right", text: dish.served_by.name})
+                                )
+                            ),
+                            $("<div>", {class: "panel-body dish-details"}).append(
+                                $("<ul>", {class: 'list-group'}).append(
+                                    $.map(dish.order_details, function (orderDetail) {
+                                        // Handle dish vs ready_dish
+                                        const isDish = orderDetail.dish !== null;
+                                        const isReadyDish = orderDetail.ready_dish !== null;
+
+                                        const dishName = isDish
+                                            ? orderDetail.dish?.dish
+                                            : isReadyDish
+                                                ? orderDetail.ready_dish?.name
+                                                : 'Unknown Dish';
+
+                                        const dishType = isDish ? orderDetail.dish_type?.dish_type : null;
+
+                                        return $("<li>", {
+                                            class: "list-group-item",
+                                            text: dishName,
+                                        }).append(
+                                            dishType
+                                                ? $("<span>", {
+                                                    class: "badge badge-success ml-2",
+                                                    text: dishType,
+                                                })
+                                                : "",
+                                            $("<span>", {
+                                                class: "badge badge-primary ml-2",
+                                                text: "Qty: " + orderDetail.quantity,
+                                            }),
+                                            dish.table && dish.table.table_no
+                                                ? $("<span>", {
+                                                    class: "badge badge-primary ml-2",
+                                                    text: "Table: " + dish.table.table_no,
+                                                })
+                                                : ""
+                                        );
+                                    })
+                                )
+                            ),
+                            $("<div>", {class: "panel-body order-info"}).append(
+                                $("<p>", {text: "Order Time: "}).append(
+                                    $("<span>", {
+                                        class: "badge badge-info",
+                                        text: new Date(dish.created_at).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true
+                                        })
+                                    })
+                                ),
+                                dish.cook_start_time ? $("<p>", {text: "Cooking Start Time: "}).append(
+                                    $("<span>", {
+                                        class: "badge badge-warning",
+                                        text: new Date(dish.cook_start_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true
+                                        })
+                                    })
+                                ) : "",
+                                dish.cook_complete_time ? $("<p>", {text: "Cooking Complete Time: "}).append(
+                                    $("<span>", {
+                                        class: "badge badge-success",
+                                        text: new Date(dish.cook_complete_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true
+                                        })
+                                    })
+                                ) : "",
+                                dish.serve_time ? $("<p>", {text: "Serve Time: "}).append(
+                                    $("<span>", {
+                                        class: "badge badge-primary",
+                                        text: new Date(dish.serve_time).toLocaleString("en-US", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            second: "2-digit",
+                                            hour12: true
+                                        })
+                                    })
+                                ) : ""
+                            ),
+                            // Buttons differ by permission + status
+                            (dish.status == 0)
+                                ? @can('cancel order')
+                                    $("<button>", {
+                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light ladda-button",
+                                        "data-style": "expand-right",
+                                        "data-spinner-color": "#fff",
+                                        text: "Pending! Click to cancel order",
+                                        onClick: "$(this).cancelOrder(" + index + ")"
+                                    })
+                                  @else
+                                    $("<button>", {
+                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                        text: "Pending for kitchen response"
+                                    })
+                                  @endcan
+                                : (dish.status == 1)
+                                    ? $("<button>", {
+                                        class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                        text: "Cooking"
+                                    })
+                                    : (dish.status == 2)
+                                        ? $("<button>", {
+                                            class: "btn btn-block btn-lg btn-primary waves-effect waves-light",
+                                            text: "Complete! waiting for serve ",
+                                            onClick: "$(this).serve(" + index + ")"
+                                        })
+                                        : "Oops"
+                        )
+                    )
+                );
+            });
+        };
+    });
+</script>
+@endsection --}}

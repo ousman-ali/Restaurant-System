@@ -12,6 +12,9 @@ use App\Http\Middleware\BarmanRoleCheck;
 use App\Http\Middleware\BakerRoleCheck;
 use App\Http\Middleware\CashierRoleCheck;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -67,12 +70,18 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'active.user' => ActiveUser::class,
         'inactive.user' => InActiveUser::class,
-        'admin' => AdminRoleCheck::class,
-        'manager' => ManagerRoleCheck::class,
-        'kitchen' => KitchenRoleCheck::class,
-        'waiter' => WaiterRoleCheck::class,
-        'barman' => BarmanRoleCheck::class,
-        'baker' => BakerRoleCheck::class,
-        'cashier' => CashierRoleCheck::class,
+        
+        // 'admin' => AdminRoleCheck::class,
+        // 'manager' => ManagerRoleCheck::class,
+        // 'kitchen' => KitchenRoleCheck::class,
+        // 'waiter' => WaiterRoleCheck::class,
+        // 'barman' => BarmanRoleCheck::class,
+        // 'baker' => BakerRoleCheck::class,
+        // 'cashier' => CashierRoleCheck::class,
+
+        // ✅ Spatie permissions
+        'role' => RoleMiddleware::class,
+        'permission' => PermissionMiddleware::class,
+        'role_or_permission' => RoleOrPermissionMiddleware::class,
     ];
 }

@@ -198,27 +198,4 @@ class UserController extends Controller
             }
         }
     }
-
-    //assign roles to the user
-    public function assignRoleToUser(Request $request, User $user)
-    {
-        // Validate input
-        $request->validate([
-            'role' => 'required|exists:roles,name',
-        ]);
-
-        // Remove all current roles & permissions (optional, depends on your logic)
-        $user->syncRoles([$request->role]); // assigns the role and removes previous roles
-
-        // Optional: permissions are automatically assigned through the role
-        // But if you want to explicitly sync permissions of the role:
-        $role = Role::findByName($request->role);
-        $user->syncPermissions($role->permissions);
-
-        return response()->json([
-            'message' => "Role '{$request->role}' assigned to user '{$user->name}' successfully.",
-            'user_roles' => $user->getRoleNames(),
-            'user_permissions' => $user->getAllPermissions()->pluck('name'),
-        ]);
-    }
 }

@@ -1,4 +1,11 @@
 <!-- ========== Left Sidebar Start ========== -->
+@php
+    $canWaiter  = auth()->user()->can('waiter.my-orders');
+    $canCashier = auth()->user()->can('cashier.my-orders');
+    $canBarman  = auth()->user()->can('barman.my-orders');
+
+    $totalPermissions = collect([$canWaiter, $canCashier, $canBarman])->filter()->count();
+@endphp
 
 <div class="left side-menu">
     <div class="sidebar-inner slimscrollleft">
@@ -52,7 +59,23 @@
                     <a href="javascript:void(0);" class="waves-effect"><i class="ti-notepad"></i> <span> Orders </span> <span class="menu-arrow"></span> </a>
                     <ul class="list-unstyled">
                         <li><a href="{{url('/new-order')}}">New Order</a></li>
-                        <li><a href="{{url('/all-order')}}">All Order</a></li>
+                        {{-- @if($totalPermissions === 3)
+                           <li><a href="{{url('/all-order')}}">All Orders</a></li> 
+                        @endif --}}
+                        <li><a href="{{url('/all-order')}}">All Orders</a></li>
+                        {{-- @if($totalPermissions < 3 && $totalPermissions > 0)
+                            <li>
+                                @if($canWaiter)
+                                    <a href="{{ route('waiter.my-orders') }}">My Orders</a>
+                                @endif
+                                @if($canCashier)
+                                    <a href="{{ route('cashier.my-orders') }}">My Orders</a>
+                                @endif
+                                @if($canBarman)
+                                    <a href="{{ route('barman.my-orders') }}">My Orders</a>
+                                @endif
+                            </li>
+                        @endif --}}
                         <li><a href="{{url('/non-paid-order')}}">Non paid Order</a></li>
                     </ul>
                 </li>
